@@ -33,9 +33,10 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .form-section h2{font-size:var(--fs-h3);margin-bottom:var(--space-4);color:var(--duo-white)}
 .field{margin-bottom:var(--space-3)}
 .field label{display:block;font-size:var(--fs-sm);font-weight:600;color:var(--duo-silver);margin-bottom:6px}
-.field input,.field select{width:100%;background:var(--duo-graphite);border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:12px 14px;color:var(--duo-white);font-family:var(--font-body);font-size:1rem;transition:border-color .2s}
+.field input,.field select{width:100%;background:var(--duo-graphite);border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:12px 14px;color:var(--duo-white);font-family:var(--font-body);font-size:1rem;transition:border-color .2s;-webkit-appearance:none;appearance:none}
 .field input:focus,.field select:focus{outline:none;border-color:var(--duo-red);box-shadow:0 0 0 3px rgba(225,29,38,.15)}
 .field input::placeholder{color:var(--duo-mute)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8F98' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
 .field select option{background:var(--duo-graphite)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
 .field-row-3{display:grid;grid-template-columns:130px 1fr;gap:var(--space-3)}
@@ -86,7 +87,40 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .pix-copy{background:var(--duo-ink);border:1px solid #23262b;border-radius:var(--radius-sm);padding:var(--space-3);word-break:break-all;font-size:var(--fs-xs);color:var(--duo-silver);margin-top:var(--space-2)}
 .btn-copy{background:transparent;border:1.5px solid var(--duo-red);color:var(--duo-red);border-radius:var(--radius-pill);padding:8px 20px;font-family:var(--font-display);text-transform:uppercase;font-size:var(--fs-xs);cursor:pointer;margin-top:var(--space-2);transition:all .2s}
 .btn-copy:hover{background:var(--duo-red);color:#fff}
-@media(max-width:768px){.checkout-grid{grid-template-columns:1fr}.order-card{position:static;order:-1}.field-row,.field-row-3{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .checkout-grid{grid-template-columns:1fr}
+  .order-card{position:static;order:-1}
+  .field-row,.field-row-3{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .wrap{padding:0 var(--space-3)}
+  nav{padding:var(--space-2) 0}
+  nav .brand{font-size:1.1rem}
+  nav img{height:30px;width:30px}
+  nav .secure span{display:none}
+  .checkout-grid{padding:var(--space-3) 0 var(--space-5)}
+  .form-section h2{font-size:1rem;margin-bottom:var(--space-3)}
+  .field{margin-bottom:var(--space-2)}
+  .field input,.field select{padding:13px 12px;font-size:16px} /* 16px evita zoom no iOS */
+  .separator{margin:var(--space-3) 0}
+  .pay-tab{padding:10px 8px;font-size:12px;gap:5px}
+  .pay-tab svg{width:16px;height:16px}
+  .btn-submit{padding:16px;font-size:1rem}
+  .order-card{padding:var(--space-3);border-radius:var(--radius)}
+  .order-card h3{font-size:1rem;margin-bottom:var(--space-3)}
+  .kit-option{padding:var(--space-2) var(--space-3)}
+  .kit-option .kit-badge{font-size:9px;padding:2px 8px;right:8px}
+  .kit-option .kit-price{font-size:1.1rem}
+  .order-summary .row.total{font-size:1.1rem}
+  .topbar{font-size:10px;padding:5px var(--space-3);letter-spacing:0.08em}
+  .pix-panel{padding:var(--space-3)}
+  #feedback{padding:var(--space-3)}
+}
+@media(max-width:380px){
+  nav .brand{font-size:.95rem}
+  .topbar{display:none}
+  .kit-selector{gap:8px}
+}
 </style>
 <body>
 <div class="topbar">Pagamento 100% seguro · Mercado Pago · Entrega discreta</div>
@@ -129,7 +163,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
         </div>
         <div class="field">
           <label for="cpf">CPF</label>
-          <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" autocomplete="off" required maxlength="14">
+          <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" autocomplete="off" required maxlength="14" inputmode="numeric">
           <span class="error">CPF inválido</span>
         </div>
 
@@ -139,7 +173,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
         <div class="field-row-3">
           <div class="field">
             <label for="zipCode">CEP</label>
-            <input type="text" id="zipCode" name="zipCode" placeholder="00000-000" maxlength="9" required>
+            <input type="text" id="zipCode" name="zipCode" placeholder="00000-000" maxlength="9" required inputmode="numeric">
             <span class="hint">Auto-preenchimento</span>
             <span class="error">CEP inválido</span>
           </div>
