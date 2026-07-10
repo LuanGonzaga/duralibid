@@ -49,6 +49,7 @@ export default async function handler(req, res) {
       transaction_amount: kitData.price,
       description: kitData.name,
       payer,
+      metadata: { kit: parseInt(kit) },
       notification_url: `${baseUrl}/api/webhook`,
     };
 
