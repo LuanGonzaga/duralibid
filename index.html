@@ -154,6 +154,10 @@
   .urgency { background: var(--grad-fire); text-align: center; padding: var(--space-4) 0; }
   .urgency h3 { color: #fff; font-size: 1.6rem; }
   .urgency p { color: rgba(255,255,255,.92); margin: 6px auto 0; font-weight: 600; }
+  @keyframes timerPulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .7; transform: scale(1.06); }
+  }
 
   /* ---- dor ---- */
   .dor { background: var(--duo-ink); }
@@ -580,8 +584,9 @@
 <!-- URGÊNCIA -->
 <section class="urgency">
   <div class="wrap">
-    <h3>Preço promocional desta remessa</h3>
-    <p>O kit de 4 meses sai por R$ 59,97 o frasco · condição válida enquanto durar o estoque</p>
+    <h3>⚡ Preço promocional desta remessa</h3>
+    <p>Oferta reservada por: <span id="urgency-timer" style="font-family:var(--font-display);font-size:1.3rem;letter-spacing:0.06em;color:#fff;background:rgba(0,0,0,.2);padding:2px 12px;border-radius:6px">20:00</span></p>
+    <p style="margin-top:4px;font-size:var(--fs-xs);opacity:.85">Condição válida enquanto durar o estoque</p>
   </div>
 </section>
 
@@ -720,6 +725,42 @@
       entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.18 });
     document.querySelectorAll('.reveal, .showcase-frame').forEach(function(el){ io.observe(el); });
+  })();
+
+  // Urgency timer — 20 min por sessão, persiste via sessionStorage
+  (function(){
+    var DURATION = 20 * 60; // 20 minutos em segundos
+    var KEY = 'dl_timer_end';
+    var el = document.getElementById('urgency-timer');
+    if (!el) return;
+
+    // Se não tem deadline salvo, cria um novo
+    var end = parseInt(sessionStorage.getItem(KEY));
+    if (!end || end < Date.now()) {
+      end = Date.now() + DURATION * 1000;
+      sessionStorage.setItem(KEY, end);
+    }
+
+    function update() {
+      var remaining = Math.max(0, Math.floor((end - Date.now()) / 1000));
+      var m = Math.floor(remaining / 60);
+      var s = remaining % 60;
+      el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+
+      if (remaining <= 0) {
+        // Reinicia o timer quando chega a zero (oferta "renovada")
+        end = Date.now() + DURATION * 1000;
+        sessionStorage.setItem(KEY, end);
+      }
+
+      // Pulsa vermelho mais forte nos últimos 5 minutos
+      if (remaining <= 300) {
+        el.style.animation = 'timerPulse .8s ease-in-out infinite';
+      }
+    }
+
+    update();
+    setInterval(update, 1000);
   })();
 </script>
 
