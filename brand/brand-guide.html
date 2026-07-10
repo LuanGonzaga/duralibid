@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DURALIBID — Manual de Marca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--duo-black);
+    color: var(--duo-white);
+    font-family: var(--font-body);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  h1,h2,h3 { font-family: var(--font-display); letter-spacing: var(--ls-display); text-transform: uppercase; line-height: 1.05; }
+  h2 { font-size: var(--fs-h1); margin-bottom: var(--space-3); }
+  h3 { font-size: var(--fs-h3); color: var(--duo-silver); margin-bottom: var(--space-2); }
+  p { color: var(--duo-mute); max-width: 62ch; }
+  section { padding: var(--space-6) 0; border-top: 1px solid #23262b; }
+  .eyebrow { font-size: var(--fs-xs); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--duo-red); font-weight: 700; }
+
+  /* ---- HERO ---- */
+  .hero { text-align: center; padding: var(--space-6) 0 var(--space-5); background: var(--grad-stage); border-radius: var(--radius-lg); }
+  .hero svg { width: 220px; height: 220px; filter: drop-shadow(0 0 30px rgba(225,29,38,.3)); }
+  .wordmark { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-hero); letter-spacing: var(--ls-display);
+    background: var(--grad-chrome); -webkit-background-clip: text; background-clip: text; color: transparent; margin-top: var(--space-3); }
+  .wordmark b { color: var(--duo-red); -webkit-text-fill-color: var(--duo-red); }
+  .tagline { letter-spacing: var(--ls-caps); text-transform: uppercase; font-size: var(--fs-sm); color: var(--duo-mute); margin-top: var(--space-2); }
+  .tagline span { color: var(--duo-red); margin: 0 6px; }
+
+  /* ---- GRID ---- */
+  .grid { display: grid; gap: var(--space-3); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 720px){ .g2,.g3,.g4 { grid-template-columns: 1fr 1fr; } }
+
+  /* ---- SWATCHES ---- */
+  .sw { border-radius: var(--radius); overflow: hidden; background: var(--duo-graphite); }
+  .sw .chip { height: 96px; }
+  .sw .meta { padding: var(--space-2) var(--space-3); }
+  .sw .name { font-weight: 600; font-size: var(--fs-sm); }
+  .sw .hex { font-size: var(--fs-xs); color: var(--duo-mute); font-family: monospace; text-transform: uppercase; }
+
+  /* ---- LOGO TILES ---- */
+  .tile { border-radius: var(--radius); display: grid; place-items: center; aspect-ratio: 1; }
+  .tile.dark { background: var(--duo-black); border: 1px solid #23262b; }
+  .tile.light { background: var(--duo-white); }
+  .tile.red { background: var(--grad-fire); }
+  .tile svg { width: 70%; height: 70%; }
+  .tile.mono svg path, .tile.mono svg rect { fill: currentColor !important; stroke: none !important; }
+  .tile.mono svg circle { fill: transparent !important; }
+
+  /* ---- TYPE SPECIMEN ---- */
+  .spec .display { font-family: var(--font-display); font-weight: 700; font-size: 3rem; text-transform: uppercase; letter-spacing: var(--ls-display); }
+  .spec .body { font-family: var(--font-body); font-size: 1.05rem; color: var(--duo-white); }
+  .scale div { border-bottom: 1px solid #23262b; padding: var(--space-2) 0; display: flex; align-items: baseline; gap: var(--space-3); }
+  .scale .tag { font-size: var(--fs-xs); color: var(--duo-mute); width: 70px; font-family: monospace; }
+
+  /* ---- COMPONENTS ---- */
+  .btn { font-family: var(--font-display); text-transform: uppercase; letter-spacing: var(--ls-display); font-weight: 600;
+    border: none; border-radius: var(--radius-pill); padding: 14px 32px; cursor: pointer; font-size: var(--fs-sm); }
+  .btn-primary { background: var(--grad-fire); color: #fff; box-shadow: var(--glow-red); }
+  .btn-ghost { background: transparent; color: var(--duo-silver); border: 1.5px solid var(--duo-steel); }
+  .btn-gold { background: var(--grad-gold); color: #2a1c00; }
+  .card { background: var(--duo-graphite); border: 1px solid #23262b; border-radius: var(--radius); padding: var(--space-4); }
+  .card .tag { display: inline-block; font-size: var(--fs-xs); letter-spacing: var(--ls-caps); color: var(--duo-red); text-transform: uppercase; font-weight: 700; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(225,29,38,.12); color: var(--duo-red-glow);
+    border: 1px solid rgba(225,29,38,.3); padding: 4px 12px; border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 600; }
+  .input { width: 100%; background: var(--duo-ink); border: 1.5px solid #2a2e34; border-radius: var(--radius-sm);
+    padding: 12px 14px; color: var(--duo-white); font-family: var(--font-body); }
+  .input:focus { outline: none; border-color: var(--duo-red); box-shadow: var(--glow-red); }
+
+  /* ---- DO / DONT ---- */
+  .rule { border-radius: var(--radius); padding: var(--space-3); border: 1px solid #23262b; }
+  .rule.do { border-left: 4px solid #2ecc71; }
+  .rule.dont { border-left: 4px solid var(--duo-red); }
+  .rule h4 { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .rule.do h4 { color: #2ecc71; }
+  .rule.dont h4 { color: var(--duo-red-glow); }
+  .rule p { font-size: var(--fs-sm); }
+  ul.voice { list-style: none; }
+  ul.voice li { padding: 8px 0; border-bottom: 1px solid #23262b; color: var(--duo-silver); }
+  ul.voice li b { color: var(--duo-white); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <img src="logo.png" width="220" height="220" alt="Logo Duralibid" style="border-radius:50%">
+    <div class="wordmark">DURA<b>LIBID</b></div>
+    <div class="tagline">Performance <span>·</span> Confiança <span>·</span> Intensidade</div>
+  </header>
+
+  <!-- ESSÊNCIA -->
+  <section>
+    <p class="eyebrow">01 · Essência</p>
+    <h2>A Marca</h2>
+    <p>DURALIBID é um suplemento natural de performance masculina. A marca projeta <b style="color:var(--duo-white)">força, virilidade e controle</b> — sem vulgaridade. Tom premium, discreto e confiável. O punho cerrado representa poder e domínio; a chama, energia e intensidade; o cromado, qualidade e precisão.</p>
+    <div class="grid g3" style="margin-top:var(--space-4)">
+      <div class="card"><span class="tag">Poder</span><p style="color:var(--duo-white)">Postura forte e direta. Quem usa, comanda.</p></div>
+      <div class="card"><span class="tag">Confiança</span><p style="color:var(--duo-white)">Resultado natural, seguro e discreto.</p></div>
+      <div class="card"><span class="tag">Intensidade</span><p style="color:var(--duo-white)">Energia que se sente. Sem meio-termo.</p></div>
+    </div>
+  </section>
+
+  <!-- LOGO -->
+  <section>
+    <p class="eyebrow">02 · Logotipo</p>
+    <h2>Símbolo & Banner</h2>
+    <p>Símbolo: punho cerrado + chama sobre anel cromado. Aplica sobre fundo escuro (preto/grafite). Banner horizontal para topo de página, e-mail e capa.</p>
+    <div class="grid g2" style="margin-top:var(--space-4)">
+      <div class="tile dark"><img src="logo.png" alt="Símbolo Duralibid" style="width:80%;border-radius:50%"></div>
+      <div class="tile dark" style="aspect-ratio:auto;padding:var(--space-4)"><img src="banner.png" alt="Banner Duralibid" style="width:100%;height:auto"></div>
+    </div>
+    <div class="grid g2" style="margin-top:var(--space-4)">
+      <div class="rule do"><h4>✓ FAÇA</h4><p>Margem livre ao redor = altura do punho. Aplique sobre preto ou grafite. Mantenha o disco circular intacto.</p></div>
+      <div class="rule dont"><h4>✕ NÃO FAÇA</h4><p>Não distorça, não recorte o anel, não use sobre fundo claro (logo tem fundo preto), não troque as cores das chamas.</p></div>
+    </div>
+  </section>
+
+  <!-- CORES -->
+  <section>
+    <p class="eyebrow">03 · Paleta</p>
+    <h2>Cores</h2>
+    <p>Vermelho fogo é a cor de ação. Preto e grafite sustentam. Cromado dá premium. Dourado conecta ao produto natural.</p>
+    <div class="grid g4" style="margin-top:var(--space-4)">
+      <div class="sw"><div class="chip" style="background:#E11D26"></div><div class="meta"><div class="name">Vermelho Fogo</div><div class="hex">#E11D26</div></div></div>
+      <div class="sw"><div class="chip" style="background:#A50F16"></div><div class="meta"><div class="name">Vermelho Sangue</div><div class="hex">#A50F16</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0A0A0A;border:1px solid #23262b"></div><div class="meta"><div class="name">Preto Profundo</div><div class="hex">#0A0A0A</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1E2126"></div><div class="meta"><div class="name">Grafite</div><div class="hex">#1E2126</div></div></div>
+      <div class="sw"><div class="chip" style="background:linear-gradient(180deg,#F2F4F6,#6E747C)"></div><div class="meta"><div class="name">Cromado</div><div class="hex">#C9CDD2→#6E747C</div></div></div>
+      <div class="sw"><div class="chip" style="background:#D9A441"></div><div class="meta"><div class="name">Dourado Âmbar</div><div class="hex">#D9A441</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F5F5F5"></div><div class="meta"><div class="name">Branco</div><div class="hex">#F5F5F5</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8A8F98"></div><div class="meta"><div class="name">Texto Mudo</div><div class="hex">#8A8F98</div></div></div>
+    </div>
+  </section>
+
+  <!-- TIPOGRAFIA -->
+  <section>
+    <p class="eyebrow">04 · Tipografia</p>
+    <h2>Fontes</h2>
+    <div class="grid g2 spec" style="margin-top:var(--space-4)">
+      <div class="card">
+        <h3>Oswald — Display</h3>
+        <div class="display">AaBbCc 123</div>
+        <p style="margin-top:8px">Títulos, wordmark, CTAs. Condensada, forte, em caixa alta.</p>
+      </div>
+      <div class="card">
+        <h3>Inter — Corpo</h3>
+        <div class="body">AaBbCc 123<br>O gato preto pulou alto.</div>
+        <p style="margin-top:8px">Texto corrido, UI, descrições. Legível e neutra.</p>
+      </div>
+    </div>
+    <div class="scale card" style="margin-top:var(--space-3)">
+      <div><span class="tag">Hero 80</span><span style="font-family:var(--font-display);font-size:2.5rem;text-transform:uppercase">Alta Performance</span></div>
+      <div><span class="tag">H1 52</span><span style="font-family:var(--font-display);font-size:2rem;text-transform:uppercase">Resultado Real</span></div>
+      <div><span class="tag">H2 28</span><span style="font-family:var(--font-display);font-size:1.4rem;text-transform:uppercase">Fórmula Natural</span></div>
+      <div><span class="tag">Body 16</span><span style="font-family:var(--font-body)">Controle prolongado e mais confiança.</span></div>
+    </div>
+  </section>
+
+  <!-- COMPONENTES -->
+  <section>
+    <p class="eyebrow">05 · Componentes</p>
+    <h2>UI Kit</h2>
+    <div class="card" style="margin-top:var(--space-4)">
+      <h3>Botões</h3>
+      <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary">Quero meu Duralibid</button>
+        <button class="btn btn-gold">Comprar agora</button>
+        <button class="btn btn-ghost">Saiba mais</button>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:var(--space-3)">
+      <div class="card">
+        <h3>Badges & Tags</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge">🔥 100% Natural</span>
+          <span class="badge">✓ Frete discreto</span>
+          <span class="badge">★ 5.0</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Input</h3>
+        <input class="input" placeholder="Seu melhor e-mail" />
+      </div>
+    </div>
+    <div class="card" style="margin-top:var(--space-3)">
+      <span class="tag">Card de Benefício</span>
+      <h3 style="margin-top:8px;color:var(--duo-white)">Resistência Prolongada</h3>
+      <p>Fórmula com ativos naturais de rápida absorção para mais controle e confiança.</p>
+    </div>
+  </section>
+
+  <!-- TOM DE VOZ -->
+  <section>
+    <p class="eyebrow">06 · Tom de Voz</p>
+    <h2>Como Falamos</h2>
+    <ul class="voice">
+      <li><b>Direto e confiante.</b> Frases curtas. Verbo no comando: "Assuma o controle."</li>
+      <li><b>Discreto, nunca vulgar.</b> Fala de performance e confiança — não de explícito.</li>
+      <li><b>Prova, não promessa vazia.</b> "Ativos naturais", "absorção rápida", "resultado que você sente".</li>
+      <li><b>Respeito.</b> Sem pressão tóxica nem ansiedade. Foco em bem-estar masculino.</li>
+    </ul>
+    <div class="grid g2" style="margin-top:var(--space-4)">
+      <div class="rule do"><h4>✓ Tom certo</h4><p>"Mais controle. Mais confiança. Melhores momentos."</p></div>
+      <div class="rule dont"><h4>✕ Evitar</h4><p>Linguagem explícita, promessas médicas milagrosas ou apelo de insegurança.</p></div>
+    </div>
+  </section>
+
+  <footer style="padding:var(--space-5) 0;text-align:center;color:var(--duo-mute);font-size:var(--fs-xs)">
+    DURALIBID · Manual de Marca v1 · Performance · Confiança · Intensidade
+  </footer>
+
+</div>
+</body>
+</html>

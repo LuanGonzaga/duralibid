@@ -1,0 +1,59 @@
+/* ============================================================
+   DURALIBID — Design Tokens
+   Identidade visual: Performance · Confiança · Intensidade
+   ============================================================ */
+
+:root {
+  /* ---------- Cores de marca ---------- */
+  --duo-red:            #E11D26;  /* Vermelho fogo — primária */
+  --duo-red-deep:       #A50F16;  /* Vermelho sangue — hover/pressed */
+  --duo-red-glow:       #FF3A43;  /* Realce / brilho de chama */
+
+  --duo-black:          #0A0A0A;  /* Preto profundo — fundo base */
+  --duo-ink:            #141518;  /* Carvão — superfícies elevadas */
+  --duo-graphite:       #1E2126;  /* Grafite — cards */
+
+  --duo-silver:         #C9CDD2;  /* Cromado claro */
+  --duo-steel:          #6E747C;  /* Cromado escuro */
+
+  --duo-gold:           #D9A441;  /* Dourado âmbar — produto natural */
+  --duo-gold-deep:      #A9781F;
+
+  --duo-white:          #F5F5F5;
+  --duo-mute:           #8A8F98;  /* Texto secundário */
+
+  /* ---------- Gradientes ---------- */
+  --grad-chrome:  linear-gradient(180deg, #F2F4F6 0%, #C9CDD2 45%, #6E747C 100%);
+  --grad-fire:    linear-gradient(135deg, #FF3A43 0%, #E11D26 50%, #A50F16 100%);
+  --grad-gold:    linear-gradient(180deg, #F0C871 0%, #D9A441 55%, #A9781F 100%);
+  --grad-stage:   radial-gradient(circle at 50% 30%, #1E2126 0%, #0A0A0A 70%);
+
+  /* ---------- Tipografia ---------- */
+  --font-display: "Anton", "Archivo Black", "Arial Narrow", sans-serif; /* impacto, títulos */
+  --font-body:    "Manrope", "Inter", system-ui, sans-serif;            /* corpo, UI */
+
+  --fs-hero:   clamp(2.75rem, 6vw, 5rem);
+  --fs-h1:     clamp(2rem, 4vw, 3.25rem);
+  --fs-h2:     1.75rem;
+  --fs-h3:     1.25rem;
+  --fs-body:   1rem;
+  --fs-sm:     0.875rem;
+  --fs-xs:     0.75rem;
+
+  --ls-display: 0.04em;
+  --ls-caps:    0.22em;  /* tagline em caixa alta */
+
+  /* ---------- Forma & sombra ---------- */
+  --radius-sm: 6px;
+  --radius:    12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --shadow-sm:  0 2px 8px rgba(0,0,0,.4);
+  --shadow:     0 8px 28px rgba(0,0,0,.55);
+  --glow-red:   0 0 24px rgba(225,29,38,.45);
+
+  /* ---------- Espaçamento ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 16px;
+  --space-4: 24px; --space-5: 40px; --space-6: 64px;
+}

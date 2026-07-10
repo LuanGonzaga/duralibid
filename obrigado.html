@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedido confirmado — DuraLibid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="brand/tokens.css">
+<!-- Meta Pixel Purchase -->
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','918376947924562');fbq('track','PageView');</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
+<script>window.pixelId="6a5121ed882e6adbfb3d7934";var a=document.createElement("script");a.setAttribute("async","");a.setAttribute("defer","");a.setAttribute("src","https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);</script>
+<script src="https://cdn.utmify.com.br/scripts/utms/latest.js" async defer></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--duo-black);color:var(--duo-white);font-family:var(--font-body);min-height:100vh;display:grid;place-items:center;padding:var(--space-5) var(--space-4)}
+h1,h2{font-family:var(--font-display);text-transform:uppercase;line-height:1}
+.card{background:var(--duo-graphite);border:1px solid #23262b;border-radius:24px;padding:var(--space-6);max-width:560px;width:100%;text-align:center}
+.check{width:80px;height:80px;border-radius:50%;background:rgba(46,204,113,.15);border:2px solid rgba(46,204,113,.4);display:grid;place-items:center;margin:0 auto var(--space-4)}
+.check svg{width:40px;height:40px;stroke:#2ecc71;fill:none;stroke-width:2.5}
+h1{font-size:var(--fs-h1);color:var(--duo-white);margin-bottom:var(--space-2)}
+.sub{color:var(--duo-silver);margin-bottom:var(--space-4)}
+.info{background:var(--duo-ink);border-radius:var(--radius);padding:var(--space-3);margin-bottom:var(--space-4);font-size:var(--fs-sm);color:var(--duo-mute);line-height:1.7}
+.info b{color:var(--duo-white)}
+.btn{display:inline-block;font-family:var(--font-display);text-transform:uppercase;letter-spacing:0.04em;background:var(--grad-fire);color:#fff;padding:14px 36px;border-radius:var(--radius-pill);text-decoration:none;box-shadow:var(--glow-red)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="check">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>Pedido <span style="color:var(--duo-red)">confirmado!</span></h1>
+  <p class="sub">Seu pagamento foi aprovado e o pedido está sendo preparado.</p>
+  <div class="info">
+    <b>O que acontece agora?</b><br>
+    Você receberá um e-mail de confirmação em breve.<br>
+    O prazo de entrega é de <b>5 a 10 dias úteis</b>.<br>
+    A embalagem é <b>100% discreta</b>, sem identificação do produto.
+  </div>
+  <a class="btn" href="index.html">Voltar ao início</a>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  const kit = p.get('kit');
+  const prices = { '1': 89.90, '2': 165.90, '3': 239.90 };
+  if (kit && prices[kit]) {
+    fbq('track', 'Purchase', {
+      value: prices[kit], currency: 'BRL',
+      content_ids: ['duralibid-serumintimo'], content_type: 'product'
+    });
+  }
+</script>
+</body>
+</html>
