@@ -1,3 +1,5 @@
+import { sendCapiEvent } from './capi.js';
+
 const KITS = {
   1: { name: 'DuraLibid — 1 Frasco (1 mês)',    quantity: 1, price: 89.90  },
   2: { name: 'DuraLibid — 2 Frascos (2 meses)', quantity: 2, price: 165.90 },
@@ -62,6 +64,30 @@ export default async function handler(req, res) {
       payload.installments = parseInt(installments) || 1;
       if (issuer_id) payload.issuer_id = issuer_id;
     }
+
+    // Disparar evento InitiateCheckout na CAPI
+    await sendCapiEvent({
+      eventName: 'InitiateCheckout',
+      eventData: {
+        value: kitData.price,
+        currency: 'BRL',
+        content_ids: [`duralibid-${kit}frasco`],
+        content_type: 'product',
+        num_items: kitData.quantity,
+      },
+      userData: {
+        email: email,
+        phone: phone,
+        firstName: name.split(' ')[0],
+        lastName: name.split(' ').slice(1).join(' '),
+        city: city,
+        state: state,
+        zipCode: zipCode,
+      },
+      clientIp: req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      eventSourceUrl: 'https://duralibid.com.br/checkout.html',
+    });
 
     const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',

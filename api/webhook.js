@@ -1,3 +1,5 @@
+import { sendCapiEvent } from './capi.js';
+
 const KITS = {
   1: { name: '1 Frasco — 30ml', price: 89.90,  qty: 1 },
   2: { name: '2 Frascos — 30ml cada', price: 165.90, qty: 2 },
@@ -212,6 +214,29 @@ export default async function handler(req, res) {
     const payer = payment.payer;
     const kitId = parseInt(payment.metadata?.kit) || 2;
     const kit   = KITS[kitId] || KITS[2];
+
+    // Disparar evento Purchase na CAPI
+    await sendCapiEvent({
+      eventName: 'Purchase',
+      eventData: {
+        value: kit.price,
+        currency: 'BRL',
+        content_ids: [`duralibid-${kitId}frasco`],
+        content_type: 'product',
+        num_items: kit.qty,
+        order_id: payment.id.toString(),
+      },
+      userData: {
+        email: payer.email,
+        phone: `${payer.phone?.area_code}${payer.phone?.number}`,
+        firstName: payer.first_name,
+        lastName: payer.last_name,
+        city: payer.address?.city,
+        state: payer.address?.federal_unit,
+        zipCode: payer.address?.zip_code,
+      },
+      eventSourceUrl: 'https://duralibid.com.br/obrigado.html',
+    });
 
     // Tentar criar etiqueta no Melhor Envio
     let etiqueta = null;
