@@ -221,7 +221,7 @@ export default async function handler(req, res) {
       eventData: {
         value: kit.price,
         currency: 'BRL',
-        content_ids: [`duralibid-${kitId}frasco`],
+        content_ids: [`duralibid-${kitId}frasco${kit.qty > 1 ? 's' : ''}`],
         content_type: 'product',
         num_items: kit.qty,
         order_id: payment.id.toString(),
@@ -234,8 +234,11 @@ export default async function handler(req, res) {
         city: payer.address?.city,
         state: payer.address?.federal_unit,
         zipCode: payer.address?.zip_code,
+        fbp: payment.metadata?.fbp,
+        fbc: payment.metadata?.fbc,
       },
-      eventSourceUrl: 'https://duralibid.com.br/obrigado.html',
+      eventSourceUrl: payment.metadata?.source_url || 'https://duralibid.com.br/checkout.html',
+      eventId: `purchase_${payment.id}`,
     });
 
     // Tentar criar etiqueta no Melhor Envio

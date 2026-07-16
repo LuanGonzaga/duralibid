@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="brand/tokens.css">
 <!-- Meta Pixel -->
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','918376947924562');fbq('track','PageView');fbq('track','InitiateCheckout',{content_ids:['duralibid-serumintimo'],content_type:'product',currency:'BRL'});</script>
+<script src="tracking.js"></script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
 <!-- UTMify -->
 <script>window.pixelId="6a5121ed882e6adbfb3d7934";var a=document.createElement("script");a.setAttribute("async","");a.setAttribute("defer","");a.setAttribute("src","https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);</script>
@@ -333,6 +333,32 @@ document.querySelectorAll('.kit-option').forEach(el => {
 // Init from URL param
 const urlKit = new URLSearchParams(location.search).get('kit');
 selectKit(urlKit && KITS[urlKit] ? urlKit : '2');
+if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
+  DLTracking.track('InitiateCheckout', DLTracking.kitPayload(selectedKit));
+}
+
+(function notifyCheckoutVisit() {
+  const key = `dl_checkout_visit_notified_${selectedKit}`;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+  } catch (e) {}
+
+  const metaCookies = DLTracking.getMetaCookies();
+  fetch('/api/checkout-visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kit: selectedKit,
+      sourceUrl: location.href,
+      attribution: DLTracking.getAttribution(),
+      tracking: {
+        fbp: metaCookies.fbp,
+        fbc: metaCookies.fbc,
+      },
+    }),
+  }).catch(() => {});
+})();
 
 // --- Payment tabs ---
 document.querySelectorAll('.pay-tab').forEach(tab => {
@@ -413,8 +439,14 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
   if (!validate()) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
 
   const btn = document.getElementById('submitBtn');
+  const fb = document.getElementById('feedback');
   btn.disabled = true;
   btn.textContent = 'Processando…';
+  const addPaymentInfoEventId = DLTracking.track('AddPaymentInfo', {
+    ...DLTracking.kitPayload(selectedKit),
+    payment_method: paymentMethod,
+  });
+  const metaCookies = DLTracking.getMetaCookies();
 
   const body = {
     kit: selectedKit,
@@ -430,6 +462,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     neighborhood: document.getElementById('neighborhood').value,
     city: document.getElementById('city').value,
     state: document.getElementById('state').value,
+    tracking: {
+      eventId: addPaymentInfoEventId,
+      fbp: metaCookies.fbp,
+      fbc: metaCookies.fbc,
+      sourceUrl: location.href,
+      attribution: DLTracking.getAttribution(),
+    },
   };
 
   if (paymentMethod === 'credit_card') {
@@ -449,12 +488,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    const fb = document.getElementById('feedback');
 
     if (res.ok && (data.status === 'approved' || data.status === 'pending' || data.pix_copy_paste)) {
-      fbq('track', 'Purchase', { value: KITS[selectedKit].price, currency: 'BRL', content_ids: ['duralibid-serumintimo'], content_type: 'product' });
-
       if (paymentMethod === 'pix' && data.pix_copy_paste) {
+        DLTracking.trackCustom('PixGenerated', {
+          ...DLTracking.kitPayload(selectedKit),
+          payment_id: data.payment_id,
+        });
         fb.className = 'success';
         fb.style.display = 'block';
         fb.innerHTML = `
@@ -477,7 +517,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
       throw new Error(data.error || 'Erro ao processar');
     }
   } catch (err) {
-    const fb = document.getElementById('feedback');
     fb.className = 'error';
     fb.style.display = 'block';
     fb.innerHTML = `<h3>Erro no pagamento</h3><p style="color:var(--duo-silver)">${err.message || 'Tente novamente ou use outro método de pagamento.'}</p>`;

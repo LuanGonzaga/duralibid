@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="brand/tokens.css">
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','918376947924562');fbq('track','PageView');</script>
+<script src="tracking.js"></script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
 <script>window.pixelId="6a5121ed882e6adbfb3d7934";var a=document.createElement("script");a.setAttribute("async","");a.setAttribute("defer","");a.setAttribute("src","https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);</script>
 <script src="https://cdn.utmify.com.br/scripts/utms/latest.js" async defer></script>
@@ -47,9 +47,12 @@ h1{font-size:var(--fs-h1);color:var(--duo-white);margin-bottom:var(--space-2)}
   const kit = p.get('kit');
   const prices = { '1': 89.90, '2': 165.90, '3': 239.90 };
   if (kit && prices[kit]) {
-    fbq('track', 'Purchase', {
-      value: prices[kit], currency: 'BRL',
-      content_ids: ['duralibid-serumintimo'], content_type: 'product'
+    DLTracking.trackCustom('ThankYouPageViewed', {
+      value: prices[kit],
+      currency: 'BRL',
+      content_ids: ['duralibid-serumintimo'],
+      content_type: 'product',
+      payment_id: p.get('id') || undefined
     });
   }
 </script>

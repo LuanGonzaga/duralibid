@@ -10,7 +10,9 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="brand/tokens.css">
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init', '918376947924562');fbq('track', 'PageView');fbq('track', 'ViewContent', {content_name: 'Duralibid', content_category: 'Sérum Íntimo Masculino', content_ids: ['duralibid-serumintimo'], content_type: 'product', value: 239.90, currency: 'BRL'});</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
+<script src="tracking.js"></script>
+<script>DLTracking.track('ViewContent', DLTracking.productPayload());</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
 <!-- End Meta Pixel Code -->
 
 <!-- UTMify -->
@@ -318,7 +320,7 @@
       <a href="#como-usar"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg><span>Como usar</span></a>
       <a href="#prova"><svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.7-7-5.5-4.7 7.2-.6L12 2l2.8 6.4 7.2.6-5.5 4.7 1.7 7z"/></svg><span>Depoimentos</span></a>
     </div>
-    <a class="nav-cta" href="#kits" onclick="fbq('track','AddToCart',{content_name:'Duralibid',content_ids:['duralibid-serumintimo'],content_type:'product',value:239.90,currency:'BRL'})">Comprar agora</a>
+    <a class="nav-cta" href="#kits" data-track-cta="nav_comprar_agora">Comprar agora</a>
   </nav>
 </header>
 
@@ -342,7 +344,7 @@
             <span class="stars">★★★★★</span>
             <small>4,9/5 · avaliações reais de compradores</small>
           </div>
-          <a class="btn btn-primary" href="#kits" onclick="fbq('track','AddToCart',{content_name:'Duralibid',content_ids:['duralibid-serumintimo'],content_type:'product',value:239.90,currency:'BRL'})">Quero experimentar →</a>
+          <a class="btn btn-primary" href="#kits" data-track-cta="hero_quero_experimentar">Quero experimentar →</a>
           <p class="microcopy">🔒 Frete grátis e discreto · Garantia de 7 dias · Registro ANVISA</p>
           <div class="trust">
             <span><b>+12 mil</b> homens</span>
@@ -400,7 +402,7 @@
         </ul>
       </div>
     </div>
-    <a class="btn btn-primary reveal" href="#kits" style="margin-top:var(--space-5)" onclick="fbq('track','AddToCart',{content_name:'Duralibid',content_ids:['duralibid-serumintimo'],content_type:'product',value:239.90,currency:'BRL'})">Quero essa virada agora →</a>
+    <a class="btn btn-primary reveal" href="#kits" style="margin-top:var(--space-5)" data-track-cta="meio_quero_virada">Quero essa virada agora →</a>
   </div>
 </section>
 
@@ -610,7 +612,7 @@
           <li>Frete grátis e discreto</li>
           <li>Garantia de 7 dias</li>
         </ul>
-        <a class="btn btn-gold btn-block" href="checkout.html?kit=1" onclick="fbq('track','InitiateCheckout',{content_name:'DuraLibid 1 Frasco',content_ids:['duralibid-1frasco'],content_type:'product',num_items:1,value:89.90,currency:'BRL'})">Comprar 1 unidade</a>
+        <a class="btn btn-gold btn-block" href="checkout.html?kit=1" data-track-checkout="1">Comprar 1 unidade</a>
       </div>
 
       <div class="plan best">
@@ -627,7 +629,7 @@
           <li>Frete grátis e discreto</li>
           <li>Garantia de 7 dias</li>
         </ul>
-        <a class="btn btn-primary btn-block" href="checkout.html?kit=2" onclick="fbq('track','InitiateCheckout',{content_name:'DuraLibid 2 Frascos',content_ids:['duralibid-2frascos'],content_type:'product',num_items:2,value:165.90,currency:'BRL'})">Comprar 2 unidades →</a>
+        <a class="btn btn-primary btn-block" href="checkout.html?kit=2" data-track-checkout="2">Comprar 2 unidades →</a>
       </div>
 
       <div class="plan">
@@ -643,7 +645,7 @@
           <li>Frete grátis e discreto</li>
           <li>Garantia de 7 dias</li>
         </ul>
-        <a class="btn btn-gold btn-block" href="checkout.html?kit=3" onclick="fbq('track','InitiateCheckout',{content_name:'DuraLibid 3 Frascos',content_ids:['duralibid-3frascos'],content_type:'product',num_items:3,value:239.90,currency:'BRL'})">Comprar melhor preço</a>
+        <a class="btn btn-gold btn-block" href="checkout.html?kit=3" data-track-checkout="3">Comprar melhor preço</a>
       </div>
 
     </div>
@@ -698,14 +700,14 @@
   <div class="wrap">
     <h2 class="sec reveal">Assuma o controle <span class="red">hoje</span></h2>
     <p class="lead reveal" style="margin-bottom:var(--space-4)">Você já sabe como é falhar na hora. Com 7 dias de garantia, o único risco é continuar como está.</p>
-    <a class="btn btn-primary reveal" href="#kits" onclick="fbq('track','AddToCart',{content_name:'Duralibid',content_ids:['duralibid-serumintimo'],content_type:'product',value:239.90,currency:'BRL'})">Quero experimentar →</a>
+    <a class="btn btn-primary reveal" href="#kits" data-track-cta="final_quero_experimentar">Quero experimentar →</a>
   </div>
 </section>
 
 <!-- STICKY -->
 <div class="sticky">
   <span class="txt"><b>DURALIBID</b> · a partir de R$ 89,90</span>
-  <a class="btn btn-primary" href="#kits" style="padding:14px 36px;font-size:1.05rem" onclick="fbq('track','InitiateCheckout',{content_name:'Duralibid',content_ids:['duralibid-serumintimo'],content_type:'product',value:239.90,currency:'BRL'})">Comprar agora</a>
+  <a class="btn btn-primary" href="#kits" style="padding:14px 36px;font-size:1.05rem" data-track-cta="sticky_comprar_agora">Comprar agora</a>
 </div>
 
 <footer>

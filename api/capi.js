@@ -9,6 +9,11 @@ function hash(value) {
   return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 }
 
+function firstHeaderValue(value) {
+  if (!value) return undefined;
+  return String(value).split(',')[0].trim() || undefined;
+}
+
 /**
  * Envia um evento para a API de Conversões do Meta (server-side)
  * @param {string} eventName  - Ex: 'Purchase', 'InitiateCheckout', 'PageView'
@@ -16,12 +21,13 @@ function hash(value) {
  * @param {object} userData   - Dados do usuário (serão hasheados)
  * @param {object} req        - Request object (para IP e user agent)
  */
-export async function sendCapiEvent({ eventName, eventData = {}, userData = {}, clientIp, userAgent, eventSourceUrl }) {
+export async function sendCapiEvent({ eventName, eventData = {}, userData = {}, clientIp, userAgent, eventSourceUrl, eventId }) {
   if (!PIXEL_ID || !TOKEN) return;
 
   const payload = {
     data: [{
       event_name: eventName,
+      event_id: eventId || undefined,
       event_time: Math.floor(Date.now() / 1000),
       event_source_url: eventSourceUrl || 'https://duralibid.com.br',
       action_source: 'website',
@@ -35,7 +41,9 @@ export async function sendCapiEvent({ eventName, eventData = {}, userData = {}, 
         zp:  hash(userData.zipCode?.replace(/\D/g, '')),
         country: hash('br'),
         external_id: hash(userData.email), // ID único do usuário
-        client_ip_address: clientIp || undefined,
+        fbp: userData.fbp || undefined,
+        fbc: userData.fbc || undefined,
+        client_ip_address: firstHeaderValue(clientIp),
         client_user_agent: userAgent || undefined,
       },
       custom_data: eventData,
