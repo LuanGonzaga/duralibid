@@ -142,6 +142,28 @@ tr:hover td{background:#FCF3F3}
 .spark{display:flex;align-items:end;gap:6px;height:56px;margin-top:12px}
 .spark span{flex:1;min-width:10px;border-radius:6px 6px 0 0;background:#DCE5F3;min-height:5px}
 .spark span.hot{background:var(--red)}
+.period-select{height:40px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-weight:900;padding:0 10px;outline:none}
+.ads-panel{margin-bottom:14px;overflow:hidden}
+.ads-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.72fr);gap:14px;padding:16px}
+.ad-metrics{display:grid;grid-template-columns:repeat(3,minmax(130px,1fr));gap:10px}
+.ad-card{min-height:112px;border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:13px;display:flex;flex-direction:column;justify-content:space-between}
+.ad-card span{color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase}
+.ad-card strong{display:block;margin-top:12px;color:var(--ink);font-size:1.42rem;line-height:1.05;letter-spacing:0}
+.ad-card small{display:block;margin-top:7px;color:var(--muted);font-size:.78rem;line-height:1.35}
+.ad-trend{display:flex;align-items:end;gap:7px;height:158px;padding:14px 4px 0;border-top:1px solid var(--line);margin-top:14px}
+.ad-trend span{flex:1;min-width:9px;border-radius:6px 6px 0 0;background:#DCE5F3;min-height:5px;position:relative}
+.ad-trend span.hot{background:var(--red)}
+.ad-trend span.paid{background:var(--green)}
+.campaign-list{display:grid;gap:10px}
+.campaign-row{border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
+.campaign-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.campaign-top strong{display:block;color:var(--ink);font-size:.9rem;line-height:1.25}
+.campaign-top span{color:var(--muted);font-size:.78rem;white-space:nowrap}
+.campaign-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:.78rem}
+.campaign-meter{height:7px;border-radius:999px;background:#EEF2F7;overflow:hidden;margin-top:10px}
+.campaign-meter span{display:block;height:100%;border-radius:999px;background:var(--red)}
+.setup{border:1px dashed var(--line-strong);background:#FFF8E7;border-radius:8px;padding:14px;color:#7A4B00;line-height:1.5}
+.setup strong{display:block;color:#4A2D00;margin-bottom:4px}
 
 @media(max-width:1180px){
   .app{grid-template-columns:1fr}
@@ -150,12 +172,14 @@ tr:hover td{background:#FCF3F3}
   .main{padding:16px}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid{grid-template-columns:1fr}
+  .ads-shell{grid-template-columns:1fr}
 }
 @media(max-width:760px){
   .topbar,.filters,.table-head{align-items:flex-start;flex-direction:column}
   .actions{width:100%;justify-content:flex-start}
   .btn{flex:1;min-width:130px}
   .kpis{grid-template-columns:1fr}
+  .ad-metrics{grid-template-columns:1fr}
   .funnel-row{grid-template-columns:1fr;gap:7px}
   .funnel-value{text-align:left}
   .search{min-width:100%;width:100%}
@@ -223,6 +247,14 @@ tr:hover td{background:#FCF3F3}
         <p>Visao do funil de checkout, Pix e recuperacao em tempo quase real.</p>
       </div>
       <div class="actions">
+        <select id="adsPeriod" class="period-select" aria-label="Periodo Meta Ads">
+          <option value="today">Hoje</option>
+          <option value="yesterday">Ontem</option>
+          <option value="last_7d" selected>Ultimos 7 dias</option>
+          <option value="last_14d">Ultimos 14 dias</option>
+          <option value="last_30d">Ultimos 30 dias</option>
+          <option value="this_month">Este mes</option>
+        </select>
         <button id="refresh" class="btn" type="button">Atualizar</button>
         <button id="exportCsv" class="btn" type="button">Exportar CSV</button>
         <button id="logout" class="btn dark" type="button">Sair</button>
@@ -265,6 +297,39 @@ tr:hover td{background:#FCF3F3}
           <small id="kRecoveryHint">Sequencias de e-mail enviadas</small>
         </div>
       </article>
+    </section>
+
+    <section class="panel ads-panel" aria-label="Metricas Meta Ads">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Meta Ads</div>
+          <div id="metaAdsSubtitle" class="panel-sub">Investimento, cliques, compras e ROAS por periodo.</div>
+        </div>
+        <span id="metaAdsStatus" class="status-text">Aguardando login</span>
+      </div>
+      <div class="ads-shell">
+        <div>
+          <div id="metaSetup" class="setup hidden">
+            <strong>Meta Ads ainda nao esta conectado</strong>
+            Configure <span class="mono">META_AD_ACCOUNT_ID</span> e <span class="mono">META_ADS_ACCESS_TOKEN</span> na Vercel para trazer os dados reais.
+          </div>
+          <div id="adMetrics" class="ad-metrics">
+            <article class="ad-card"><span>Investimento</span><strong id="mSpend" class="mono">R$ 0,00</strong><small id="mSpendHint">Meta Ads</small></article>
+            <article class="ad-card"><span>Cliques no link</span><strong id="mClicks" class="mono">0</strong><small id="mCtr">CTR 0%</small></article>
+            <article class="ad-card"><span>CPC medio</span><strong id="mCpc" class="mono">R$ 0,00</strong><small id="mCpm">CPM R$ 0,00</small></article>
+            <article class="ad-card"><span>Compras Meta</span><strong id="mPurchases" class="mono">0</strong><small id="mCpa">CPA R$ 0,00</small></article>
+            <article class="ad-card"><span>Valor atribuido</span><strong id="mPurchaseValue" class="mono">R$ 0,00</strong><small>Receita no Meta Ads</small></article>
+            <article class="ad-card"><span>ROAS Meta</span><strong id="mRoas" class="mono">0.00x</strong><small id="mLeads">Leads Meta 0</small></article>
+          </div>
+          <div id="adTrend" class="ad-trend" aria-label="Investimento diario Meta Ads"></div>
+        </div>
+        <div>
+          <div class="panel-title">Campanhas por investimento</div>
+          <div class="panel-sub">Ranking das campanhas ativas no periodo selecionado.</div>
+          <div style="height:12px"></div>
+          <div id="campaigns" class="campaign-list"></div>
+        </div>
+      </div>
     </section>
 
     <section class="grid">
@@ -347,7 +412,7 @@ tr:hover td{background:#FCF3F3}
 <script>
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const number = new Intl.NumberFormat('pt-BR');
-const state = { leads: [], filtered: [], status: 'all', query: '' };
+const state = { leads: [], filtered: [], status: 'all', query: '', metaAds: null, metaPeriod: 'last_7d' };
 
 const STATUS = {
   checkout_visit: 'Checkout',
@@ -368,6 +433,7 @@ function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated'
 function isRegistered(lead) { return Boolean(lead.email || lead.phone || lead.name || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
 function amount(lead) { return Number(lead.amount || 0); }
 function percent(value, total) { return total ? Math.round((value / total) * 100) : 0; }
+function decimal(value, digits) { return Number(value || 0).toFixed(digits == null ? 2 : digits); }
 
 function fmtDate(value) {
   if (!value) return '-';
@@ -434,6 +500,30 @@ async function loadLeads() {
   $('lastUpdate').textContent = `Atualizado ${new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(new Date())}`;
 }
 
+async function loadDashboard() {
+  await loadLeads();
+  await loadMetaAds().catch((err) => renderMetaAdsError(err.message));
+}
+
+async function loadMetaAds() {
+  $('metaAdsStatus').textContent = 'Carregando Meta Ads...';
+  const params = new URLSearchParams({ period: state.metaPeriod });
+  const res = await fetch(`/api/meta-ads?${params.toString()}`, {
+    headers: {
+      'X-Admin-User': panelUser(),
+      'X-Admin-Password': password(),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Nao foi possivel carregar Meta Ads.');
+  if (!data.configured) {
+    renderMetaAdsSetup(data.message);
+    return;
+  }
+  state.metaAds = data;
+  renderMetaAds(data);
+}
+
 function applyFilters() {
   const q = state.query.trim().toLowerCase();
   state.filtered = state.leads.filter((lead) => {
@@ -459,6 +549,97 @@ function render() {
   renderRows();
   $('statusText').textContent = `${number.format(state.filtered.length)} de ${number.format(state.leads.length)} registros`;
   $('activeFilter').textContent = state.status === 'all' ? 'Todos os status' : statusLabel(state.status);
+}
+
+function resetMetaNumbers() {
+  $('mSpend').textContent = money.format(0);
+  $('mClicks').textContent = '0';
+  $('mCtr').textContent = 'CTR 0%';
+  $('mCpc').textContent = money.format(0);
+  $('mCpm').textContent = `CPM ${money.format(0)}`;
+  $('mPurchases').textContent = '0';
+  $('mCpa').textContent = `CPA ${money.format(0)}`;
+  $('mPurchaseValue').textContent = money.format(0);
+  $('mRoas').textContent = '0.00x';
+  $('mLeads').textContent = 'Leads Meta 0';
+}
+
+function renderMetaAdsSetup(message) {
+  state.metaAds = null;
+  $('metaSetup').classList.remove('hidden');
+  $('adMetrics').classList.add('hidden');
+  $('adTrend').classList.add('hidden');
+  $('metaAdsStatus').textContent = 'Nao conectado';
+  $('metaAdsSubtitle').textContent = message || 'Configure a conta de anuncios para ver metricas de midia paga.';
+  $('campaigns').innerHTML = '<div class="insight"><strong>Aguardando conexao</strong><span>Assim que o token de Marketing API estiver configurado, as campanhas aparecem aqui.</span></div>';
+  resetMetaNumbers();
+}
+
+function renderMetaAdsError(message) {
+  $('metaSetup').classList.remove('hidden');
+  $('adMetrics').classList.add('hidden');
+  $('adTrend').classList.add('hidden');
+  $('metaAdsStatus').textContent = 'Erro Meta Ads';
+  $('metaAdsSubtitle').textContent = message || 'Nao foi possivel consultar Meta Ads.';
+  $('campaigns').innerHTML = '<div class="insight"><strong>Erro ao consultar</strong><span>Confira o token, a conta de anuncios e a permissao ads_read.</span></div>';
+}
+
+function renderMetaAds(data) {
+  const s = data.summary || {};
+  $('metaSetup').classList.add('hidden');
+  $('adMetrics').classList.remove('hidden');
+  $('adTrend').classList.remove('hidden');
+  $('metaAdsStatus').textContent = data.period_label || 'Meta Ads';
+  $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'} - ${data.graph_version || 'Graph API'}`;
+  $('mSpend').textContent = money.format(s.spend || 0);
+  $('mSpendHint').textContent = data.period_label || 'Periodo selecionado';
+  $('mClicks').textContent = number.format(s.link_clicks || s.clicks || 0);
+  $('mCtr').textContent = `CTR ${decimal(s.ctr || 0)}%`;
+  $('mCpc').textContent = money.format(s.cpc || 0);
+  $('mCpm').textContent = `CPM ${money.format(s.cpm || 0)}`;
+  $('mPurchases').textContent = number.format(s.purchases || 0);
+  $('mCpa').textContent = `CPA ${money.format(s.cost_per_purchase || 0)}`;
+  $('mPurchaseValue').textContent = money.format(s.purchase_value || 0);
+  $('mRoas').textContent = `${decimal(s.roas || 0)}x`;
+  $('mLeads').textContent = `Leads Meta ${number.format(s.leads || 0)}`;
+  renderAdTrend(data.daily || []);
+  renderCampaigns(data.campaigns || [], s.spend || 0);
+}
+
+function renderAdTrend(days) {
+  if (!days.length) {
+    $('adTrend').innerHTML = '<span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span>';
+    return;
+  }
+  const max = Math.max(...days.map((day) => day.spend || 0), 1);
+  $('adTrend').innerHTML = days.map((day) => {
+    const height = Math.max(8, Math.round(((day.spend || 0) / max) * 144));
+    const label = `${day.date_start || ''}: ${money.format(day.spend || 0)} | compras ${day.purchases || 0}`;
+    return `<span class="${day.purchases ? 'paid' : ''}" style="height:${height}px" title="${escapeHtml(label)}"></span>`;
+  }).join('');
+}
+
+function renderCampaigns(campaigns, totalSpend) {
+  if (!campaigns.length) {
+    $('campaigns').innerHTML = '<div class="insight"><strong>Nenhuma campanha no periodo</strong><span>Troque o periodo ou confirme se a conta de anuncios tem dados recentes.</span></div>';
+    return;
+  }
+  const max = Math.max(...campaigns.map((campaign) => campaign.spend || 0), totalSpend || 1);
+  $('campaigns').innerHTML = campaigns.map((campaign) => `
+    <div class="campaign-row">
+      <div class="campaign-top">
+        <strong>${escapeHtml(campaign.campaign_name || 'Campanha sem nome')}</strong>
+        <span class="mono">${money.format(campaign.spend || 0)}</span>
+      </div>
+      <div class="campaign-meta">
+        <span>${number.format(campaign.link_clicks || campaign.clicks || 0)} cliques</span>
+        <span>CTR ${decimal(campaign.ctr || 0)}%</span>
+        <span>${number.format(campaign.purchases || 0)} compras</span>
+        <span>ROAS ${decimal(campaign.roas || 0)}x</span>
+      </div>
+      <div class="campaign-meter"><span style="width:${percent(campaign.spend || 0, max)}%"></span></div>
+    </div>
+  `).join('');
 }
 
 function renderKpis(s) {
@@ -669,7 +850,7 @@ $('loginForm').addEventListener('submit', async (event) => {
   sessionStorage.setItem('dl_panel_password', $('password').value);
   $('loginError').classList.add('hidden');
   try {
-    await loadLeads();
+    await loadDashboard();
     $('login').classList.add('hidden');
     $('app').classList.remove('hidden');
   } catch (err) {
@@ -683,8 +864,12 @@ $('logout').addEventListener('click', () => {
   sessionStorage.removeItem('dl_panel_password');
   location.reload();
 });
-$('refresh').addEventListener('click', () => loadLeads().catch((err) => $('statusText').textContent = err.message));
+$('refresh').addEventListener('click', () => loadDashboard().catch((err) => $('statusText').textContent = err.message));
 $('exportCsv').addEventListener('click', exportCsv);
+$('adsPeriod').addEventListener('change', (event) => {
+  state.metaPeriod = event.target.value;
+  loadMetaAds().catch((err) => renderMetaAdsError(err.message));
+});
 $('search').addEventListener('input', (event) => {
   state.query = event.target.value;
   applyFilters();
@@ -697,7 +882,7 @@ document.querySelectorAll('[data-nav-filter]').forEach((button) => {
 });
 
 if (password()) {
-  loadLeads().then(() => {
+  loadDashboard().then(() => {
     $('login').classList.add('hidden');
     $('app').classList.remove('hidden');
   }).catch(() => {
