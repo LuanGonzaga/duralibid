@@ -144,22 +144,39 @@ tr:hover td{background:#FCF3F3}
 .spark span{flex:1;min-width:10px;border-radius:6px 6px 0 0;background:#DCE5F3;min-height:5px}
 .spark span.hot{background:var(--red)}
 .period-select{height:40px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-weight:900;padding:0 10px;outline:none}
-.ads-panel{margin-bottom:14px;overflow:hidden}
-.ads-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.72fr);gap:14px;padding:16px}
-.ad-metrics{display:grid;grid-template-columns:repeat(3,minmax(130px,1fr));gap:10px}
-.ad-card{min-height:112px;border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:13px;display:flex;flex-direction:column;justify-content:space-between}
+.ads-panel{margin-bottom:14px;overflow:hidden;border-color:#D8E0EB}
+.ads-shell{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:14px;padding:16px}
+.ad-hero{min-height:348px;border:1px solid #D8E0EB;background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFD 100%);border-radius:8px;padding:16px;display:flex;flex-direction:column}
+.ad-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
+.ad-hero-title span{display:block;color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase}
+.ad-hero-title strong{display:block;margin-top:6px;color:var(--ink);font-size:1.5rem;line-height:1.1}
+.ad-hero-stat{text-align:right}
+.ad-hero-stat span{display:block;color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase}
+.ad-hero-stat strong{display:block;margin-top:6px;color:var(--red);font-size:1.8rem;line-height:1}
+.chart{width:100%;min-height:220px;flex:1;border-radius:8px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.chart svg{display:block;width:100%;height:100%}
+.chart-empty{height:220px;display:grid;place-items:center;color:var(--muted);font-weight:800;background:#fff;border:1px dashed var(--line-strong);border-radius:8px}
+.chart-legend{display:flex;align-items:center;gap:14px;margin-top:10px;color:var(--muted);font-size:.78rem;font-weight:800;flex-wrap:wrap}
+.legend-item{display:inline-flex;align-items:center;gap:6px}
+.legend-dot{width:9px;height:9px;border-radius:50%;background:var(--red)}
+.legend-dot.green{background:var(--green)}.legend-dot.blue{background:var(--blue)}
+.ad-side{display:grid;grid-template-rows:auto 1fr;gap:10px}
+.ad-metrics{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:10px}
+.ad-card{min-height:104px;border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:13px;display:flex;flex-direction:column;justify-content:space-between}
 .ad-card span{color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase}
-.ad-card strong{display:block;margin-top:12px;color:var(--ink);font-size:1.42rem;line-height:1.05;letter-spacing:0}
+.ad-card strong{display:block;margin-top:12px;color:var(--ink);font-size:1.34rem;line-height:1.05;letter-spacing:0}
 .ad-card small{display:block;margin-top:7px;color:var(--muted);font-size:.78rem;line-height:1.35}
-.bridge-metrics{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:10px}
+.bridge-metrics{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:14px}
 .bridge-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:12px}
 .bridge-card span{display:block;color:var(--muted);font-size:.7rem;font-weight:950;text-transform:uppercase}
 .bridge-card strong{display:block;margin-top:8px;color:var(--ink);font-size:1.18rem;line-height:1.08}
 .bridge-card small{display:block;margin-top:6px;color:var(--muted);font-size:.76rem;line-height:1.35}
-.ad-trend{display:flex;align-items:end;gap:7px;height:158px;padding:14px 4px 0;border-top:1px solid var(--line);margin-top:14px}
-.ad-trend span{flex:1;min-width:9px;border-radius:6px 6px 0 0;background:#DCE5F3;min-height:5px;position:relative}
-.ad-trend span.hot{background:var(--red)}
-.ad-trend span.paid{background:var(--green)}
+.funnel-chart-wrap{display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1fr);gap:16px;align-items:center}
+.donut{min-height:240px;border:1px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;padding:12px}
+.donut svg{width:100%;max-width:250px;height:auto}
+.funnel-bars{display:grid;gap:11px}
+.mini-chart{margin-top:14px;min-height:84px;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.mini-chart svg{display:block;width:100%;height:84px}
 .campaign-list{display:grid;gap:10px}
 .campaign-row{border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
 .campaign-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -179,6 +196,7 @@ tr:hover td{background:#FCF3F3}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid{grid-template-columns:1fr}
   .ads-shell{grid-template-columns:1fr}
+  .funnel-chart-wrap{grid-template-columns:1fr}
 }
 @media(max-width:760px){
   .topbar,.filters,.table-head{align-items:flex-start;flex-direction:column}
@@ -283,6 +301,62 @@ tr:hover td{background:#FCF3F3}
       </div>
     </header>
 
+    <section class="panel ads-panel" aria-label="Metricas Meta Ads">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Meta Ads</div>
+          <div id="metaAdsSubtitle" class="panel-sub">Investimento, cliques, compras e ROAS por periodo.</div>
+        </div>
+        <span id="metaAdsStatus" class="status-text">Aguardando login</span>
+      </div>
+      <div class="ads-shell">
+        <div class="ad-hero">
+          <div class="ad-hero-top">
+            <div class="ad-hero-title">
+              <span>Investimento diario</span>
+              <strong id="adHeroTitle">Meta Ads</strong>
+            </div>
+            <div class="ad-hero-stat">
+              <span>Total gasto</span>
+              <strong id="adHeroSpend" class="mono">R$ 0,00</strong>
+            </div>
+          </div>
+          <div id="metaSetup" class="setup hidden">
+            <strong>Meta Ads ainda nao esta conectado</strong>
+            Configure <span class="mono">META_AD_ACCOUNT_ID</span> e <span class="mono">META_ADS_ACCESS_TOKEN</span> na Vercel para trazer os dados reais.
+          </div>
+          <div id="adTrend" class="chart" aria-label="Grafico diario Meta Ads"></div>
+          <div class="chart-legend">
+            <span class="legend-item"><i class="legend-dot"></i>Investimento</span>
+            <span class="legend-item"><i class="legend-dot green"></i>Compras</span>
+            <span class="legend-item"><i class="legend-dot blue"></i>Cliques</span>
+          </div>
+          <div id="bridgeMetrics" class="bridge-metrics">
+            <article class="bridge-card"><span>ROAS real</span><strong id="bRealRoas" class="mono">0.00x</strong><small>Receita paga / investimento</small></article>
+            <article class="bridge-card"><span>Custo por lead</span><strong id="bCostLead" class="mono">R$ 0,00</strong><small>Investimento / leads internos</small></article>
+            <article class="bridge-card"><span>Custo por Pix</span><strong id="bCostPix" class="mono">R$ 0,00</strong><small>Investimento / Pix gerados</small></article>
+            <article class="bridge-card"><span>Pix para pago</span><strong id="bPixPaidRate" class="mono">0%</strong><small>Pedidos pagos sobre Pix</small></article>
+          </div>
+        </div>
+        <div class="ad-side">
+          <div id="adMetrics" class="ad-metrics">
+            <article class="ad-card"><span>Investimento</span><strong id="mSpend" class="mono">R$ 0,00</strong><small id="mSpendHint">Meta Ads</small></article>
+            <article class="ad-card"><span>Cliques no link</span><strong id="mClicks" class="mono">0</strong><small id="mCtr">CTR 0%</small></article>
+            <article class="ad-card"><span>CPC medio</span><strong id="mCpc" class="mono">R$ 0,00</strong><small id="mCpm">CPM R$ 0,00</small></article>
+            <article class="ad-card"><span>Compras Meta</span><strong id="mPurchases" class="mono">0</strong><small id="mCpa">CPA R$ 0,00</small></article>
+            <article class="ad-card"><span>Valor atribuido</span><strong id="mPurchaseValue" class="mono">R$ 0,00</strong><small>Receita no Meta Ads</small></article>
+            <article class="ad-card"><span>ROAS Meta</span><strong id="mRoas" class="mono">0.00x</strong><small id="mLeads">Leads Meta 0</small></article>
+          </div>
+          <div>
+            <div class="panel-title">Campanhas por investimento</div>
+            <div class="panel-sub">Ranking das campanhas ativas no periodo selecionado.</div>
+            <div style="height:12px"></div>
+            <div id="campaigns" class="campaign-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="kpis" aria-label="Indicadores">
       <article class="kpi">
         <div class="kpi-head"><span>Receita paga</span><i class="dot green"></i></div>
@@ -321,45 +395,6 @@ tr:hover td{background:#FCF3F3}
       </article>
     </section>
 
-    <section class="panel ads-panel" aria-label="Metricas Meta Ads">
-      <div class="panel-head">
-        <div>
-          <div class="panel-title">Meta Ads</div>
-          <div id="metaAdsSubtitle" class="panel-sub">Investimento, cliques, compras e ROAS por periodo.</div>
-        </div>
-        <span id="metaAdsStatus" class="status-text">Aguardando login</span>
-      </div>
-      <div class="ads-shell">
-        <div>
-          <div id="metaSetup" class="setup hidden">
-            <strong>Meta Ads ainda nao esta conectado</strong>
-            Configure <span class="mono">META_AD_ACCOUNT_ID</span> e <span class="mono">META_ADS_ACCESS_TOKEN</span> na Vercel para trazer os dados reais.
-          </div>
-          <div id="adMetrics" class="ad-metrics">
-            <article class="ad-card"><span>Investimento</span><strong id="mSpend" class="mono">R$ 0,00</strong><small id="mSpendHint">Meta Ads</small></article>
-            <article class="ad-card"><span>Cliques no link</span><strong id="mClicks" class="mono">0</strong><small id="mCtr">CTR 0%</small></article>
-            <article class="ad-card"><span>CPC medio</span><strong id="mCpc" class="mono">R$ 0,00</strong><small id="mCpm">CPM R$ 0,00</small></article>
-            <article class="ad-card"><span>Compras Meta</span><strong id="mPurchases" class="mono">0</strong><small id="mCpa">CPA R$ 0,00</small></article>
-            <article class="ad-card"><span>Valor atribuido</span><strong id="mPurchaseValue" class="mono">R$ 0,00</strong><small>Receita no Meta Ads</small></article>
-            <article class="ad-card"><span>ROAS Meta</span><strong id="mRoas" class="mono">0.00x</strong><small id="mLeads">Leads Meta 0</small></article>
-          </div>
-          <div id="bridgeMetrics" class="bridge-metrics">
-            <article class="bridge-card"><span>ROAS real</span><strong id="bRealRoas" class="mono">0.00x</strong><small>Receita paga / investimento</small></article>
-            <article class="bridge-card"><span>Custo por lead</span><strong id="bCostLead" class="mono">R$ 0,00</strong><small>Investimento / leads internos</small></article>
-            <article class="bridge-card"><span>Custo por Pix</span><strong id="bCostPix" class="mono">R$ 0,00</strong><small>Investimento / Pix gerados</small></article>
-            <article class="bridge-card"><span>Pix para pago</span><strong id="bPixPaidRate" class="mono">0%</strong><small>Pedidos pagos sobre Pix</small></article>
-          </div>
-          <div id="adTrend" class="ad-trend" aria-label="Investimento diario Meta Ads"></div>
-        </div>
-        <div>
-          <div class="panel-title">Campanhas por investimento</div>
-          <div class="panel-sub">Ranking das campanhas ativas no periodo selecionado.</div>
-          <div style="height:12px"></div>
-          <div id="campaigns" class="campaign-list"></div>
-        </div>
-      </div>
-    </section>
-
     <section class="grid">
       <article class="panel">
         <div class="panel-head">
@@ -370,8 +405,11 @@ tr:hover td{background:#FCF3F3}
           <span id="lastUpdate" class="status-text">-</span>
         </div>
         <div class="panel-body">
-          <div id="funnel" class="funnel"></div>
-          <div id="spark" class="spark" aria-label="Leads por dia"></div>
+          <div class="funnel-chart-wrap">
+            <div id="funnelDonut" class="donut" aria-label="Distribuicao do funil"></div>
+            <div id="funnel" class="funnel-bars"></div>
+          </div>
+          <div id="spark" class="mini-chart" aria-label="Leads por dia"></div>
         </div>
       </article>
 
@@ -529,6 +567,26 @@ function isRegistered(lead) { return Boolean(lead.email || lead.phone || lead.na
 function amount(lead) { return Number(lead.amount || 0); }
 function percent(value, total) { return total ? Math.round((value / total) * 100) : 0; }
 function decimal(value, digits) { return Number(value || 0).toFixed(digits == null ? 2 : digits); }
+function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
+
+function pointsPath(points) {
+  return points.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ');
+}
+
+function areaPath(points, bottom) {
+  if (!points.length) return '';
+  return `${pointsPath(points)} L${points[points.length - 1].x.toFixed(2)},${bottom} L${points[0].x.toFixed(2)},${bottom} Z`;
+}
+
+function scaledPoints(values, width, height, pad, maxValue) {
+  const max = Math.max(maxValue || 0, ...values, 1);
+  const step = values.length > 1 ? (width - pad * 2) / (values.length - 1) : 0;
+  return values.map((value, index) => ({
+    x: pad + step * index,
+    y: pad + (height - pad * 2) * (1 - clamp(value / max, 0, 1)),
+    value,
+  }));
+}
 
 function fmtDate(value) {
   if (!value) return '-';
@@ -655,6 +713,8 @@ function renderBridgeMetrics(s) {
 }
 
 function resetMetaNumbers() {
+  $('adHeroTitle').textContent = 'Meta Ads';
+  $('adHeroSpend').textContent = money.format(0);
   $('mSpend').textContent = money.format(0);
   $('mClicks').textContent = '0';
   $('mCtr').textContent = 'CTR 0%';
@@ -697,6 +757,8 @@ function renderMetaAds(data) {
   $('adTrend').classList.remove('hidden');
   $('metaAdsStatus').textContent = data.period_label || 'Meta Ads';
   $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'} - ${data.graph_version || 'Graph API'}`;
+  $('adHeroTitle').textContent = data.period_label || 'Meta Ads';
+  $('adHeroSpend').textContent = money.format(s.spend || 0);
   $('mSpend').textContent = money.format(s.spend || 0);
   $('mSpendHint').textContent = data.period_label || 'Periodo selecionado';
   $('mClicks').textContent = number.format(s.link_clicks || s.clicks || 0);
@@ -715,15 +777,52 @@ function renderMetaAds(data) {
 
 function renderAdTrend(days) {
   if (!days.length) {
-    $('adTrend').innerHTML = '<span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span><span style="height:8px"></span>';
+    $('adTrend').innerHTML = '<div class="chart-empty">Sem dados de Meta Ads para este periodo</div>';
     return;
   }
-  const max = Math.max(...days.map((day) => day.spend || 0), 1);
-  $('adTrend').innerHTML = days.map((day) => {
-    const height = Math.max(8, Math.round(((day.spend || 0) / max) * 144));
-    const label = `${day.date_start || ''}: ${money.format(day.spend || 0)} | compras ${day.purchases || 0}`;
-    return `<span class="${day.purchases ? 'paid' : ''}" style="height:${height}px" title="${escapeHtml(label)}"></span>`;
+  const width = 760;
+  const height = 240;
+  const pad = 28;
+  const spendValues = days.map((day) => Number(day.spend || 0));
+  const clickValues = days.map((day) => Number(day.link_clicks || day.clicks || 0));
+  const purchaseValues = days.map((day) => Number(day.purchases || 0));
+  const spendPoints = scaledPoints(spendValues, width, height, pad, Math.max(...spendValues, 1));
+  const clickPoints = scaledPoints(clickValues, width, height, pad, Math.max(...clickValues, 1));
+  const maxPurchases = Math.max(...purchaseValues, 1);
+  const purchaseDots = purchaseValues.map((value, index) => {
+    if (!value) return '';
+    const point = spendPoints[index];
+    const radius = 4 + clamp(value / maxPurchases, 0, 1) * 5;
+    return `<circle cx="${point.x.toFixed(2)}" cy="${(point.y - 10).toFixed(2)}" r="${radius.toFixed(2)}" fill="#14975B"><title>${value} compras</title></circle>`;
   }).join('');
+  const labels = days.map((day, index) => {
+    if (index !== 0 && index !== days.length - 1) return '';
+    const point = spendPoints[index];
+    const label = (day.date_start || '').slice(5).replace('-', '/');
+    return `<text x="${point.x.toFixed(2)}" y="228" text-anchor="${index === 0 ? 'start' : 'end'}" font-size="11" fill="#687282">${label}</text>`;
+  }).join('');
+  const grid = [0,1,2,3].map((item) => {
+    const y = pad + item * ((height - pad * 2) / 3);
+    return `<line x1="${pad}" x2="${width - pad}" y1="${y.toFixed(2)}" y2="${y.toFixed(2)}" stroke="#E8EDF4" stroke-width="1"/>`;
+  }).join('');
+
+  $('adTrend').innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Investimento, cliques e compras por dia">
+      <defs>
+        <linearGradient id="spendArea" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#E11D26" stop-opacity=".22"/>
+          <stop offset="100%" stop-color="#E11D26" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="${width}" height="${height}" rx="8" fill="#FFFFFF"/>
+      ${grid}
+      <path d="${areaPath(spendPoints, height - pad)}" fill="url(#spendArea)"/>
+      <path d="${pointsPath(spendPoints)}" fill="none" stroke="#E11D26" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${pointsPath(clickPoints)}" fill="none" stroke="#2456D6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+      ${purchaseDots}
+      ${labels}
+    </svg>
+  `;
 }
 
 function renderCampaigns(campaigns, totalSpend) {
@@ -776,6 +875,7 @@ function funnelRow(label, sub, value, total, color) {
 
 function renderFunnel(s) {
   const base = Math.max(s.total, 1);
+  renderFunnelDonut(s);
   $('funnel').innerHTML = [
     funnelRow('Checkout', 'visitou a etapa', s.total, base, 'blue'),
     funnelRow('Cadastro', 'informou dados', s.registered, base, ''),
@@ -783,6 +883,60 @@ function renderFunnel(s) {
     funnelRow('Pago', 'compra concluida', s.paid, base, 'green'),
     funnelRow('Abandono', 'precisa de acao', s.abandoned, base, 'orange'),
   ].join('');
+}
+
+function renderFunnelDonut(s) {
+  const segments = [
+    { label: 'Checkout', value: Math.max(s.checkout, s.total - s.registered), color: '#2456D6' },
+    { label: 'Cadastro', value: Math.max(s.registered - s.pix, 0), color: '#E11D26' },
+    { label: 'Pix aberto', value: s.openPix, color: '#D9A441' },
+    { label: 'Pago', value: s.paid, color: '#14975B' },
+    { label: 'Abandono', value: s.abandoned, color: '#D97316' },
+  ].filter((item) => item.value > 0);
+  const total = segments.reduce((sum, item) => sum + item.value, 0);
+  if (!total) {
+    $('funnelDonut').innerHTML = `
+      <svg viewBox="0 0 260 260" role="img" aria-label="Funil sem dados">
+        <circle cx="130" cy="130" r="82" fill="none" stroke="#EEF2F7" stroke-width="28"/>
+        <text x="130" y="124" text-anchor="middle" font-size="28" font-weight="900" fill="#111318">0</text>
+        <text x="130" y="148" text-anchor="middle" font-size="12" fill="#687282">sem leads</text>
+      </svg>
+    `;
+    return;
+  }
+  const radius = 82;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const circles = segments.map((item) => {
+    const dash = (item.value / total) * circumference;
+    const circle = `
+      <circle cx="130" cy="130" r="${radius}" fill="none" stroke="${item.color}" stroke-width="28"
+        stroke-dasharray="${dash.toFixed(2)} ${(circumference - dash).toFixed(2)}"
+        stroke-dashoffset="${(-offset).toFixed(2)}" stroke-linecap="round"
+        transform="rotate(-90 130 130)">
+        <title>${escapeHtml(item.label)}: ${item.value}</title>
+      </circle>
+    `;
+    offset += dash;
+    return circle;
+  }).join('');
+  const legend = segments.map((item, index) => {
+    const x = index < 3 ? 44 + index * 72 : 80 + (index - 3) * 78;
+    const y = index < 3 ? 230 : 250;
+    return `
+      <circle cx="${x}" cy="${y - 4}" r="4" fill="${item.color}"/>
+      <text x="${x + 8}" y="${y}" font-size="10" fill="#687282">${escapeHtml(item.label)}</text>
+    `;
+  }).join('');
+  $('funnelDonut').innerHTML = `
+    <svg viewBox="0 0 260 270" role="img" aria-label="Distribuicao do funil">
+      <circle cx="130" cy="130" r="${radius}" fill="none" stroke="#EEF2F7" stroke-width="28"/>
+      ${circles}
+      <text x="130" y="124" text-anchor="middle" font-size="32" font-weight="900" fill="#111318">${number.format(s.total)}</text>
+      <text x="130" y="149" text-anchor="middle" font-size="12" fill="#687282">leads</text>
+      ${legend}
+    </svg>
+  `;
 }
 
 function renderInsights(s) {
@@ -846,11 +1000,30 @@ function renderSpark() {
     const day = days.find((item) => item.key === key);
     if (day) day.count += 1;
   });
-  const max = Math.max(...days.map((item) => item.count), 1);
-  $('spark').innerHTML = days.map((item, index) => {
-    const height = Math.max(8, Math.round((item.count / max) * 56));
-    return `<span class="${index === 6 ? 'hot' : ''}" style="height:${height}px" title="${item.count} leads"></span>`;
+  const width = 760;
+  const height = 84;
+  const pad = 12;
+  const values = days.map((item) => item.count);
+  const points = scaledPoints(values, width, height, pad, Math.max(...values, 1));
+  const labels = days.map((day, index) => {
+    if (index % 2 !== 0 && index !== days.length - 1) return '';
+    const point = points[index];
+    return `<text x="${point.x.toFixed(2)}" y="78" text-anchor="middle" font-size="9" fill="#687282">${day.key.slice(5).replace('-', '/')}</text>`;
   }).join('');
+  $('spark').innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Leads nos ultimos sete dias">
+      <defs>
+        <linearGradient id="leadArea" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#2456D6" stop-opacity=".18"/>
+          <stop offset="100%" stop-color="#2456D6" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath(points, height - pad)}" fill="url(#leadArea)"/>
+      <path d="${pointsPath(points)}" fill="none" stroke="#2456D6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      ${points.map((point) => `<circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="3.5" fill="#2456D6"><title>${point.value} leads</title></circle>`).join('')}
+      ${labels}
+    </svg>
+  `;
 }
 
 function escapeHtml(value) {
