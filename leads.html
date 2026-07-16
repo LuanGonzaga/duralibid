@@ -47,6 +47,7 @@ a{color:inherit;text-decoration:none}
 .field input{height:46px;background:#0A0D12;color:#F5F5F5;border:1px solid #2D3542;border-radius:7px;padding:0 13px;outline:none}
 .field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,164,65,.16)}
 .error{margin-top:12px;color:#FF8A8A;font-size:.9rem}
+.auth-note{margin-top:14px;color:#8992A3;font-size:.78rem;line-height:1.45}
 
 .app{min-height:100vh;display:grid;grid-template-columns:260px minmax(0,1fr)}
 .sidebar{position:sticky;top:0;height:100vh;background:#0E1117;color:#F4F7FB;padding:20px;display:flex;flex-direction:column;border-right:1px solid #222938}
@@ -150,6 +151,11 @@ tr:hover td{background:#FCF3F3}
 .ad-card span{color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase}
 .ad-card strong{display:block;margin-top:12px;color:var(--ink);font-size:1.42rem;line-height:1.05;letter-spacing:0}
 .ad-card small{display:block;margin-top:7px;color:var(--muted);font-size:.78rem;line-height:1.35}
+.bridge-metrics{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:10px}
+.bridge-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:12px}
+.bridge-card span{display:block;color:var(--muted);font-size:.7rem;font-weight:950;text-transform:uppercase}
+.bridge-card strong{display:block;margin-top:8px;color:var(--ink);font-size:1.18rem;line-height:1.08}
+.bridge-card small{display:block;margin-top:6px;color:var(--muted);font-size:.76rem;line-height:1.35}
 .ad-trend{display:flex;align-items:end;gap:7px;height:158px;padding:14px 4px 0;border-top:1px solid var(--line);margin-top:14px}
 .ad-trend span{flex:1;min-width:9px;border-radius:6px 6px 0 0;background:#DCE5F3;min-height:5px;position:relative}
 .ad-trend span.hot{background:var(--red)}
@@ -180,6 +186,7 @@ tr:hover td{background:#FCF3F3}
   .btn{flex:1;min-width:130px}
   .kpis{grid-template-columns:1fr}
   .ad-metrics{grid-template-columns:1fr}
+  .bridge-metrics{grid-template-columns:1fr}
   .funnel-row{grid-template-columns:1fr;gap:7px}
   .funnel-value{text-align:left}
   .search{min-width:100%;width:100%}
@@ -189,7 +196,21 @@ tr:hover td{background:#FCF3F3}
 </style>
 </head>
 <body>
-<main id="login" class="login-page">
+<main id="boot" class="login-page">
+  <section class="login-card">
+    <div class="login-brand">
+      <img src="brand/logo.png" alt="DuraLibid">
+      <div>
+        <strong>DuraLibid</strong>
+        <span>Dashboard</span>
+      </div>
+    </div>
+    <h1>Carregando painel</h1>
+    <p>Buscando leads, pedidos e metricas da Meta Ads.</p>
+  </section>
+</main>
+
+<main id="login" class="login-page hidden">
   <section class="login-card">
     <div class="login-brand">
       <img src="brand/logo.png" alt="DuraLibid">
@@ -213,6 +234,7 @@ tr:hover td{background:#FCF3F3}
         <button class="btn primary" type="submit">Entrar</button>
       </div>
       <p id="loginError" class="error hidden"></p>
+      <p class="auth-note">O acesso fica salvo neste navegador para nao pedir login a cada F5. Use Sair em computador compartilhado.</p>
     </form>
   </section>
 </main>
@@ -227,7 +249,7 @@ tr:hover td{background:#FCF3F3}
       </div>
     </div>
     <nav class="nav" aria-label="Painel">
-      <button class="active" type="button">Dashboard</button>
+      <button class="active" type="button" data-nav-filter="all">Dashboard</button>
       <button type="button" data-nav-filter="pix_generated">Pix em aberto</button>
       <button type="button" data-nav-filter="paid">Pagamentos</button>
       <button type="button" data-nav-filter="abandoned">Abandono</button>
@@ -321,6 +343,12 @@ tr:hover td{background:#FCF3F3}
             <article class="ad-card"><span>Valor atribuido</span><strong id="mPurchaseValue" class="mono">R$ 0,00</strong><small>Receita no Meta Ads</small></article>
             <article class="ad-card"><span>ROAS Meta</span><strong id="mRoas" class="mono">0.00x</strong><small id="mLeads">Leads Meta 0</small></article>
           </div>
+          <div id="bridgeMetrics" class="bridge-metrics">
+            <article class="bridge-card"><span>ROAS real</span><strong id="bRealRoas" class="mono">0.00x</strong><small>Receita paga / investimento</small></article>
+            <article class="bridge-card"><span>Custo por lead</span><strong id="bCostLead" class="mono">R$ 0,00</strong><small>Investimento / leads internos</small></article>
+            <article class="bridge-card"><span>Custo por Pix</span><strong id="bCostPix" class="mono">R$ 0,00</strong><small>Investimento / Pix gerados</small></article>
+            <article class="bridge-card"><span>Pix para pago</span><strong id="bPixPaidRate" class="mono">0%</strong><small>Pedidos pagos sobre Pix</small></article>
+          </div>
           <div id="adTrend" class="ad-trend" aria-label="Investimento diario Meta Ads"></div>
         </div>
         <div>
@@ -413,6 +441,7 @@ tr:hover td{background:#FCF3F3}
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const number = new Intl.NumberFormat('pt-BR');
 const state = { leads: [], filtered: [], status: 'all', query: '', metaAds: null, metaPeriod: 'last_7d' };
+const AUTH_KEY = 'dl_panel_auth_v1';
 
 const STATUS = {
   checkout_visit: 'Checkout',
@@ -425,8 +454,74 @@ const STATUS = {
 
 function $(id) { return document.getElementById(id); }
 function text(value) { return value == null || value === '' ? '-' : String(value); }
-function panelUser() { return sessionStorage.getItem('dl_panel_user') || ''; }
-function password() { return sessionStorage.getItem('dl_panel_password') || ''; }
+function storageGet(store, key) {
+  try { return store.getItem(key); } catch (e) { return null; }
+}
+function storageSet(store, key, value) {
+  try { store.setItem(key, value); } catch (e) {}
+}
+function storageRemove(store, key) {
+  try { store.removeItem(key); } catch (e) {}
+}
+function readAuth() {
+  let auth = null;
+  const raw = storageGet(localStorage, AUTH_KEY) || storageGet(sessionStorage, AUTH_KEY);
+  if (raw) {
+    try { auth = JSON.parse(raw); } catch (e) {}
+  }
+  if (auth?.user && auth?.password) return auth;
+
+  const legacyUser = storageGet(sessionStorage, 'dl_panel_user') || storageGet(localStorage, 'dl_panel_user');
+  const legacyPassword = storageGet(sessionStorage, 'dl_panel_password') || storageGet(localStorage, 'dl_panel_password');
+  if (legacyUser && legacyPassword) {
+    auth = { user: legacyUser, password: legacyPassword, savedAt: Date.now() };
+    saveAuth(auth.user, auth.password);
+    return auth;
+  }
+  return { user: '', password: '' };
+}
+function saveAuth(user, pass) {
+  const auth = JSON.stringify({ user, password: pass, savedAt: Date.now() });
+  storageSet(localStorage, AUTH_KEY, auth);
+  storageSet(sessionStorage, AUTH_KEY, auth);
+  storageSet(sessionStorage, 'dl_panel_user', user);
+  storageSet(sessionStorage, 'dl_panel_password', pass);
+}
+function clearAuth() {
+  [localStorage, sessionStorage].forEach((store) => {
+    storageRemove(store, AUTH_KEY);
+    storageRemove(store, 'dl_panel_user');
+    storageRemove(store, 'dl_panel_password');
+  });
+}
+function panelUser() { return readAuth().user || ''; }
+function password() { return readAuth().password || ''; }
+function authHeaders() {
+  const auth = readAuth();
+  return {
+    'X-Admin-User': auth.user || '',
+    'X-Admin-Password': auth.password || '',
+  };
+}
+function showLogin(message) {
+  $('boot').classList.add('hidden');
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  if (message) {
+    $('loginError').textContent = message;
+    $('loginError').classList.remove('hidden');
+  }
+}
+function showApp() {
+  $('boot').classList.add('hidden');
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+}
+function authError(message) {
+  const err = new Error(message || 'Usuario ou senha invalido.');
+  err.auth = true;
+  return err;
+}
 function statusLabel(value) { return STATUS[value] || value || '-'; }
 function isPaid(lead) { return lead.funnel_status === 'paid' || lead.payment_status === 'approved'; }
 function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status); }
@@ -488,12 +583,10 @@ async function loadLeads() {
   $('statusText').textContent = 'Carregando registros...';
   const params = new URLSearchParams({ status: 'all', limit: '500' });
   const res = await fetch(`/api/leads?${params.toString()}`, {
-    headers: {
-      'X-Admin-User': panelUser(),
-      'X-Admin-Password': password(),
-    },
+    headers: authHeaders(),
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) throw authError(data.error);
   if (!res.ok) throw new Error(data.error || 'Nao foi possivel carregar os leads.');
   state.leads = data.leads || [];
   applyFilters();
@@ -502,19 +595,20 @@ async function loadLeads() {
 
 async function loadDashboard() {
   await loadLeads();
-  await loadMetaAds().catch((err) => renderMetaAdsError(err.message));
+  await loadMetaAds().catch((err) => {
+    if (err.auth) throw err;
+    renderMetaAdsError(err.message);
+  });
 }
 
 async function loadMetaAds() {
   $('metaAdsStatus').textContent = 'Carregando Meta Ads...';
   const params = new URLSearchParams({ period: state.metaPeriod });
   const res = await fetch(`/api/meta-ads?${params.toString()}`, {
-    headers: {
-      'X-Admin-User': panelUser(),
-      'X-Admin-Password': password(),
-    },
+    headers: authHeaders(),
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) throw authError(data.error);
   if (!res.ok) throw new Error(data.error || 'Nao foi possivel carregar Meta Ads.');
   if (!data.configured) {
     renderMetaAdsSetup(data.message);
@@ -547,8 +641,17 @@ function render() {
   renderSources();
   renderSpark();
   renderRows();
+  renderBridgeMetrics(s);
   $('statusText').textContent = `${number.format(state.filtered.length)} de ${number.format(state.leads.length)} registros`;
   $('activeFilter').textContent = state.status === 'all' ? 'Todos os status' : statusLabel(state.status);
+}
+
+function renderBridgeMetrics(s) {
+  const adSpend = Number(state.metaAds?.summary?.spend || 0);
+  $('bRealRoas').textContent = `${decimal(adSpend ? s.revenue / adSpend : 0)}x`;
+  $('bCostLead').textContent = money.format(adSpend && s.total ? adSpend / s.total : 0);
+  $('bCostPix').textContent = money.format(adSpend && s.pix ? adSpend / s.pix : 0);
+  $('bPixPaidRate').textContent = `${percent(s.paid, s.pix)}%`;
 }
 
 function resetMetaNumbers() {
@@ -568,6 +671,7 @@ function renderMetaAdsSetup(message) {
   state.metaAds = null;
   $('metaSetup').classList.remove('hidden');
   $('adMetrics').classList.add('hidden');
+  $('bridgeMetrics').classList.add('hidden');
   $('adTrend').classList.add('hidden');
   $('metaAdsStatus').textContent = 'Nao conectado';
   $('metaAdsSubtitle').textContent = message || 'Configure a conta de anuncios para ver metricas de midia paga.';
@@ -578,6 +682,7 @@ function renderMetaAdsSetup(message) {
 function renderMetaAdsError(message) {
   $('metaSetup').classList.remove('hidden');
   $('adMetrics').classList.add('hidden');
+  $('bridgeMetrics').classList.add('hidden');
   $('adTrend').classList.add('hidden');
   $('metaAdsStatus').textContent = 'Erro Meta Ads';
   $('metaAdsSubtitle').textContent = message || 'Nao foi possivel consultar Meta Ads.';
@@ -588,6 +693,7 @@ function renderMetaAds(data) {
   const s = data.summary || {};
   $('metaSetup').classList.add('hidden');
   $('adMetrics').classList.remove('hidden');
+  $('bridgeMetrics').classList.remove('hidden');
   $('adTrend').classList.remove('hidden');
   $('metaAdsStatus').textContent = data.period_label || 'Meta Ads';
   $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'} - ${data.graph_version || 'Graph API'}`;
@@ -602,6 +708,7 @@ function renderMetaAds(data) {
   $('mPurchaseValue').textContent = money.format(s.purchase_value || 0);
   $('mRoas').textContent = `${decimal(s.roas || 0)}x`;
   $('mLeads').textContent = `Leads Meta ${number.format(s.leads || 0)}`;
+  renderBridgeMetrics(summary(state.leads));
   renderAdTrend(data.daily || []);
   renderCampaigns(data.campaigns || [], s.spend || 0);
 }
@@ -821,6 +928,9 @@ function setStatus(status) {
   document.querySelectorAll('.segment').forEach((button) => {
     button.classList.toggle('active', button.dataset.status === status);
   });
+  document.querySelectorAll('[data-nav-filter]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.navFilter === status);
+  });
   applyFilters();
 }
 
@@ -846,29 +956,46 @@ function exportCsv() {
 
 $('loginForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  sessionStorage.setItem('dl_panel_user', $('user').value.trim());
-  sessionStorage.setItem('dl_panel_password', $('password').value);
+  saveAuth($('user').value.trim(), $('password').value);
   $('loginError').classList.add('hidden');
   try {
+    showApp();
     await loadDashboard();
-    $('login').classList.add('hidden');
-    $('app').classList.remove('hidden');
   } catch (err) {
+    if (err.auth) {
+      clearAuth();
+      showLogin(err.message);
+      return;
+    }
+    showLogin(err.message);
     $('loginError').textContent = err.message;
     $('loginError').classList.remove('hidden');
   }
 });
 
 $('logout').addEventListener('click', () => {
-  sessionStorage.removeItem('dl_panel_user');
-  sessionStorage.removeItem('dl_panel_password');
+  clearAuth();
   location.reload();
 });
-$('refresh').addEventListener('click', () => loadDashboard().catch((err) => $('statusText').textContent = err.message));
+$('refresh').addEventListener('click', () => loadDashboard().catch((err) => {
+  if (err.auth) {
+    clearAuth();
+    showLogin(err.message);
+    return;
+  }
+  $('statusText').textContent = err.message;
+}));
 $('exportCsv').addEventListener('click', exportCsv);
 $('adsPeriod').addEventListener('change', (event) => {
   state.metaPeriod = event.target.value;
-  loadMetaAds().catch((err) => renderMetaAdsError(err.message));
+  loadMetaAds().catch((err) => {
+    if (err.auth) {
+      clearAuth();
+      showLogin(err.message);
+      return;
+    }
+    renderMetaAdsError(err.message);
+  });
 });
 $('search').addEventListener('input', (event) => {
   state.query = event.target.value;
@@ -881,15 +1008,25 @@ document.querySelectorAll('[data-nav-filter]').forEach((button) => {
   button.addEventListener('click', () => setStatus(button.dataset.navFilter));
 });
 
-if (password()) {
-  loadDashboard().then(() => {
-    $('login').classList.add('hidden');
-    $('app').classList.remove('hidden');
-  }).catch(() => {
-    sessionStorage.removeItem('dl_panel_user');
-    sessionStorage.removeItem('dl_panel_password');
-  });
+async function boot() {
+  if (!password()) {
+    showLogin();
+    return;
+  }
+  showApp();
+  try {
+    await loadDashboard();
+  } catch (err) {
+    if (err.auth) {
+      clearAuth();
+      showLogin(err.message);
+      return;
+    }
+    $('statusText').textContent = err.message;
+  }
 }
+
+boot();
 </script>
 </body>
 </html>
