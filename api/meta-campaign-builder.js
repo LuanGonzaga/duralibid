@@ -81,15 +81,18 @@ function fallbackTargeting() {
 }
 
 function checkoutUrl(kit = 2) {
+  return `${checkoutBaseUrl(kit)}&${checkoutUrlTags()}`;
+}
+
+function checkoutBaseUrl(kit = 2) {
   const params = new URLSearchParams({
     kit: String(kit),
-    utm_source: 'fb',
-    utm_medium: 'paid',
-    utm_campaign: '{{campaign.id}}',
-    utm_content: '{{ad.id}}',
-    utm_term: '{{adset.id}}',
   });
   return `https://www.duralibid.com.br/checkout.html?${params.toString()}`;
+}
+
+function checkoutUrlTags() {
+  return 'utm_source=fb&utm_medium=paid&utm_campaign={{campaign.id}}&utm_content={{ad.id}}&utm_term={{adset.id}}';
 }
 
 function updateCallToAction(callToAction, link) {
@@ -332,6 +335,53 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
   };
 }
 
+async function copyAdsToAdset({ sourceCampaignId, targetAdsetId, kit = 2, limit = 3 }) {
+  const source = await loadSource(sourceCampaignId);
+  const sourceAds = source.ads.filter((ad) => ad.status === 'ACTIVE' && ad.effective_status !== 'DISAPPROVED');
+  const adsToCopy = (sourceAds.length ? sourceAds : source.ads).slice(0, Math.max(1, Number(limit) || 3));
+  const copiedAds = [];
+  const failures = [];
+  const linkUrl = checkoutBaseUrl(kit);
+  const urlTags = checkoutUrlTags();
+
+  for (const ad of adsToCopy) {
+    try {
+      const copied = await metaRequest(`${ad.id}/copies`, {
+        adset_id: targetAdsetId,
+        status: 'PAUSED',
+        creative_parameters: JSON.stringify({
+          link_url: linkUrl,
+          url_tags: urlTags,
+        }),
+      }, 'POST');
+      copiedAds.push({
+        source_ad_id: ad.id,
+        source_name: ad.name,
+        copied_ad_id: copied.copied_ad_id || copied.id || '',
+        meta: copied,
+      });
+    } catch (err) {
+      failures.push({
+        source_ad_id: ad.id,
+        source_name: ad.name,
+        error: err.message,
+        meta: err.meta,
+      });
+    }
+  }
+
+  return {
+    source: {
+      campaign: source.campaign,
+      ads: adsToCopy.map(summarizeAd),
+    },
+    target_adset_id: targetAdsetId,
+    destination_url: `${linkUrl}&${urlTags}`,
+    copied_ads: copiedAds,
+    failures,
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -371,6 +421,16 @@ export default async function handler(req, res) {
         })),
         ads: source.ads.map(summarizeAd),
       });
+    }
+
+    if (req.body?.target_adset_id) {
+      const result = await copyAdsToAdset({
+        sourceCampaignId,
+        targetAdsetId: req.body.target_adset_id,
+        kit: req.body?.kit || 2,
+        limit: req.body?.limit || 3,
+      });
+      return res.status(200).json({ ok: result.copied_ads.length > 0, ...result });
     }
 
     const result = await createCampaign({
