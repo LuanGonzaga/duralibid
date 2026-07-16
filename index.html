@@ -104,6 +104,19 @@
   .coupon-status { min-height: 18px; color: var(--duo-mute); font-size: var(--fs-xs); }
   .coupon-status.ok { color: #2ecc71; }
   .coupon-status.error { color: var(--duo-red); }
+  .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .hero-actions .btn { padding: 17px 30px; }
+  .hero-coupon { max-width: 520px; margin-top: var(--space-3); padding: 14px; border: 1px solid rgba(217,164,65,.42);
+    border-radius: 18px; background: linear-gradient(135deg, rgba(217,164,65,.14), rgba(225,29,38,.08));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+  .hero-coupon b { display: block; color: var(--duo-white); font-size: .98rem; }
+  .hero-coupon p { margin: 2px 0 0; color: var(--duo-mute); font-size: var(--fs-xs); }
+  .coupon-inline-form { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; margin-top: 10px; }
+  .coupon-inline-form input { min-width: 0; width: 100%; background: rgba(10,10,10,.72); border: 1.5px solid rgba(245,245,245,.16);
+    border-radius: var(--radius-sm); padding: 14px; color: var(--duo-white); font-family: var(--font-body); font-size: 1rem; }
+  .coupon-inline-form input:focus { outline: none; border-color: var(--duo-gold); box-shadow: 0 0 0 3px rgba(217,164,65,.16); }
+  .coupon-inline-form button { padding: 14px 20px; font-size: .9rem; white-space: nowrap; }
+  .coupon-inline-form .coupon-status { grid-column: 1 / -1; }
 
   /* ===== HERO — bordered premium card (Logitech-style) ===== */
   .hero { position: relative; padding: var(--space-4) 0 var(--space-6); }
@@ -298,6 +311,11 @@
     .hero .ticks { margin-bottom: var(--space-3); }
     .hero .trust { gap: var(--space-2); justify-content: space-between; }
     .hero .rating { margin-bottom: var(--space-3); }
+    .hero-actions { display: grid; gap: 10px; }
+    .hero-actions .btn { width: 100%; padding: 15px 18px; }
+    .hero-coupon { padding: 12px; border-radius: 14px; }
+    .coupon-inline-form { grid-template-columns: 1fr; }
+    .coupon-inline-form button { width: 100%; }
     .btn { padding: 16px 20px; font-size: .95rem; width: 100%; }
     .g3, .g2 { grid-template-columns: 1fr; }
     .vs { grid-template-columns: 1fr; gap: var(--space-3); }
@@ -373,7 +391,19 @@
             <span class="stars">★★★★★</span>
             <small>4,9/5 · avaliações reais de compradores</small>
           </div>
-          <a class="btn btn-primary" href="#kits" data-track-cta="hero_quero_experimentar">Quero experimentar →</a>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#kits" data-track-cta="hero_quero_experimentar">Quero experimentar →</a>
+            <button class="btn btn-gold" type="button" data-open-coupon data-track-cta="hero_receber_cupom">Receber cupom</button>
+          </div>
+          <div class="hero-coupon" aria-label="Cupom exclusivo por e-mail">
+            <b>Cupom exclusivo no seu e-mail</b>
+            <p>Deixe seu e-mail e continue a compra com a oferta reservada.</p>
+            <form class="coupon-inline-form" data-coupon-form>
+              <input type="email" name="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+              <button class="btn btn-gold" type="submit">Enviar cupom</button>
+              <span class="coupon-status" data-coupon-status></span>
+            </form>
+          </div>
           <p class="microcopy">🔒 Frete grátis e discreto · Garantia de 7 dias · Registro ANVISA</p>
           <div class="trust">
             <span><b>+12 mil</b> homens</span>
@@ -739,10 +769,10 @@
     <span class="eyebrow">Oferta reservada</span>
     <h3 id="couponTitle">Receba um cupom exclusivo</h3>
     <p>Informe seu e-mail para receber um cupom especial da DuraLibid e continuar quando quiser.</p>
-    <form class="coupon-form" id="couponForm">
-      <input id="couponEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+    <form class="coupon-form" id="couponForm" data-coupon-form>
+      <input id="couponEmail" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
       <button class="btn btn-primary" type="submit">Receber cupom</button>
-      <span class="coupon-status" id="couponStatus"></span>
+      <span class="coupon-status" id="couponStatus" data-coupon-status></span>
     </form>
   </div>
 </div>
@@ -808,16 +838,18 @@
     setInterval(update, 1000);
   })();
 
-  // Coupon popup: aparece depois de 15s e envia cupom por e-mail
+  // Coupon capture: aparece por tempo, rolagem ou clique e envia cupom por e-mail
   (function(){
     var modal = document.getElementById('couponModal');
-    var form = document.getElementById('couponForm');
-    var email = document.getElementById('couponEmail');
-    var status = document.getElementById('couponStatus');
+    var modalForm = document.getElementById('couponForm');
+    var modalEmail = document.getElementById('couponEmail');
     var close = document.getElementById('couponClose');
+    var forms = document.querySelectorAll('[data-coupon-form]');
+    var openers = document.querySelectorAll('[data-open-coupon]');
     var KEY = 'dl_coupon_popup_v1';
-    var SHOW_DELAY = 15000;
-    if (!modal || !form || !email || !status || !close || !window.DLTracking) return;
+    var SHOW_DELAY = 7000;
+    var SCROLL_TRIGGER = 0.38;
+    if (!modal || !modalForm || !modalEmail || !close || !forms.length || !window.DLTracking) return;
 
     function readState() {
       try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
@@ -832,19 +864,54 @@
       if (state.dismissed && age < 24 * 60 * 60 * 1000) return false;
       return true;
     }
-    function show() {
-      if (!shouldShow()) return;
+    function show(force) {
+      if (!force && !shouldShow()) return;
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
-      setTimeout(function(){ email.focus(); }, 80);
+      setTimeout(function(){ modalEmail.focus(); }, 80);
     }
     function hide(reason) {
       modal.classList.remove('show');
       modal.setAttribute('aria-hidden', 'true');
       if (reason === 'dismissed') saveState({ dismissed: true, at: Date.now() });
     }
+    function statusFor(form) {
+      return form.querySelector('[data-coupon-status]') || form.querySelector('.coupon-status');
+    }
+    function emailFor(form) {
+      return form.querySelector('input[type="email"]');
+    }
+    function setStatus(form, text, kind) {
+      var el = statusFor(form);
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'coupon-status' + (kind ? ' ' + kind : '');
+    }
+    function shareEmail(value) {
+      forms.forEach(function(form){
+        var input = emailFor(form);
+        if (input && !input.value) input.value = value;
+      });
+    }
+    function onScrollIntent() {
+      if (!shouldShow()) {
+        window.removeEventListener('scroll', onScrollIntent);
+        return;
+      }
+      var doc = document.documentElement;
+      var max = Math.max(1, doc.scrollHeight - window.innerHeight);
+      var depth = ((window.scrollY || doc.scrollTop || 0) / max);
+      if (depth >= SCROLL_TRIGGER) {
+        show();
+        window.removeEventListener('scroll', onScrollIntent);
+      }
+    }
 
     setTimeout(show, SHOW_DELAY);
+    window.addEventListener('scroll', onScrollIntent, { passive: true });
+    openers.forEach(function(opener){
+      opener.addEventListener('click', function(){ show(true); });
+    });
     close.addEventListener('click', function(){ hide('dismissed'); });
     modal.addEventListener('click', function(event){
       if (event.target === modal) hide('dismissed');
@@ -853,59 +920,65 @@
       if (event.key === 'Escape' && modal.classList.contains('show')) hide('dismissed');
     });
 
-    form.addEventListener('submit', async function(event){
-      event.preventDefault();
-      var value = email.value.trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        status.textContent = 'Informe um e-mail valido.';
-        status.className = 'coupon-status error';
-        return;
-      }
+    forms.forEach(function(form){
+      form.addEventListener('submit', async function(event){
+        event.preventDefault();
+        var input = emailFor(form);
+        var value = input ? input.value.trim().toLowerCase() : '';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          setStatus(form, 'Informe um e-mail valido.', 'error');
+          return;
+        }
 
-      var button = form.querySelector('button');
-      button.disabled = true;
-      button.textContent = 'Enviando...';
-      status.textContent = '';
-      status.className = 'coupon-status';
-      var metaCookies = DLTracking.getMetaCookies();
-      var eventId = DLTracking.track('Lead', {
-        content_name: 'Cupom DuraLibid',
-        lead_type: 'coupon',
-        currency: 'BRL',
-        value: 0
-      });
+        shareEmail(value);
+        var button = form.querySelector('button[type="submit"]') || form.querySelector('button');
+        var originalText = button ? (button.getAttribute('data-label') || button.textContent) : '';
+        if (button) {
+          button.setAttribute('data-label', originalText);
+          button.disabled = true;
+          button.textContent = 'Enviando...';
+        }
+        setStatus(form, '', '');
+        var metaCookies = DLTracking.getMetaCookies();
+        var eventId = DLTracking.track('Lead', {
+          content_name: 'Cupom DuraLibid',
+          lead_type: 'coupon',
+          currency: 'BRL',
+          value: 0
+        });
 
-      try {
-        var res = await fetch('/api/lead-coupon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: value,
-            leadId: DLTracking.getLeadId(),
-            eventId: eventId,
-            sourceUrl: location.href,
-            attribution: DLTracking.getAttribution(),
-            tracking: {
+        try {
+          var res = await fetch('/api/lead-coupon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: value,
               leadId: DLTracking.getLeadId(),
               eventId: eventId,
-              fbp: metaCookies.fbp,
-              fbc: metaCookies.fbc
-            }
-          })
-        });
-        var data = await res.json().catch(function(){ return {}; });
-        if (!res.ok) throw new Error(data.error || 'Nao foi possivel enviar o cupom.');
-        saveState({ requested: true, at: Date.now() });
-        status.textContent = 'Cupom enviado. Confira seu e-mail.';
-        status.className = 'coupon-status ok';
-        setTimeout(function(){ hide(); }, 1800);
-      } catch (err) {
-        status.textContent = err.message || 'Nao foi possivel enviar agora.';
-        status.className = 'coupon-status error';
-      } finally {
-        button.disabled = false;
-        button.textContent = 'Receber cupom';
-      }
+              sourceUrl: location.href,
+              attribution: DLTracking.getAttribution(),
+              tracking: {
+                leadId: DLTracking.getLeadId(),
+                eventId: eventId,
+                fbp: metaCookies.fbp,
+                fbc: metaCookies.fbc
+              }
+            })
+          });
+          var data = await res.json().catch(function(){ return {}; });
+          if (!res.ok) throw new Error(data.error || 'Nao foi possivel enviar o cupom.');
+          saveState({ requested: true, at: Date.now() });
+          forms.forEach(function(item){ setStatus(item, 'Cupom enviado. Confira seu e-mail.', 'ok'); });
+          setTimeout(function(){ hide(); }, 1800);
+        } catch (err) {
+          setStatus(form, err.message || 'Nao foi possivel enviar agora.', 'error');
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        }
+      });
     });
   })();
 </script>
