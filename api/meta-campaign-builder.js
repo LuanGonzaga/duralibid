@@ -59,6 +59,11 @@ function cleanTargeting(targeting = {}) {
   const copy = JSON.parse(JSON.stringify(targeting || {}));
   delete copy.targeting_sentence_lines;
   delete copy.effective_publisher_platforms;
+  if (Array.isArray(copy.instagram_positions)
+    && copy.instagram_positions.includes('explore_home')
+    && !copy.instagram_positions.includes('explore')) {
+    copy.instagram_positions.push('explore');
+  }
   return copy;
 }
 
