@@ -118,6 +118,18 @@ function cloneObjectStorySpec(spec, link) {
   return cloned;
 }
 
+function pageIdFromAd(ad) {
+  const spec = ad.creative?.object_story_spec || {};
+  if (spec.page_id) return String(spec.page_id);
+  const storyId = ad.creative?.object_story_id || ad.creative?.effective_object_story_id || '';
+  return String(storyId).includes('_') ? String(storyId).split('_')[0] : '';
+}
+
+function minimalObjectStorySpec(ad) {
+  const pageId = pageIdFromAd(ad);
+  return pageId ? { page_id: pageId } : null;
+}
+
 function cloneAssetFeedSpec(assetFeed, link) {
   if (!assetFeed || typeof assetFeed !== 'object') return null;
   const cloned = JSON.parse(JSON.stringify(assetFeed));
@@ -260,7 +272,8 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
         name: `${campaignName} | ${ad.name}`,
         asset_feed_spec: JSON.stringify(assetFeedSpec),
       };
-      if (spec) creativePayload.object_story_spec = JSON.stringify(spec);
+      const storySpec = minimalObjectStorySpec(ad) || spec;
+      if (storySpec) creativePayload.object_story_spec = JSON.stringify(storySpec);
       const creative = await metaRequest(`${account}/adcreatives`, creativePayload, 'POST');
       creativeId = creative.id;
     } else if (spec?.link_data || spec?.video_data) {
