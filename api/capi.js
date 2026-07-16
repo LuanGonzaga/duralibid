@@ -2,6 +2,7 @@ import crypto from 'crypto';
 
 const PIXEL_ID = process.env.META_PIXEL_ID;
 const TOKEN    = process.env.META_CAPI_TOKEN;
+const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v25.0';
 
 // Hash SHA-256 para dados PII (obrigatório pelo Meta)
 function hash(value) {
@@ -52,7 +53,7 @@ export async function sendCapiEvent({ eventName, eventData = {}, userData = {}, 
   };
 
   try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${TOKEN}`, {
+    const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${PIXEL_ID}/events?access_token=${TOKEN}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

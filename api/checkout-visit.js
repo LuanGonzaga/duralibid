@@ -1,9 +1,10 @@
+import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
 
 const KITS = {
-  1: { name: 'DuraLibid - 1 Frasco', price: 89.90 },
-  2: { name: 'DuraLibid - 2 Frascos', price: 165.90 },
-  3: { name: 'DuraLibid - 3 Frascos', price: 239.90 },
+  1: { name: 'DuraLibid - 1 Frasco', price: 89.90, quantity: 1, id: 'duralibid-1frasco' },
+  2: { name: 'DuraLibid - 2 Frascos', price: 165.90, quantity: 2, id: 'duralibid-2frascos' },
+  3: { name: 'DuraLibid - 3 Frascos', price: 239.90, quantity: 3, id: 'duralibid-3frascos' },
 };
 
 function escapeHtml(value) {
@@ -132,6 +133,29 @@ export default async function handler(req, res) {
       tracking: { ...tracking, source_url: sourceUrl, ip, user_agent: userAgent },
       metadata: { last_event: 'checkout_visit' },
     });
+
+    if (tracking?.eventId) {
+      await sendCapiEvent({
+        eventName: 'InitiateCheckout',
+        eventData: {
+          content_name: kit.name,
+          content_ids: [kit.id],
+          content_type: 'product',
+          currency: 'BRL',
+          value: kit.price,
+          num_items: kit.quantity,
+          funnel_event: 'checkout_visit',
+        },
+        userData: {
+          fbp: tracking?.fbp,
+          fbc: tracking?.fbc,
+        },
+        clientIp: ip,
+        userAgent,
+        eventSourceUrl: sourceUrl || 'https://duralibid.com.br/checkout.html',
+        eventId: tracking.eventId,
+      });
+    }
 
     await sendEmail({
       to: adminEmail(),

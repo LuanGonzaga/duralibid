@@ -187,15 +187,18 @@
     var payload = {
       leadId: getLeadId(),
       eventName: name,
+      eventId: data.eventId,
       pageType: data.pageType || detectPageType(),
       ctaName: data.ctaName,
       destination: data.destination,
       kit: data.kit,
       paymentMethod: data.paymentMethod,
+      eventData: data.eventData,
       sourceUrl: window.location.href,
       attribution: getAttribution(),
       tracking: {
         leadId: getLeadId(),
+        eventId: data.eventId,
         fbp: metaCookies.fbp,
         fbc: metaCookies.fbc,
       },
@@ -225,13 +228,18 @@
   function bindPageTracking() {
     document.querySelectorAll('[data-track-cta]').forEach(function (el) {
       el.addEventListener('click', function () {
-        trackCustom('CTAClick', {
+        var ctaEventId = trackCustom('CTAClick', {
           cta_name: el.getAttribute('data-track-cta'),
           destination: el.getAttribute('href') || '',
         });
         recordFunnelEvent('cta_click', {
+          eventId: ctaEventId,
           ctaName: el.getAttribute('data-track-cta'),
           destination: el.getAttribute('href') || '',
+          eventData: {
+            cta_name: el.getAttribute('data-track-cta'),
+            destination: el.getAttribute('href') || '',
+          },
         });
       });
     });
@@ -239,20 +247,23 @@
     document.querySelectorAll('[data-track-checkout]').forEach(function (el) {
       el.addEventListener('click', function () {
         var kit = parseInt(el.getAttribute('data-track-checkout'), 10) || 2;
+        var payload = kitPayload(kit);
         markCheckoutClick(kit);
-        track('InitiateCheckout', kitPayload(kit));
+        var checkoutEventId = track('InitiateCheckout', payload);
         recordFunnelEvent('checkout_click', {
+          eventId: checkoutEventId,
           ctaName: el.textContent || 'checkout',
           destination: el.getAttribute('href') || '',
           kit: kit,
+          eventData: payload,
         });
       });
     });
   }
 
   initMetaPixel();
-  track('PageView', {});
-  recordFunnelEvent('page_view', { pageType: detectPageType() }, {
+  var pageViewEventId = track('PageView', {});
+  recordFunnelEvent('page_view', { pageType: detectPageType(), eventId: pageViewEventId }, {
     onceKey: 'page_view_' + window.location.pathname,
     ttl: 10 * 60 * 1000,
   });

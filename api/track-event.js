@@ -1,9 +1,10 @@
+import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
 
 const KITS = {
-  1: { name: 'DuraLibid - 1 Frasco', price: 89.90 },
-  2: { name: 'DuraLibid - 2 Frascos', price: 165.90 },
-  3: { name: 'DuraLibid - 3 Frascos', price: 239.90 },
+  1: { name: 'DuraLibid - 1 Frasco', price: 89.90, quantity: 1, id: 'duralibid-1frasco' },
+  2: { name: 'DuraLibid - 2 Frascos', price: 165.90, quantity: 2, id: 'duralibid-2frascos' },
+  3: { name: 'DuraLibid - 3 Frascos', price: 239.90, quantity: 3, id: 'duralibid-3frascos' },
 };
 
 const EVENT_STATUS = {
@@ -14,6 +15,16 @@ const EVENT_STATUS = {
   checkout_visit: 'checkout_visit',
   form_started: 'form_started',
   form_submitted: 'form_submitted',
+};
+
+const CAPI_EVENTS = {
+  page_view: 'PageView',
+  view_content: 'ViewContent',
+  cta_click: 'CTAClick',
+  checkout_click: 'InitiateCheckout',
+  checkout_visit: 'InitiateCheckout',
+  form_started: 'FormStarted',
+  form_submitted: 'Lead',
 };
 
 function firstHeaderValue(value) {
@@ -36,6 +47,31 @@ function cleanObject(value) {
   }, {});
 }
 
+function cleanEventData(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.entries(value).reduce((acc, [key, item]) => {
+    if (item == null || item === '') return acc;
+    if (Array.isArray(item)) {
+      acc[key] = item
+        .filter((entry) => ['string', 'number', 'boolean'].includes(typeof entry))
+        .map((entry) => (typeof entry === 'string' ? cleanString(entry, 200) : entry));
+      return acc;
+    }
+    if (['string', 'number', 'boolean'].includes(typeof item)) {
+      acc[key] = typeof item === 'string' ? cleanString(item, 500) : item;
+    }
+    return acc;
+  }, {});
+}
+
+function splitName(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(' '),
+  };
+}
+
 function kitFields(kitId) {
   const id = parseInt(kitId, 10);
   const kit = KITS[id];
@@ -45,6 +81,56 @@ function kitFields(kitId) {
     kit_name: kit.name,
     amount: kit.price,
   };
+}
+
+function capiEventData(eventName, body, kitId) {
+  const explicit = cleanEventData(body.eventData || body.details?.eventData);
+  const id = parseInt(kitId, 10);
+  const kit = KITS[id];
+  const base = kit ? {
+    content_name: kit.name,
+    content_ids: [kit.id],
+    content_type: 'product',
+    currency: 'BRL',
+    value: kit.price,
+    num_items: kit.quantity,
+  } : {};
+
+  return {
+    ...base,
+    ...explicit,
+    funnel_event: eventName,
+    page_type: cleanString(body.pageType || body.details?.pageType, 80),
+    cta_name: cleanString(body.ctaName || body.details?.ctaName, 120),
+    destination: cleanString(body.destination || body.details?.destination),
+    payment_method: cleanString(body.paymentMethod || body.details?.paymentMethod, 60),
+  };
+}
+
+async function sendFunnelCapi({ eventName, body, customer, address, tracking, kitId, ip, userAgent }) {
+  const metaEventName = CAPI_EVENTS[eventName];
+  if (!metaEventName) return;
+
+  const nameParts = splitName(customer.name);
+  await sendCapiEvent({
+    eventName: metaEventName,
+    eventData: capiEventData(eventName, body, kitId),
+    userData: {
+      email: customer.email,
+      phone: customer.phone,
+      firstName: nameParts.firstName,
+      lastName: nameParts.lastName,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      fbp: tracking.fbp,
+      fbc: tracking.fbc,
+    },
+    clientIp: ip,
+    userAgent,
+    eventSourceUrl: cleanString(body.sourceUrl || tracking.source_url) || 'https://duralibid.com.br',
+    eventId: cleanString(body.eventId || body.tracking?.eventId || body.details?.eventId, 160),
+  });
 }
 
 export default async function handler(req, res) {
@@ -69,6 +155,7 @@ export default async function handler(req, res) {
     const tracking = {
       ...cleanObject(body.tracking),
       source_url: cleanString(body.sourceUrl || body.tracking?.source_url),
+      event_id: cleanString(body.eventId || body.tracking?.eventId || body.details?.eventId, 160),
       last_page_type: cleanString(body.pageType || body.details?.pageType, 80),
       last_event: eventName,
       ip,
@@ -77,6 +164,7 @@ export default async function handler(req, res) {
     const event = {
       name: eventName,
       at: new Date().toISOString(),
+      event_id: cleanString(body.eventId || body.tracking?.eventId || body.details?.eventId, 160),
       page_type: cleanString(body.pageType || body.details?.pageType, 80),
       cta_name: cleanString(body.ctaName || body.details?.ctaName, 120),
       destination: cleanString(body.destination || body.details?.destination),
@@ -111,6 +199,7 @@ export default async function handler(req, res) {
     };
 
     await upsertLeadByLeadId(lead);
+    await sendFunnelCapi({ eventName, body, customer, address, tracking, kitId, ip, userAgent });
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('track-event error:', err);

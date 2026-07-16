@@ -11,7 +11,20 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="brand/tokens.css">
 <script src="tracking.js"></script>
-<script>DLTracking.track('ViewContent', DLTracking.productPayload());</script>
+<script>
+(function(){
+  var payload = DLTracking.productPayload();
+  var viewContentEventId = DLTracking.track('ViewContent', payload);
+  DLTracking.recordFunnelEvent('view_content', {
+    pageType: 'product',
+    eventId: viewContentEventId,
+    eventData: payload
+  }, {
+    onceKey: 'view_content_product',
+    ttl: 10 * 60 * 1000
+  });
+})();
+</script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
 <!-- End Meta Pixel Code -->
 

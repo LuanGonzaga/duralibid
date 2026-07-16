@@ -335,8 +335,9 @@ document.querySelectorAll('.kit-option').forEach(el => {
 // Init from URL param
 const urlKit = new URLSearchParams(location.search).get('kit');
 selectKit(urlKit && KITS[urlKit] ? urlKit : '2');
+let initiateCheckoutEventId = null;
 if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
-  DLTracking.track('InitiateCheckout', DLTracking.kitPayload(selectedKit));
+  initiateCheckoutEventId = DLTracking.track('InitiateCheckout', DLTracking.kitPayload(selectedKit));
 }
 
 (function notifyCheckoutVisit() {
@@ -357,6 +358,7 @@ if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
       attribution: DLTracking.getAttribution(),
       tracking: {
         leadId,
+        eventId: initiateCheckoutEventId,
         fbp: metaCookies.fbp,
         fbc: metaCookies.fbc,
       },
@@ -370,10 +372,19 @@ if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
   form.addEventListener('input', (event) => {
     if (started || !event.target.matches('input, select')) return;
     started = true;
+    const formStartedEventId = DLTracking.trackCustom('FormStarted', {
+      ...DLTracking.kitPayload(selectedKit),
+      payment_method: paymentMethod,
+    });
     DLTracking.recordFunnelEvent('form_started', {
+      eventId: formStartedEventId,
       pageType: 'checkout',
       kit: selectedKit,
       paymentMethod,
+      eventData: {
+        ...DLTracking.kitPayload(selectedKit),
+        payment_method: paymentMethod,
+      },
     }, {
       onceKey: `form_started_${selectedKit}`,
       ttl: 60 * 60 * 1000,
@@ -461,10 +472,21 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
 
   const btn = document.getElementById('submitBtn');
   const fb = document.getElementById('feedback');
+  const leadEventId = DLTracking.track('Lead', {
+    ...DLTracking.kitPayload(selectedKit),
+    payment_method: paymentMethod,
+    funnel_step: 'form_submitted',
+  });
   DLTracking.recordFunnelEvent('form_submitted', {
+    eventId: leadEventId,
     pageType: 'checkout',
     kit: selectedKit,
     paymentMethod,
+    eventData: {
+      ...DLTracking.kitPayload(selectedKit),
+      payment_method: paymentMethod,
+      funnel_step: 'form_submitted',
+    },
     customer: {
       name: document.getElementById('name').value,
       email: document.getElementById('email').value,
