@@ -919,8 +919,8 @@
           var data = await res.json().catch(function(){ return {}; });
           if (!res.ok) throw new Error(data.error || 'Nao foi possivel enviar o cupom.');
           saveState({ requested: true, at: Date.now() });
-          forms.forEach(function(item){ setStatus(item, 'Cupom enviado. Confira seu e-mail.', 'ok'); });
-          setTimeout(function(){ hide(); }, 1800);
+          forms.forEach(function(item){ setStatus(item, 'Pronto. Seu cupom foi reservado e o link com desconto chegou no seu e-mail.', 'ok'); });
+          setTimeout(function(){ hide(); }, 2600);
         } catch (err) {
           setStatus(form, err.message || 'Nao foi possivel enviar agora.', 'error');
         } finally {

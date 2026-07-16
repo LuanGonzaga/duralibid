@@ -49,7 +49,7 @@ function couponLink() {
   return `https://www.duralibid.com.br/checkout.html?${params.toString()}`;
 }
 
-async function sendEmail({ to, subject, html }) {
+async function sendEmail({ to, subject, html, text }) {
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY ausente; cupom nao enviado.');
     return;
@@ -66,6 +66,7 @@ async function sendEmail({ to, subject, html }) {
       to,
       subject,
       html,
+      text,
     }),
   });
 
@@ -78,20 +79,44 @@ async function sendEmail({ to, subject, html }) {
 function couponEmail({ email }) {
   const link = couponLink();
   return `
+  <div style="display:none;max-height:0;overflow:hidden;color:transparent;opacity:0">Seu cupom DuraLibid foi reservado. Use o link para finalizar com desconto, entrega discreta e garantia de 7 dias.</div>
   <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#0A0A0A;color:#F5F5F5;padding:32px;border-radius:12px">
-    <p style="margin:0 0 8px;color:#D9A441;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Cupom exclusivo DuraLibid</p>
-    <h1 style="color:#F5F5F5;font-size:28px;margin:0 0 12px">Seu cupom esta liberado</h1>
-    <p style="color:#C9CDD2;font-size:16px;line-height:1.6;margin:0 0 24px">Use o codigo abaixo no checkout para receber ${DISCOUNT_PERCENT}% de desconto no seu pedido.</p>
+    <p style="margin:0 0 8px;color:#D9A441;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Cupom confirmado</p>
+    <h1 style="color:#F5F5F5;font-size:28px;margin:0 0 12px">Seu cupom DuraLibid esta reservado</h1>
+    <p style="color:#C9CDD2;font-size:16px;line-height:1.6;margin:0 0 18px">Voce deu o primeiro passo. Agora e so finalizar pelo link abaixo para comprar com desconto aplicado automaticamente.</p>
+    <p style="color:#C9CDD2;font-size:15px;line-height:1.6;margin:0 0 24px">O DuraLibid foi feito para quem quer mais controle e confianca com um cuidado masculino discreto, de uso topico e sem complicacao.</p>
 
     <div style="background:#1E2126;border:1px solid #2A2E34;border-radius:10px;padding:22px;text-align:center;margin-bottom:22px">
-      <p style="color:#8A8F98;font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 8px">Seu codigo</p>
+      <p style="color:#8A8F98;font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 8px">Cupom reservado</p>
       <div style="font-size:34px;letter-spacing:.18em;color:#E11D26;font-weight:800;margin-bottom:14px">${COUPON_CODE}</div>
-      <a href="${escapeHtml(link)}" style="display:inline-block;background:#E11D26;color:#fff;text-decoration:none;border-radius:999px;padding:14px 24px;font-weight:800;text-transform:uppercase">Usar cupom agora</a>
+      <a href="${escapeHtml(link)}" style="display:inline-block;background:#E11D26;color:#fff;text-decoration:none;border-radius:999px;padding:14px 24px;font-weight:800;text-transform:uppercase">Ir para o checkout com desconto</a>
     </div>
 
-    <p style="color:#C9CDD2;font-size:14px;line-height:1.6;margin:0 0 18px">O desconto e aplicado automaticamente pelo link acima. Se preferir, acesse o site e digite o codigo <strong>${COUPON_CODE}</strong> no campo de cupom.</p>
+    <div style="background:#121417;border:1px solid #252930;border-radius:10px;padding:18px;margin:0 0 20px">
+      <p style="color:#F5F5F5;font-size:15px;font-weight:700;margin:0 0 10px">Ao finalizar pelo link, voce ja compra com:</p>
+      <p style="color:#C9CDD2;font-size:14px;line-height:1.7;margin:0">✓ ${DISCOUNT_PERCENT}% de desconto aplicado automaticamente<br>✓ Entrega discreta no endereco informado<br>✓ Pagamento seguro via Mercado Pago<br>✓ Garantia de 7 dias para testar com tranquilidade</p>
+    </div>
+
+    <p style="color:#C9CDD2;font-size:14px;line-height:1.6;margin:0 0 18px">Recomendacao: o kit com 2 frascos costuma ser a escolha mais equilibrada para testar o produto com calma e manter uma unidade de reserva.</p>
+    <p style="color:#C9CDD2;font-size:14px;line-height:1.6;margin:0 0 18px">Se preferir, acesse o site e digite o codigo <strong>${COUPON_CODE}</strong> no campo de cupom.</p>
     <p style="color:#8A8F98;font-size:12px;margin:0">Enviado para ${escapeHtml(email)}. Duvidas? Responda este e-mail.</p>
   </div>`;
+}
+
+function couponEmailText() {
+  const link = couponLink();
+  return `Seu cupom DuraLibid esta reservado.
+
+Use o codigo ${COUPON_CODE} para receber ${DISCOUNT_PERCENT}% de desconto.
+
+Finalize pelo link abaixo com o desconto aplicado automaticamente:
+${link}
+
+Ao finalizar pelo link, voce compra com entrega discreta, pagamento seguro via Mercado Pago e garantia de 7 dias.
+
+Recomendacao: o kit com 2 frascos costuma ser a escolha mais equilibrada para testar o produto com calma e manter uma unidade de reserva.
+
+Duvidas? Responda este e-mail.`;
 }
 
 export default async function handler(req, res) {
@@ -144,8 +169,9 @@ export default async function handler(req, res) {
     await Promise.allSettled([
       sendEmail({
         to: email,
-        subject: 'Seu cupom DuraLibid esta aqui',
+        subject: 'Seu cupom DuraLibid foi reservado',
         html: couponEmail({ email }),
+        text: couponEmailText(),
       }),
       sendCapiEvent({
         eventName: 'Lead',
