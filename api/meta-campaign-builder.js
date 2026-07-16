@@ -114,6 +114,14 @@ function cloneObjectStorySpec(spec, link) {
 }
 
 function summarizeAd(ad) {
+  const spec = ad.creative?.object_story_spec || {};
+  const assetFeed = ad.creative?.asset_feed_spec || {};
+  const link = spec.link_data?.link
+    || spec.video_data?.call_to_action?.value?.link
+    || ad.creative?.object_url
+    || assetFeed.link_urls?.[0]?.website_url
+    || assetFeed.link_urls?.[0]?.display_url
+    || '';
   return {
     id: ad.id,
     name: ad.name,
@@ -121,13 +129,16 @@ function summarizeAd(ad) {
     effective_status: ad.effective_status,
     creative_id: ad.creative?.id,
     creative_name: ad.creative?.name,
-    has_link_data: Boolean(ad.creative?.object_story_spec?.link_data),
-    link: ad.creative?.object_story_spec?.link_data?.link
-      || ad.creative?.object_story_spec?.video_data?.call_to_action?.value?.link
+    has_link_data: Boolean(spec.link_data),
+    has_asset_feed: Boolean(ad.creative?.asset_feed_spec),
+    object_story_id: ad.creative?.object_story_id || ad.creative?.effective_object_story_id || '',
+    image_hash: spec.link_data?.image_hash || assetFeed.images?.[0]?.hash || '',
+    link,
+    body: spec.link_data?.message
+      || spec.video_data?.message
+      || assetFeed.bodies?.[0]?.text
       || '',
-    body: ad.creative?.object_story_spec?.link_data?.message
-      || ad.creative?.object_story_spec?.video_data?.message
-      || '',
+    title: spec.link_data?.name || assetFeed.titles?.[0]?.text || '',
   };
 }
 
@@ -159,7 +170,7 @@ async function loadSource(sourceCampaignId) {
       'status',
       'effective_status',
       'adset_id',
-      'creative{id,name,object_story_spec,thumbnail_url}',
+      'creative{id,name,object_story_spec,asset_feed_spec,object_story_id,effective_object_story_id,thumbnail_url,object_url,url_tags}',
     ].join(','),
     limit: 50,
   });
