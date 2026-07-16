@@ -113,6 +113,23 @@ function cloneObjectStorySpec(spec, link) {
   return cloned;
 }
 
+function cloneAssetFeedSpec(assetFeed, link) {
+  if (!assetFeed || typeof assetFeed !== 'object') return null;
+  const cloned = JSON.parse(JSON.stringify(assetFeed));
+  const linkUrls = Array.isArray(cloned.link_urls) && cloned.link_urls.length
+    ? cloned.link_urls
+    : [{}];
+  cloned.link_urls = linkUrls.map((item) => ({
+    ...item,
+    website_url: link,
+    display_url: 'duralibid.com.br',
+  }));
+  if (!Array.isArray(cloned.call_to_action_types) || !cloned.call_to_action_types.length) {
+    cloned.call_to_action_types = ['LEARN_MORE'];
+  }
+  return cloned;
+}
+
 function summarizeAd(ad) {
   const spec = ad.creative?.object_story_spec || {};
   const assetFeed = ad.creative?.asset_feed_spec || {};
@@ -188,7 +205,7 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
   const sourceAdset = source.adsets.find((item) => item.effective_status === 'ACTIVE')
     || source.adsets[0]
     || {};
-  const sourceAds = source.ads.filter((ad) => ad.effective_status === 'ACTIVE' || ad.status === 'ACTIVE');
+  const sourceAds = source.ads.filter((ad) => ad.status === 'ACTIVE' && ad.effective_status !== 'DISAPPROVED');
   const adsToClone = sourceAds.length ? sourceAds : source.ads.slice(0, 2);
   const targetUrl = checkoutUrl(kit);
   const campaignName = name || `DURALIBID - TESTE LEAD - C1 - ${new Date().toISOString().slice(0, 10)}`;
@@ -230,8 +247,17 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
   const createdAds = [];
   for (const ad of adsToClone) {
     const spec = cloneObjectStorySpec(ad.creative?.object_story_spec, targetUrl);
+    const assetFeedSpec = cloneAssetFeedSpec(ad.creative?.asset_feed_spec, targetUrl);
     let creativeId = ad.creative?.id;
-    if (spec?.link_data || spec?.video_data) {
+    if (assetFeedSpec) {
+      const creativePayload = {
+        name: `${campaignName} | ${ad.name}`,
+        asset_feed_spec: JSON.stringify(assetFeedSpec),
+      };
+      if (spec) creativePayload.object_story_spec = JSON.stringify(spec);
+      const creative = await metaRequest(`${account}/adcreatives`, creativePayload, 'POST');
+      creativeId = creative.id;
+    } else if (spec?.link_data || spec?.video_data) {
       const creative = await metaRequest(`${account}/adcreatives`, {
         name: `${campaignName} | ${ad.name}`,
         object_story_spec: JSON.stringify(spec),
