@@ -226,6 +226,7 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
       daily_budget: String(Math.max(1, Number(dailyBudget)) * 100),
       billing_event: 'IMPRESSIONS',
       optimization_goal: 'OFFSITE_CONVERSIONS',
+      is_adset_budget_sharing_enabled: 'false',
       bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
       destination_type: 'WEBSITE',
       promoted_object: JSON.stringify({
