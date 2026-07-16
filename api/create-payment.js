@@ -24,6 +24,27 @@ function formatMoney(value) {
   });
 }
 
+function normalizeCoupon(value) {
+  return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function roundMoney(value) {
+  return Math.round(Number(value || 0) * 100) / 100;
+}
+
+function priceWithCoupon(price, couponCode) {
+  const code = normalizeCoupon(couponCode);
+  const discountPercent = code === 'DURA5' ? 5 : 0;
+  const discount = roundMoney(Number(price) * (discountPercent / 100));
+  return {
+    couponCode: discountPercent ? code : '',
+    discountPercent,
+    discount,
+    subtotal: roundMoney(price),
+    total: roundMoney(Number(price) - discount),
+  };
+}
+
 async function sendEmail({ to, subject, html }) {
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY ausente; e-mail nao enviado.');
@@ -65,7 +86,7 @@ function renderRows(data) {
     .join('');
 }
 
-function emailCadastroConcluido({ order, kitData, paymentMethod, paymentId, status, trackingData }) {
+function emailCadastroConcluido({ order, kitData, pricing, paymentMethod, paymentId, status, trackingData }) {
   const attribution = trackingData?.attribution || {};
   const complement = order.complement
     ? `<p style="margin:4px 0;color:#C9CDD2"><strong>Complemento:</strong> ${escapeHtml(order.complement)}</p>`
@@ -80,7 +101,10 @@ function emailCadastroConcluido({ order, kitData, paymentMethod, paymentId, stat
       <h3 style="color:#D9A441;margin:0 0 12px">Pedido</h3>
       ${renderRows({
         Produto: kitData.name,
-        Valor: formatMoney(kitData.price),
+        Subtotal: pricing?.discount ? formatMoney(pricing.subtotal) : '',
+        Cupom: pricing?.couponCode || '',
+        Desconto: pricing?.discount ? `-${formatMoney(pricing.discount)}` : '',
+        Valor: formatMoney(pricing?.total ?? kitData.price),
         Pagamento: paymentMethodLabel(paymentMethod),
         Status: status,
         'ID Mercado Pago': paymentId,
@@ -127,7 +151,7 @@ function emailCadastroConcluido({ order, kitData, paymentMethod, paymentId, stat
   </div>`;
 }
 
-function emailPixGerado({ order, kitData, paymentId, pixCode }) {
+function emailPixGerado({ order, kitData, pricing, paymentId, pixCode }) {
   const complement = order.complement
     ? `<p style="margin:4px 0;color:#C9CDD2">Complemento: ${escapeHtml(order.complement)}</p>`
     : '';
@@ -140,7 +164,8 @@ function emailPixGerado({ order, kitData, paymentId, pixCode }) {
     <div style="background:#1E2126;border-radius:8px;padding:20px;margin-bottom:20px">
       <h3 style="color:#D9A441;margin:0 0 12px">Dados do pedido</h3>
       <p style="margin:4px 0">Produto: <strong>${escapeHtml(kitData.name)}</strong></p>
-      <p style="margin:4px 0">Valor: <strong>${formatMoney(kitData.price)}</strong></p>
+      ${pricing?.discount ? `<p style="margin:4px 0">Subtotal: <strong>${formatMoney(pricing.subtotal)}</strong></p><p style="margin:4px 0">Cupom: <strong>${escapeHtml(pricing.couponCode)}</strong> (-${formatMoney(pricing.discount)})</p>` : ''}
+      <p style="margin:4px 0">Valor: <strong>${formatMoney(pricing?.total ?? kitData.price)}</strong></p>
       <p style="margin:4px 0">Forma de pagamento: <strong>Pix</strong></p>
       <p style="margin:4px 0">ID do pagamento: <strong>${escapeHtml(paymentId)}</strong></p>
     </div>
@@ -183,16 +208,25 @@ export default async function handler(req, res) {
       name, email, cpf, phone,
       zipCode, street, number, complement, neighborhood, city, state,
       token, installments, issuer_id,
+      couponCode,
       tracking = {},
     } = req.body;
 
     const kitData = KITS[kit];
     if (!kitData) return res.status(400).json({ error: 'Kit inválido' });
 
+    const pricing = priceWithCoupon(kitData.price, couponCode);
     const trackingData = tracking && typeof tracking === 'object' ? tracking : {};
     const leadId = normalizeLeadId(trackingData.leadId);
     const metadata = { kit: parseInt(kit) };
     metadata.lead_id = leadId;
+    metadata.order_amount = pricing.total;
+    metadata.order_subtotal = pricing.subtotal;
+    if (pricing.couponCode) {
+      metadata.coupon_code = pricing.couponCode;
+      metadata.discount_amount = pricing.discount;
+      metadata.discount_percent = pricing.discountPercent;
+    }
     if (trackingData.fbp) metadata.fbp = trackingData.fbp;
     if (trackingData.fbc) metadata.fbc = trackingData.fbc;
     if (trackingData.eventId) metadata.add_payment_info_event_id = trackingData.eventId;
@@ -222,7 +256,7 @@ export default async function handler(req, res) {
       : 'https://duralibid.vercel.app';
 
     let payload = {
-      transaction_amount: kitData.price,
+      transaction_amount: pricing.total,
       description: kitData.name,
       payer,
       metadata,
@@ -244,12 +278,14 @@ export default async function handler(req, res) {
       eventName: 'AddPaymentInfo',
       eventData: {
         content_name: kitData.name,
-        value: kitData.price,
+        value: pricing.total,
         currency: 'BRL',
         content_ids: [`duralibid-${kit}frasco${kitData.quantity > 1 ? 's' : ''}`],
         content_type: 'product',
         num_items: kitData.quantity,
         payment_method: paymentMethod,
+        coupon: pricing.couponCode,
+        discount: pricing.discount,
       },
       userData: {
         email: email,
@@ -297,7 +333,7 @@ export default async function handler(req, res) {
         payment_id: data.id?.toString(),
         kit_id: parseInt(kit, 10),
         kit_name: kitData.name,
-        amount: kitData.price,
+        amount: pricing.total,
         name,
         email,
         phone,
@@ -320,15 +356,24 @@ export default async function handler(req, res) {
           event_id: trackingData.eventId,
           source_url: trackingData.sourceUrl,
         },
-        metadata: { last_event: 'payment_created', status_detail: data.status_detail },
+        metadata: {
+          last_event: 'payment_created',
+          status_detail: data.status_detail,
+          coupon_code: pricing.couponCode,
+          discount_amount: pricing.discount,
+          discount_percent: pricing.discountPercent,
+          subtotal: pricing.subtotal,
+          total: pricing.total,
+        },
       });
 
       const adminLeadEmail = sendEmail({
         to: adminEmail(),
-        subject: `Cadastro concluido - ${name} - ${formatMoney(kitData.price)}`,
+        subject: `Cadastro concluido - ${name} - ${formatMoney(pricing.total)}`,
         html: emailCadastroConcluido({
           order,
           kitData,
+          pricing,
           paymentMethod,
           paymentId: data.id,
           status: data.status,
@@ -347,6 +392,7 @@ export default async function handler(req, res) {
             html: emailPixGerado({
               order,
               kitData,
+              pricing,
               paymentId: data.id,
               pixCode,
             }),
@@ -360,6 +406,7 @@ export default async function handler(req, res) {
           payment_id: data.id,
           pix_copy_paste: pixCode,
           pix_qr_base64: data.point_of_interaction?.transaction_data?.qr_code_base64,
+          pricing,
         });
       } else {
         await adminLeadEmail;
@@ -368,6 +415,7 @@ export default async function handler(req, res) {
           status: data.status,
           payment_id: data.id,
           status_detail: data.status_detail,
+          pricing,
         });
       }
     }

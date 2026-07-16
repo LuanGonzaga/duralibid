@@ -89,6 +89,22 @@
   .btn-block { display: block; width: 100%; }
   .microcopy { font-size: var(--fs-xs); color: var(--duo-mute); margin-top: 12px; letter-spacing: .02em; }
 
+  /* ---- coupon capture ---- */
+  .coupon-modal { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: var(--space-4); background: rgba(0,0,0,.72); backdrop-filter: blur(6px); }
+  .coupon-modal.show { display: flex; }
+  .coupon-card { width: min(440px, 100%); background: var(--duo-graphite); border: 1px solid #2a2e34; border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: 0 30px 80px rgba(0,0,0,.55); position: relative; }
+  .coupon-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border: 1px solid #2a2e34; border-radius: 50%; background: var(--duo-ink); color: var(--duo-silver); cursor: pointer; font-size: 20px; line-height: 1; }
+  .coupon-card .eyebrow { display: block; margin-bottom: 8px; }
+  .coupon-card h3 { font-size: 1.8rem; margin-bottom: 10px; color: var(--duo-white); }
+  .coupon-card p { color: var(--duo-silver); font-size: var(--fs-sm); margin-bottom: var(--space-3); }
+  .coupon-form { display: grid; gap: 10px; }
+  .coupon-form input { width: 100%; background: var(--duo-ink); border: 1.5px solid #2a2e34; border-radius: var(--radius-sm); padding: 14px; color: var(--duo-white); font-family: var(--font-body); font-size: 1rem; }
+  .coupon-form input:focus { outline: none; border-color: var(--duo-red); box-shadow: 0 0 0 3px rgba(225,29,38,.16); }
+  .coupon-form button { width: 100%; }
+  .coupon-status { min-height: 18px; color: var(--duo-mute); font-size: var(--fs-xs); }
+  .coupon-status.ok { color: #2ecc71; }
+  .coupon-status.error { color: var(--duo-red); }
+
   /* ===== HERO — bordered premium card (Logitech-style) ===== */
   .hero { position: relative; padding: var(--space-4) 0 var(--space-6); }
   .hero-card { position: relative; z-index: 2; border: 1px solid rgba(245,245,245,.14); border-radius: 28px;
@@ -717,6 +733,20 @@
   </div>
 </section>
 
+<div class="coupon-modal" id="couponModal" aria-hidden="true">
+  <div class="coupon-card" role="dialog" aria-modal="true" aria-labelledby="couponTitle">
+    <button class="coupon-close" type="button" id="couponClose" aria-label="Fechar">x</button>
+    <span class="eyebrow">Oferta reservada</span>
+    <h3 id="couponTitle">Receba um cupom exclusivo</h3>
+    <p>Informe seu e-mail para receber um cupom especial da DuraLibid e continuar quando quiser.</p>
+    <form class="coupon-form" id="couponForm">
+      <input id="couponEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+      <button class="btn btn-primary" type="submit">Receber cupom</button>
+      <span class="coupon-status" id="couponStatus"></span>
+    </form>
+  </div>
+</div>
+
 <!-- STICKY -->
 <div class="sticky">
   <span class="txt"><b>DURALIBID</b> · a partir de R$ 89,90</span>
@@ -776,6 +806,107 @@
 
     update();
     setInterval(update, 1000);
+  })();
+
+  // Coupon popup: aparece depois de 15s e envia cupom por e-mail
+  (function(){
+    var modal = document.getElementById('couponModal');
+    var form = document.getElementById('couponForm');
+    var email = document.getElementById('couponEmail');
+    var status = document.getElementById('couponStatus');
+    var close = document.getElementById('couponClose');
+    var KEY = 'dl_coupon_popup_v1';
+    var SHOW_DELAY = 15000;
+    if (!modal || !form || !email || !status || !close || !window.DLTracking) return;
+
+    function readState() {
+      try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function saveState(value) {
+      try { localStorage.setItem(KEY, JSON.stringify(value)); } catch (e) {}
+    }
+    function shouldShow() {
+      var state = readState();
+      var age = Date.now() - Number(state.at || 0);
+      if (state.requested && age < 30 * 24 * 60 * 60 * 1000) return false;
+      if (state.dismissed && age < 24 * 60 * 60 * 1000) return false;
+      return true;
+    }
+    function show() {
+      if (!shouldShow()) return;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+      setTimeout(function(){ email.focus(); }, 80);
+    }
+    function hide(reason) {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      if (reason === 'dismissed') saveState({ dismissed: true, at: Date.now() });
+    }
+
+    setTimeout(show, SHOW_DELAY);
+    close.addEventListener('click', function(){ hide('dismissed'); });
+    modal.addEventListener('click', function(event){
+      if (event.target === modal) hide('dismissed');
+    });
+    document.addEventListener('keydown', function(event){
+      if (event.key === 'Escape' && modal.classList.contains('show')) hide('dismissed');
+    });
+
+    form.addEventListener('submit', async function(event){
+      event.preventDefault();
+      var value = email.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        status.textContent = 'Informe um e-mail valido.';
+        status.className = 'coupon-status error';
+        return;
+      }
+
+      var button = form.querySelector('button');
+      button.disabled = true;
+      button.textContent = 'Enviando...';
+      status.textContent = '';
+      status.className = 'coupon-status';
+      var metaCookies = DLTracking.getMetaCookies();
+      var eventId = DLTracking.track('Lead', {
+        content_name: 'Cupom DuraLibid',
+        lead_type: 'coupon',
+        currency: 'BRL',
+        value: 0
+      });
+
+      try {
+        var res = await fetch('/api/lead-coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: value,
+            leadId: DLTracking.getLeadId(),
+            eventId: eventId,
+            sourceUrl: location.href,
+            attribution: DLTracking.getAttribution(),
+            tracking: {
+              leadId: DLTracking.getLeadId(),
+              eventId: eventId,
+              fbp: metaCookies.fbp,
+              fbc: metaCookies.fbc
+            }
+          })
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if (!res.ok) throw new Error(data.error || 'Nao foi possivel enviar o cupom.');
+        saveState({ requested: true, at: Date.now() });
+        status.textContent = 'Cupom enviado. Confira seu e-mail.';
+        status.className = 'coupon-status ok';
+        setTimeout(function(){ hide(); }, 1800);
+      } catch (err) {
+        status.textContent = err.message || 'Nao foi possivel enviar agora.';
+        status.className = 'coupon-status error';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Receber cupom';
+      }
+    });
   })();
 </script>
 

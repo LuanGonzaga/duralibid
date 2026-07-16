@@ -135,6 +135,7 @@ tr:hover td{background:#FFF7F7}
 .status-pill{display:inline-flex;align-items:center;min-height:26px;border-radius:999px;padding:0 9px;font-size:.74rem;font-weight:950;background:#EEF2F7;color:#4B5563}
 .status-pill.site_visit{background:#EEF2F7;color:#4B5563}
 .status-pill.cta_click{background:#E8F2FF;color:#2456D6}
+.status-pill.coupon_requested{background:#FFF3C4;color:#9A5B00}
 .status-pill.checkout_visit{background:#E9F3FF;color:#1F64C8}
 .status-pill.form_started{background:#FFF0E0;color:#C45A00}
 .status-pill.form_submitted{background:#F4ECFF;color:#7C3AED}
@@ -449,6 +450,7 @@ tr:hover td{background:#FFF7F7}
         <button class="segment active" type="button" data-status="all">Todos</button>
         <button class="segment" type="button" data-status="site_visit">Visita</button>
         <button class="segment" type="button" data-status="cta_click">Clique</button>
+        <button class="segment" type="button" data-status="coupon_requested">Cupom</button>
         <button class="segment" type="button" data-status="checkout_visit">Checkout</button>
         <button class="segment" type="button" data-status="form_started">Formulario</button>
         <button class="segment" type="button" data-status="form_submitted">Cadastro</button>
@@ -500,6 +502,7 @@ const AUTH_KEY = 'dl_panel_auth_v1';
 const STATUS = {
   site_visit: 'Visita',
   cta_click: 'Clique',
+  coupon_requested: 'Cupom',
   checkout_visit: 'Checkout',
   form_started: 'Formulario',
   form_submitted: 'Cadastro',
@@ -511,6 +514,7 @@ const STATUS = {
 const STATUS_RANK = {
   site_visit: 10,
   cta_click: 20,
+  coupon_requested: 25,
   checkout_visit: 30,
   form_started: 40,
   form_submitted: 50,

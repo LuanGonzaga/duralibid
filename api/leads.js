@@ -18,6 +18,7 @@ function summarize(leads) {
     total: 0,
     site_visit: 0,
     cta_click: 0,
+    coupon_requested: 0,
     checkout_visit: 0,
     form_started: 0,
     form_submitted: 0,

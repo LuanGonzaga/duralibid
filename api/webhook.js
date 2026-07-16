@@ -27,7 +27,9 @@ async function meRequest(path, method = 'GET', body = null) {
 async function criarEtiqueta(payment) {
   const payer = payment.payer;
   const addr  = payer.address;
-  const kit   = KITS[payment.metadata?.kit] || KITS[2];
+  const baseKit = KITS[payment.metadata?.kit] || KITS[2];
+  const paidAmount = Number(payment.metadata?.order_amount || payment.transaction_amount || baseKit.price);
+  const kit = { ...baseKit, price: paidAmount || baseKit.price };
 
   // 1. Adicionar ao carrinho
   const cartItem = await meRequest('/me/cart', 'POST', {
@@ -214,14 +216,23 @@ export default async function handler(req, res) {
 
     const payer = payment.payer;
     const kitId = parseInt(payment.metadata?.kit) || 2;
-    const kit   = KITS[kitId] || KITS[2];
+    const baseKit = KITS[kitId] || KITS[2];
+    const paidAmount = Number(payment.metadata?.order_amount || payment.transaction_amount || baseKit.price);
+    const kit = { ...baseKit, price: paidAmount || baseKit.price };
 
     await updateLeadByPaymentId(payment.id?.toString(), {
       funnel_status: 'paid',
       payment_status: payment.status,
+      amount: kit.price,
       recovery_stage: 3,
       paid_at: new Date().toISOString(),
-      metadata: { last_event: 'payment_approved' },
+      metadata: {
+        last_event: 'payment_approved',
+        coupon_code: payment.metadata?.coupon_code,
+        discount_amount: payment.metadata?.discount_amount,
+        discount_percent: payment.metadata?.discount_percent,
+        total: kit.price,
+      },
     });
 
     // Disparar evento Purchase na CAPI
@@ -253,7 +264,7 @@ export default async function handler(req, res) {
     // Tentar criar etiqueta no Melhor Envio
     let etiqueta = null;
     try {
-      etiqueta = await criarEtiqueta({ ...payment, metadata: { kit: kitId } });
+      etiqueta = await criarEtiqueta(payment);
     } catch (e) {
       console.error('Erro Melhor Envio:', e.message);
     }
