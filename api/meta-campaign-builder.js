@@ -130,9 +130,26 @@ function minimalObjectStorySpec(ad) {
   return pageId ? { page_id: pageId } : null;
 }
 
+function removeProfileRefs(value) {
+  if (!value || typeof value !== 'object') return value;
+  if (Array.isArray(value)) {
+    value.forEach(removeProfileRefs);
+    return value;
+  }
+  [
+    'instagram_actor_id',
+    'instagram_user_id',
+    'instagram_story_id',
+    'source_instagram_media_id',
+    'effective_instagram_story_id',
+  ].forEach((key) => delete value[key]);
+  Object.values(value).forEach(removeProfileRefs);
+  return value;
+}
+
 function cloneAssetFeedSpec(assetFeed, link) {
   if (!assetFeed || typeof assetFeed !== 'object') return null;
-  const cloned = JSON.parse(JSON.stringify(assetFeed));
+  const cloned = removeProfileRefs(JSON.parse(JSON.stringify(assetFeed)));
   const linkUrls = Array.isArray(cloned.link_urls) && cloned.link_urls.length
     ? cloned.link_urls
     : [{}];
