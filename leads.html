@@ -776,12 +776,14 @@ function renderMetaAds(data) {
   const s = data.summary || {};
   const range = data.date_range || {};
   const dateRange = range.since && range.until ? `${range.since} ate ${range.until}` : (data.period_label || '');
+  const accountLabel = s.account_name || 'Conta Meta';
+  const currencyLabel = s.currency && !accountLabel.includes(s.currency) ? `, ${s.currency}` : '';
   $('metaSetup').classList.add('hidden');
   $('adMetrics').classList.remove('hidden');
   $('bridgeMetrics').classList.remove('hidden');
   $('adTrend').classList.remove('hidden');
   $('metaAdsStatus').textContent = data.period_label || 'Meta Ads';
-  $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'}, ${s.currency || 'BRL'} - ${dateRange} - ${data.graph_version || 'Graph API'}`;
+  $('metaAdsSubtitle').textContent = `${accountLabel}${currencyLabel} - ${dateRange} - ${data.graph_version || 'Graph API'}`;
   $('adHeroTitle').textContent = data.period_label || 'Meta Ads';
   $('adHeroSpend').textContent = money.format(s.spend || 0);
   $('mSpend').textContent = money.format(s.spend || 0);
