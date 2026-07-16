@@ -133,7 +133,10 @@ tr:hover td{background:#FFF7F7}
 .client strong,.order strong{display:block;color:var(--ink);font-size:.92rem}
 .client span,.order span,.meta{display:block;color:var(--muted);font-size:.78rem;line-height:1.45;margin-top:3px}
 .status-pill{display:inline-flex;align-items:center;min-height:26px;border-radius:999px;padding:0 9px;font-size:.74rem;font-weight:950;background:#EEF2F7;color:#4B5563}
+.status-pill.site_visit{background:#EEF2F7;color:#4B5563}
+.status-pill.cta_click{background:#E8F2FF;color:#2456D6}
 .status-pill.checkout_visit{background:#E9F3FF;color:#1F64C8}
+.status-pill.form_started{background:#FFF0E0;color:#C45A00}
 .status-pill.form_submitted{background:#F4ECFF;color:#7C3AED}
 .status-pill.pix_generated,.status-pill.payment_pending{background:#FFF5DA;color:#A16207}
 .status-pill.paid{background:#E4F8ED;color:#0F7A48}
@@ -337,7 +340,7 @@ tr:hover td{background:#FFF7F7}
           </div>
           <div id="bridgeMetrics" class="bridge-metrics">
             <article class="bridge-card"><span>ROAS real</span><strong id="bRealRoas" class="mono">0.00x</strong><small>Receita paga / investimento</small></article>
-            <article class="bridge-card"><span>Custo por lead</span><strong id="bCostLead" class="mono">R$ 0,00</strong><small>Investimento / leads internos</small></article>
+            <article class="bridge-card"><span>Custo por visita CRM</span><strong id="bCostLead" class="mono">R$ 0,00</strong><small>Investimento / visitantes rastreados</small></article>
             <article class="bridge-card"><span>Custo por Pix</span><strong id="bCostPix" class="mono">R$ 0,00</strong><small>Investimento / Pix gerados</small></article>
             <article class="bridge-card"><span>Pix para pago</span><strong id="bPixPaidRate" class="mono">0%</strong><small>Pedidos pagos sobre Pix</small></article>
           </div>
@@ -376,7 +379,7 @@ tr:hover td{background:#FFF7F7}
         </div>
       </article>
       <article class="kpi">
-        <div class="kpi-head"><span>Leads totais</span><i class="dot blue"></i></div>
+        <div class="kpi-head"><span>Visitantes CRM</span><i class="dot blue"></i></div>
         <div>
           <div id="kTotal" class="kpi-value mono">0</div>
           <small id="kTotalHint">0 entraram no checkout</small>
@@ -444,7 +447,10 @@ tr:hover td{background:#FFF7F7}
       </div>
       <div id="segments" class="segments">
         <button class="segment active" type="button" data-status="all">Todos</button>
+        <button class="segment" type="button" data-status="site_visit">Visita</button>
+        <button class="segment" type="button" data-status="cta_click">Clique</button>
         <button class="segment" type="button" data-status="checkout_visit">Checkout</button>
+        <button class="segment" type="button" data-status="form_started">Formulario</button>
         <button class="segment" type="button" data-status="form_submitted">Cadastro</button>
         <button class="segment" type="button" data-status="pix_generated">Pix</button>
         <button class="segment" type="button" data-status="paid">Pago</button>
@@ -492,12 +498,26 @@ const state = { leads: [], filtered: [], status: 'all', query: '', metaAds: null
 const AUTH_KEY = 'dl_panel_auth_v1';
 
 const STATUS = {
+  site_visit: 'Visita',
+  cta_click: 'Clique',
   checkout_visit: 'Checkout',
+  form_started: 'Formulario',
   form_submitted: 'Cadastro',
   pix_generated: 'Pix gerado',
   payment_pending: 'Pendente',
   paid: 'Pago',
   abandoned: 'Abandono',
+};
+const STATUS_RANK = {
+  site_visit: 10,
+  cta_click: 20,
+  checkout_visit: 30,
+  form_started: 40,
+  form_submitted: 50,
+  pix_generated: 60,
+  payment_pending: 65,
+  abandoned: 70,
+  paid: 80,
 };
 
 function $(id) { return document.getElementById(id); }
@@ -578,6 +598,8 @@ function statusLabel(value) { return STATUS[value] || value || '-'; }
 function isPaid(lead) { return lead.funnel_status === 'paid' || lead.payment_status === 'approved'; }
 function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status); }
 function isRegistered(lead) { return Boolean(lead.email || lead.phone || lead.name || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
+function statusRank(value) { return STATUS_RANK[value] || 0; }
+function reached(lead, status) { return statusRank(lead.funnel_status) >= statusRank(status); }
 function amount(lead) { return Number(lead.amount || 0); }
 function percent(value, total) { return total ? Math.round((value / total) * 100) : 0; }
 function decimal(value, digits) { return Number(value || 0).toFixed(digits == null ? 2 : digits); }
@@ -622,7 +644,10 @@ function summary(leads) {
     acc.total += 1;
     const status = lead.funnel_status || 'unknown';
     acc.byStatus[status] = (acc.byStatus[status] || 0) + 1;
-    if (status === 'checkout_visit') acc.checkout += 1;
+    if (reached(lead, 'site_visit')) acc.site += 1;
+    if (reached(lead, 'cta_click')) acc.cta += 1;
+    if (reached(lead, 'checkout_visit')) acc.checkout += 1;
+    if (reached(lead, 'form_started')) acc.formStarted += 1;
     if (isRegistered(lead)) acc.registered += 1;
     if (hasPix(lead)) acc.pix += 1;
     if (isPaid(lead)) {
@@ -638,7 +663,10 @@ function summary(leads) {
     return acc;
   }, {
     total: 0,
+    site: 0,
+    cta: 0,
     checkout: 0,
+    formStarted: 0,
     registered: 0,
     pix: 0,
     paid: 0,
@@ -899,7 +927,7 @@ function renderKpis(s) {
   $('kRevenue').textContent = money.format(s.revenue);
   $('kPaidHint').textContent = `${number.format(s.paid)} pedidos pagos`;
   $('kTotal').textContent = number.format(s.total);
-  $('kTotalHint').textContent = `${number.format(s.checkout || s.total)} entraram no checkout`;
+  $('kTotalHint').textContent = `${number.format(s.checkout)} chegaram ao checkout`;
   $('kOpenPix').textContent = number.format(s.openPix);
   $('kOpenPixHint').textContent = `${money.format(s.openPixValue)} aguardando pagamento`;
   $('kPixRate').textContent = `${percent(s.pix, s.total)}%`;
@@ -924,7 +952,10 @@ function renderFunnel(s) {
   const base = Math.max(s.total, 1);
   renderFunnelDonut(s);
   $('funnel').innerHTML = [
-    funnelRow('Checkout', 'visitou a etapa', s.total, base, 'blue'),
+    funnelRow('Visita', 'abriu a pagina', s.site || s.total, base, 'blue'),
+    funnelRow('Clique', 'tocou em compra', s.cta, base, ''),
+    funnelRow('Checkout', 'visitou a etapa', s.checkout, base, 'blue'),
+    funnelRow('Formulario', 'comecou a preencher', s.formStarted, base, 'orange'),
     funnelRow('Cadastro', 'informou dados', s.registered, base, ''),
     funnelRow('Pix gerado', 'recebeu QR Code', s.pix, base, 'gold'),
     funnelRow('Pago', 'compra concluida', s.paid, base, 'green'),
@@ -934,7 +965,10 @@ function renderFunnel(s) {
 
 function renderFunnelDonut(s) {
   const segments = [
-    { label: 'Checkout', value: Math.max(s.checkout, s.total - s.registered), color: '#2456D6' },
+    { label: 'Visita', value: Math.max((s.site || s.total) - s.cta, 0), color: '#94A3B8' },
+    { label: 'Clique', value: Math.max(s.cta - s.checkout, 0), color: '#2456D6' },
+    { label: 'Checkout', value: Math.max(s.checkout - s.formStarted, 0), color: '#1F64C8' },
+    { label: 'Formulario', value: Math.max(s.formStarted - s.registered, 0), color: '#D97316' },
     { label: 'Cadastro', value: Math.max(s.registered - s.pix, 0), color: '#E11D26' },
     { label: 'Pix aberto', value: s.openPix, color: '#D9A441' },
     { label: 'Pago', value: s.paid, color: '#14975B' },
@@ -968,15 +1002,15 @@ function renderFunnelDonut(s) {
     return circle;
   }).join('');
   const legend = segments.map((item, index) => {
-    const x = index < 3 ? 44 + index * 72 : 80 + (index - 3) * 78;
-    const y = index < 3 ? 230 : 250;
+    const x = index % 2 === 0 ? 42 : 146;
+    const y = 224 + Math.floor(index / 2) * 16;
     return `
       <circle cx="${x}" cy="${y - 4}" r="4" fill="${item.color}"/>
       <text x="${x + 8}" y="${y}" font-size="10" fill="#687282">${escapeHtml(item.label)}</text>
     `;
   }).join('');
   $('funnelDonut').innerHTML = `
-    <svg viewBox="0 0 260 270" role="img" aria-label="Distribuicao do funil">
+    <svg viewBox="0 0 260 296" role="img" aria-label="Distribuicao do funil">
       <circle cx="130" cy="130" r="${radius}" fill="none" stroke="#EEF2F7" stroke-width="28"/>
       ${circles}
       <text x="130" y="124" text-anchor="middle" font-size="32" font-weight="900" fill="#111318">${number.format(s.total)}</text>

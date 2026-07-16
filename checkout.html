@@ -90,6 +90,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .btn-copy:hover{background:var(--duo-red);color:#fff}
 @media(max-width:768px){
   .checkout-grid{grid-template-columns:1fr}
+  .checkout-grid>aside{order:-1}
   .order-card{position:static;order:-1}
   .field-row,.field-row-3{grid-template-columns:1fr}
 }
@@ -363,6 +364,23 @@ if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
   }).catch(() => {});
 })();
 
+(function bindFormProgressTracking() {
+  const form = document.getElementById('checkoutForm');
+  let started = false;
+  form.addEventListener('input', (event) => {
+    if (started || !event.target.matches('input, select')) return;
+    started = true;
+    DLTracking.recordFunnelEvent('form_started', {
+      pageType: 'checkout',
+      kit: selectedKit,
+      paymentMethod,
+    }, {
+      onceKey: `form_started_${selectedKit}`,
+      ttl: 60 * 60 * 1000,
+    });
+  }, true);
+})();
+
 // --- Payment tabs ---
 document.querySelectorAll('.pay-tab').forEach(tab => {
   tab.addEventListener('click', async () => {
@@ -443,6 +461,29 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
 
   const btn = document.getElementById('submitBtn');
   const fb = document.getElementById('feedback');
+  DLTracking.recordFunnelEvent('form_submitted', {
+    pageType: 'checkout',
+    kit: selectedKit,
+    paymentMethod,
+    customer: {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      cpf: document.getElementById('cpf').value,
+    },
+    address: {
+      zipCode: document.getElementById('zipCode').value,
+      street: document.getElementById('street').value,
+      number: document.getElementById('number').value,
+      complement: document.getElementById('complement').value,
+      neighborhood: document.getElementById('neighborhood').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+    },
+  }, {
+    onceKey: `form_submitted_${selectedKit}`,
+    ttl: 10 * 60 * 1000,
+  });
   btn.disabled = true;
   btn.textContent = 'Processando…';
   const addPaymentInfoEventId = DLTracking.track('AddPaymentInfo', {

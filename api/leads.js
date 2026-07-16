@@ -14,7 +14,19 @@ function summarize(leads) {
     acc[status] = (acc[status] || 0) + 1;
     if (lead.payment_method === 'pix' && lead.funnel_status !== 'paid') acc.open_pix += 1;
     return acc;
-  }, { total: 0, checkout_visit: 0, pix_generated: 0, paid: 0, abandoned: 0, payment_pending: 0, open_pix: 0 });
+  }, {
+    total: 0,
+    site_visit: 0,
+    cta_click: 0,
+    checkout_visit: 0,
+    form_started: 0,
+    form_submitted: 0,
+    pix_generated: 0,
+    paid: 0,
+    abandoned: 0,
+    payment_pending: 0,
+    open_pix: 0,
+  });
 }
 
 export default async function handler(req, res) {

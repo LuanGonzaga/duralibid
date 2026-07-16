@@ -124,6 +124,13 @@
     };
   }
 
+  function detectPageType() {
+    var path = window.location.pathname.toLowerCase();
+    if (path.indexOf('checkout') !== -1) return 'checkout';
+    if (path.indexOf('obrigado') !== -1) return 'thank_you';
+    return 'product';
+  }
+
   function track(name, data, options) {
     options = options || {};
     var id = options.eventId || eventId(name);
@@ -140,6 +147,64 @@
       window.fbq('trackCustom', name, data || {}, { eventID: id });
     }
     return id;
+  }
+
+  function sentRecently(key, ttl) {
+    if (!key) return false;
+    try {
+      var storageKey = 'dl_track_sent_' + key;
+      var previous = parseInt(sessionStorage.getItem(storageKey), 10);
+      if (previous && Date.now() - previous < (ttl || 30 * 60 * 1000)) return true;
+      sessionStorage.setItem(storageKey, String(Date.now()));
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function postJson(url, payload) {
+    var body = JSON.stringify(payload);
+    if (navigator.sendBeacon) {
+      try {
+        var blob = new Blob([body], { type: 'application/json' });
+        if (navigator.sendBeacon(url, blob)) return Promise.resolve();
+      } catch (e) {}
+    }
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body,
+      keepalive: true,
+    }).catch(function () {});
+  }
+
+  function recordFunnelEvent(name, data, options) {
+    data = data || {};
+    options = options || {};
+    if (options.onceKey && sentRecently(options.onceKey, options.ttl)) return Promise.resolve();
+
+    var metaCookies = getMetaCookies();
+    var payload = {
+      leadId: getLeadId(),
+      eventName: name,
+      pageType: data.pageType || detectPageType(),
+      ctaName: data.ctaName,
+      destination: data.destination,
+      kit: data.kit,
+      paymentMethod: data.paymentMethod,
+      sourceUrl: window.location.href,
+      attribution: getAttribution(),
+      tracking: {
+        leadId: getLeadId(),
+        fbp: metaCookies.fbp,
+        fbc: metaCookies.fbc,
+      },
+      customer: data.customer,
+      address: data.address,
+      details: data,
+    };
+
+    return postJson('/api/track-event', payload);
   }
 
   function markCheckoutClick(kit) {
@@ -164,6 +229,10 @@
           cta_name: el.getAttribute('data-track-cta'),
           destination: el.getAttribute('href') || '',
         });
+        recordFunnelEvent('cta_click', {
+          ctaName: el.getAttribute('data-track-cta'),
+          destination: el.getAttribute('href') || '',
+        });
       });
     });
 
@@ -172,12 +241,21 @@
         var kit = parseInt(el.getAttribute('data-track-checkout'), 10) || 2;
         markCheckoutClick(kit);
         track('InitiateCheckout', kitPayload(kit));
+        recordFunnelEvent('checkout_click', {
+          ctaName: el.textContent || 'checkout',
+          destination: el.getAttribute('href') || '',
+          kit: kit,
+        });
       });
     });
   }
 
   initMetaPixel();
   track('PageView', {});
+  recordFunnelEvent('page_view', { pageType: detectPageType() }, {
+    onceKey: 'page_view_' + window.location.pathname,
+    ttl: 10 * 60 * 1000,
+  });
 
   window.DLTracking = {
     eventId: eventId,
@@ -186,6 +264,7 @@
     getMetaCookies: getMetaCookies,
     kitPayload: kitPayload,
     productPayload: productPayload,
+    recordFunnelEvent: recordFunnelEvent,
     recentlyTrackedCheckoutClick: recentlyTrackedCheckoutClick,
     track: track,
     trackCustom: trackCustom,
