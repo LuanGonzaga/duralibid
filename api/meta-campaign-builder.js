@@ -335,6 +335,58 @@ async function createCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 
   };
 }
 
+async function createTrafficCheckoutCampaign({ name, sourceCampaignId, dailyBudget = 20, kit = 2, limit = 3 }) {
+  const account = normalizeAccountId(process.env.META_AD_ACCOUNT_ID);
+  const source = await loadSource(sourceCampaignId);
+  const sourceAdset = source.adsets.find((item) => item.effective_status === 'ACTIVE')
+    || source.adsets[0]
+    || {};
+  const campaignName = name || `DURALIBID - CHECKOUT TRAFEGO - C1 - ${new Date().toISOString().slice(0, 10)}`;
+
+  const campaign = await metaRequest(`${account}/campaigns`, {
+    name: campaignName,
+    objective: 'OUTCOME_TRAFFIC',
+    status: 'PAUSED',
+    buying_type: 'AUCTION',
+    is_adset_budget_sharing_enabled: 'false',
+    special_ad_categories: JSON.stringify([]),
+  }, 'POST');
+
+  let adset;
+  try {
+    adset = await metaRequest(`${account}/adsets`, {
+      name: `${campaignName} | Checkout direto`,
+      campaign_id: campaign.id,
+      daily_budget: String(Math.max(1, Number(dailyBudget)) * 100),
+      billing_event: 'IMPRESSIONS',
+      optimization_goal: 'LINK_CLICKS',
+      bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
+      destination_type: 'WEBSITE',
+      targeting: JSON.stringify(cleanTargeting(sourceAdset.targeting) || fallbackTargeting()),
+      attribution_spec: JSON.stringify(sourceAdset.attribution_spec || [
+        { event_type: 'CLICK_THROUGH', window_days: 1 },
+      ]),
+      status: 'PAUSED',
+    }, 'POST');
+  } catch (err) {
+    await metaRequest(campaign.id, { status: 'PAUSED' }, 'POST').catch(() => {});
+    throw err;
+  }
+
+  const copied = await copyAdsToAdset({
+    sourceCampaignId,
+    targetAdsetId: adset.id,
+    kit,
+    limit,
+  });
+
+  return {
+    campaign: { id: campaign.id, name: campaignName, status: 'PAUSED', objective: 'OUTCOME_TRAFFIC' },
+    adset: { id: adset.id, name: `${campaignName} | Checkout direto`, status: 'PAUSED', optimization_goal: 'LINK_CLICKS' },
+    ...copied,
+  };
+}
+
 async function copyAdsToAdset({ sourceCampaignId, targetAdsetId, kit = 2, limit = 3 }) {
   const source = await loadSource(sourceCampaignId);
   const sourceAds = source.ads.filter((ad) => ad.status === 'ACTIVE' && ad.effective_status !== 'DISAPPROVED');
@@ -427,6 +479,17 @@ export default async function handler(req, res) {
       const result = await copyAdsToAdset({
         sourceCampaignId,
         targetAdsetId: req.body.target_adset_id,
+        kit: req.body?.kit || 2,
+        limit: req.body?.limit || 3,
+      });
+      return res.status(200).json({ ok: result.copied_ads.length > 0, ...result });
+    }
+
+    if (req.body?.mode === 'traffic_checkout_copy') {
+      const result = await createTrafficCheckoutCampaign({
+        sourceCampaignId,
+        name: req.body?.name,
+        dailyBudget: req.body?.daily_budget || 20,
         kit: req.body?.kit || 2,
         limit: req.body?.limit || 3,
       });
