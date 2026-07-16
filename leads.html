@@ -340,9 +340,15 @@ tr:hover td{background:#FCF3F3}
         </div>
         <div class="ad-side">
           <div id="adMetrics" class="ad-metrics">
-            <article class="ad-card"><span>Investimento</span><strong id="mSpend" class="mono">R$ 0,00</strong><small id="mSpendHint">Meta Ads</small></article>
-            <article class="ad-card"><span>Cliques no link</span><strong id="mClicks" class="mono">0</strong><small id="mCtr">CTR 0%</small></article>
-            <article class="ad-card"><span>CPC medio</span><strong id="mCpc" class="mono">R$ 0,00</strong><small id="mCpm">CPM R$ 0,00</small></article>
+            <article class="ad-card"><span>Investimento</span><strong id="mSpend" class="mono">R$ 0,00</strong><small id="mSpendHint">Periodo Meta</small></article>
+            <article class="ad-card"><span>Impressoes</span><strong id="mImpressions" class="mono">0</strong><small id="mCpm">CPM R$ 0,00</small></article>
+            <article class="ad-card"><span>Alcance</span><strong id="mReach" class="mono">0</strong><small id="mFrequency">Frequencia 0.00</small></article>
+            <article class="ad-card"><span>Cliques no link</span><strong id="mClicks" class="mono">0</strong><small id="mLinkCtr">CTR link 0%</small></article>
+            <article class="ad-card"><span>Cliques unicos</span><strong id="mUniqueClicks" class="mono">0</strong><small id="mUniqueCtr">CTR unico 0%</small></article>
+            <article class="ad-card"><span>CPC link</span><strong id="mCpc" class="mono">R$ 0,00</strong><small id="mOutboundClicks">Saidas 0</small></article>
+            <article class="ad-card"><span>Visualizacoes LP</span><strong id="mLpv" class="mono">0</strong><small id="mLpvCost">Custo R$ 0,00</small></article>
+            <article class="ad-card"><span>ViewContent</span><strong id="mContentViews" class="mono">0</strong><small id="mContentCost">Custo R$ 0,00</small></article>
+            <article class="ad-card"><span>Video plays</span><strong id="mVideoPlays" class="mono">0</strong><small id="mThruplays">Thruplays 0</small></article>
             <article class="ad-card"><span>Compras Meta</span><strong id="mPurchases" class="mono">0</strong><small id="mCpa">CPA R$ 0,00</small></article>
             <article class="ad-card"><span>Valor atribuido</span><strong id="mPurchaseValue" class="mono">R$ 0,00</strong><small>Receita no Meta Ads</small></article>
             <article class="ad-card"><span>ROAS Meta</span><strong id="mRoas" class="mono">0.00x</strong><small id="mLeads">Leads Meta 0</small></article>
@@ -491,6 +497,10 @@ const STATUS = {
 };
 
 function $(id) { return document.getElementById(id); }
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
 function text(value) { return value == null || value === '' ? '-' : String(value); }
 function storageGet(store, key) {
   try { return store.getItem(key); } catch (e) { return null; }
@@ -713,18 +723,31 @@ function renderBridgeMetrics(s) {
 }
 
 function resetMetaNumbers() {
-  $('adHeroTitle').textContent = 'Meta Ads';
-  $('adHeroSpend').textContent = money.format(0);
-  $('mSpend').textContent = money.format(0);
-  $('mClicks').textContent = '0';
-  $('mCtr').textContent = 'CTR 0%';
-  $('mCpc').textContent = money.format(0);
-  $('mCpm').textContent = `CPM ${money.format(0)}`;
-  $('mPurchases').textContent = '0';
-  $('mCpa').textContent = `CPA ${money.format(0)}`;
-  $('mPurchaseValue').textContent = money.format(0);
-  $('mRoas').textContent = '0.00x';
-  $('mLeads').textContent = 'Leads Meta 0';
+  setText('adHeroTitle', 'Meta Ads');
+  setText('adHeroSpend', money.format(0));
+  setText('mSpend', money.format(0));
+  setText('mSpendHint', 'Periodo Meta');
+  setText('mImpressions', '0');
+  setText('mReach', '0');
+  setText('mFrequency', 'Frequencia 0.00');
+  setText('mClicks', '0');
+  setText('mLinkCtr', 'CTR link 0%');
+  setText('mUniqueClicks', '0');
+  setText('mUniqueCtr', 'CTR unico 0%');
+  setText('mCpc', money.format(0));
+  setText('mCpm', `CPM ${money.format(0)}`);
+  setText('mOutboundClicks', 'Saidas 0');
+  setText('mLpv', '0');
+  setText('mLpvCost', `Custo ${money.format(0)}`);
+  setText('mContentViews', '0');
+  setText('mContentCost', `Custo ${money.format(0)}`);
+  setText('mVideoPlays', '0');
+  setText('mThruplays', 'Thruplays 0');
+  setText('mPurchases', '0');
+  setText('mCpa', `CPA ${money.format(0)}`);
+  setText('mPurchaseValue', money.format(0));
+  setText('mRoas', '0.00x');
+  setText('mLeads', 'Leads Meta 0');
 }
 
 function renderMetaAdsSetup(message) {
@@ -751,20 +774,34 @@ function renderMetaAdsError(message) {
 
 function renderMetaAds(data) {
   const s = data.summary || {};
+  const range = data.date_range || {};
+  const dateRange = range.since && range.until ? `${range.since} ate ${range.until}` : (data.period_label || '');
   $('metaSetup').classList.add('hidden');
   $('adMetrics').classList.remove('hidden');
   $('bridgeMetrics').classList.remove('hidden');
   $('adTrend').classList.remove('hidden');
   $('metaAdsStatus').textContent = data.period_label || 'Meta Ads';
-  $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'} - ${data.graph_version || 'Graph API'}`;
+  $('metaAdsSubtitle').textContent = `${s.account_name || 'Conta Meta'}, ${s.currency || 'BRL'} - ${dateRange} - ${data.graph_version || 'Graph API'}`;
   $('adHeroTitle').textContent = data.period_label || 'Meta Ads';
   $('adHeroSpend').textContent = money.format(s.spend || 0);
   $('mSpend').textContent = money.format(s.spend || 0);
-  $('mSpendHint').textContent = data.period_label || 'Periodo selecionado';
+  $('mSpendHint').textContent = dateRange || 'Periodo selecionado';
+  setText('mImpressions', number.format(s.impressions || 0));
+  setText('mReach', number.format(s.reach || 0));
+  setText('mFrequency', `Frequencia ${decimal(s.frequency || 0)}`);
   $('mClicks').textContent = number.format(s.link_clicks || s.clicks || 0);
-  $('mCtr').textContent = `CTR ${decimal(s.ctr || 0)}%`;
-  $('mCpc').textContent = money.format(s.cpc || 0);
+  setText('mLinkCtr', `CTR link ${decimal(s.link_ctr || s.ctr || 0)}%`);
+  setText('mUniqueClicks', number.format(s.unique_link_clicks || s.unique_clicks || 0));
+  setText('mUniqueCtr', `CTR unico ${decimal(s.unique_ctr || 0)}%`);
+  $('mCpc').textContent = money.format(s.cost_per_link_click || s.cpc || 0);
   $('mCpm').textContent = `CPM ${money.format(s.cpm || 0)}`;
+  setText('mOutboundClicks', `Saidas ${number.format(s.outbound_clicks || 0)}`);
+  setText('mLpv', number.format(s.landing_page_views || 0));
+  setText('mLpvCost', `Custo ${money.format(s.cost_per_landing_page_view || 0)}`);
+  setText('mContentViews', number.format(s.content_views || 0));
+  setText('mContentCost', `Custo ${money.format(s.cost_per_content_view || 0)}`);
+  setText('mVideoPlays', number.format(s.video_plays || 0));
+  setText('mThruplays', `Thruplays ${number.format(s.video_thruplays || 0)}`);
   $('mPurchases').textContent = number.format(s.purchases || 0);
   $('mCpa').textContent = `CPA ${money.format(s.cost_per_purchase || 0)}`;
   $('mPurchaseValue').textContent = money.format(s.purchase_value || 0);
@@ -838,8 +875,12 @@ function renderCampaigns(campaigns, totalSpend) {
         <span class="mono">${money.format(campaign.spend || 0)}</span>
       </div>
       <div class="campaign-meta">
+        <span>${number.format(campaign.impressions || 0)} impressoes</span>
+        <span>${number.format(campaign.reach || 0)} alcance</span>
         <span>${number.format(campaign.link_clicks || campaign.clicks || 0)} cliques</span>
-        <span>CTR ${decimal(campaign.ctr || 0)}%</span>
+        <span>CTR link ${decimal(campaign.link_ctr || campaign.ctr || 0)}%</span>
+        <span>CPM ${money.format(campaign.cpm || 0)}</span>
+        <span>LP views ${number.format(campaign.landing_page_views || 0)}</span>
         <span>${number.format(campaign.purchases || 0)} compras</span>
         <span>ROAS ${decimal(campaign.roas || 0)}x</span>
       </div>
