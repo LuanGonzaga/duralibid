@@ -1,4 +1,5 @@
 import { sendCapiEvent } from './capi.js';
+import { updateLeadByPaymentId } from '../lib/crm.js';
 
 const KITS = {
   1: { name: '1 Frasco — 30ml', price: 89.90,  qty: 1 },
@@ -214,6 +215,14 @@ export default async function handler(req, res) {
     const payer = payment.payer;
     const kitId = parseInt(payment.metadata?.kit) || 2;
     const kit   = KITS[kitId] || KITS[2];
+
+    await updateLeadByPaymentId(payment.id?.toString(), {
+      funnel_status: 'paid',
+      payment_status: payment.status,
+      recovery_stage: 3,
+      paid_at: new Date().toISOString(),
+      metadata: { last_event: 'payment_approved' },
+    });
 
     // Disparar evento Purchase na CAPI
     await sendCapiEvent({

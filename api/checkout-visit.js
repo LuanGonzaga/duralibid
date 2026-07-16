@@ -1,3 +1,5 @@
+import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
+
 const KITS = {
   1: { name: 'DuraLibid - 1 Frasco', price: 89.90 },
   2: { name: 'DuraLibid - 2 Frascos', price: 165.90 },
@@ -114,10 +116,22 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { kit: kitId, sourceUrl, attribution = {}, tracking = {} } = req.body || {};
+    const { leadId, kit: kitId, sourceUrl, attribution = {}, tracking = {} } = req.body || {};
     const kit = KITS[kitId] || KITS[2];
     const ip = firstHeaderValue(req.headers['x-forwarded-for'] || req.socket?.remoteAddress);
     const userAgent = req.headers['user-agent'] || '';
+    const crmLeadId = normalizeLeadId(leadId || tracking?.leadId);
+
+    await upsertLeadByLeadId({
+      lead_id: crmLeadId,
+      funnel_status: 'checkout_visit',
+      kit_id: parseInt(kitId, 10) || 2,
+      kit_name: kit.name,
+      amount: kit.price,
+      attribution,
+      tracking: { ...tracking, source_url: sourceUrl, ip, user_agent: userAgent },
+      metadata: { last_event: 'checkout_visit' },
+    });
 
     await sendEmail({
       to: adminEmail(),

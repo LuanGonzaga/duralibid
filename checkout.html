@@ -309,6 +309,7 @@ const KITS = {
   3: { name: 'DuraLibid — 3 Frascos', price: 239.90, old: 419.90, qtd: 3 },
 };
 
+const leadId = DLTracking.getLeadId();
 let selectedKit = 1;
 let paymentMethod = 'pix';
 let cardBrick = null;
@@ -349,10 +350,12 @@ if (!DLTracking.recentlyTrackedCheckoutClick(selectedKit)) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      leadId,
       kit: selectedKit,
       sourceUrl: location.href,
       attribution: DLTracking.getAttribution(),
       tracking: {
+        leadId,
         fbp: metaCookies.fbp,
         fbc: metaCookies.fbc,
       },
@@ -463,6 +466,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     city: document.getElementById('city').value,
     state: document.getElementById('state').value,
     tracking: {
+      leadId,
       eventId: addPaymentInfoEventId,
       fbp: metaCookies.fbp,
       fbc: metaCookies.fbc,

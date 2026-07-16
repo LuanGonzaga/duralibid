@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Leads - DuraLibid</title>
+<link rel="stylesheet" href="brand/tokens.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0A0A;color:#F5F5F5;font-family:var(--font-body);min-height:100vh}
+button,input,select{font:inherit}
+.shell{max-width:1280px;margin:0 auto;padding:24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.brand{font-family:var(--font-display);font-size:1.8rem;text-transform:uppercase;letter-spacing:.02em}
+.muted{color:#8A8F98}
+.login{max-width:420px;margin:12vh auto;background:#141518;border:1px solid #2b2f36;border-radius:8px;padding:24px}
+.login h1{font-family:var(--font-display);text-transform:uppercase;font-size:2rem;margin-bottom:8px}
+.field{display:grid;gap:8px;margin-top:18px}
+input,select{background:#0F1012;color:#F5F5F5;border:1px solid #2b2f36;border-radius:6px;padding:11px 12px;outline:none}
+input:focus,select:focus{border-color:#D9A441}
+.btn{border:0;border-radius:6px;background:#E11D26;color:#fff;font-weight:800;padding:11px 14px;cursor:pointer}
+.btn.secondary{background:#1E2126;color:#F5F5F5;border:1px solid #343942}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#141518;border:1px solid #2b2f36;border-radius:8px;padding:14px}
+.stat b{display:block;font-size:1.5rem;line-height:1.1}
+.stat span{font-size:.78rem;color:#8A8F98;text-transform:uppercase;font-weight:800}
+.table-wrap{border:1px solid #2b2f36;border-radius:8px;overflow:auto;background:#101113}
+table{width:100%;border-collapse:collapse;min-width:1120px}
+th,td{padding:12px 10px;border-bottom:1px solid #252932;text-align:left;vertical-align:top;font-size:.88rem}
+th{position:sticky;top:0;background:#17191d;color:#B8BDC7;text-transform:uppercase;font-size:.72rem;letter-spacing:.03em}
+tr:hover td{background:#15171b}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:.75rem;font-weight:800;background:#252932;color:#C9CDD2}
+.pill.paid{background:#0B3B24;color:#47D990}
+.pill.pix_generated{background:#3B2F0B;color:#F3C74F}
+.pill.abandoned{background:#3B1111;color:#FF7A7A}
+.pill.checkout_visit{background:#152B45;color:#7CB7FF}
+.nowrap{white-space:nowrap}
+a{color:#D9A441;text-decoration:none}
+.details{color:#AEB4BF;font-size:.78rem;line-height:1.5}
+.hidden{display:none}
+.error{margin-top:12px;color:#FF7A7A;font-size:.9rem}
+@media(max-width:900px){.shell{padding:16px}.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section id="login" class="login">
+    <h1>DuraLibid</h1>
+    <p class="muted">Painel interno de leads e pedidos.</p>
+    <form id="loginForm" class="field">
+      <label for="user">Usuario</label>
+      <input id="user" type="text" autocomplete="username" required>
+      <label for="password">Senha</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Entrar</button>
+      <p id="loginError" class="error hidden"></p>
+    </form>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="top">
+      <div>
+        <div class="brand">Leads e pedidos</div>
+        <p class="muted">Checkout, Pix gerado, pagamento e abandono em um lugar so.</p>
+      </div>
+      <button id="logout" class="btn secondary" type="button">Sair</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>Total</span></div>
+      <div class="stat"><b id="sCheckout">0</b><span>Checkout</span></div>
+      <div class="stat"><b id="sPix">0</b><span>Pix gerado</span></div>
+      <div class="stat"><b id="sPaid">0</b><span>Pagos</span></div>
+      <div class="stat"><b id="sAbandoned">0</b><span>Abandonados</span></div>
+      <div class="stat"><b id="sOpenPix">0</b><span>Pix em aberto</span></div>
+    </div>
+
+    <div class="toolbar">
+      <select id="status">
+        <option value="all">Todos</option>
+        <option value="checkout_visit">Entrou no checkout</option>
+        <option value="pix_generated">Pix gerado</option>
+        <option value="payment_pending">Pagamento pendente</option>
+        <option value="paid">Pago</option>
+        <option value="abandoned">Abandonado</option>
+      </select>
+      <input id="search" type="search" placeholder="Buscar nome, e-mail, telefone ou pagamento">
+      <button id="refresh" class="btn secondary" type="button">Atualizar</button>
+      <button id="exportCsv" class="btn secondary" type="button">Exportar CSV</button>
+      <span id="statusText" class="muted"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Quando</th>
+            <th>Cliente</th>
+            <th>Contato</th>
+            <th>Pedido</th>
+            <th>Pagamento</th>
+            <th>Origem</th>
+            <th>Endereco</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+let leads = [];
+
+function $(id) { return document.getElementById(id); }
+function text(value) { return value == null || value === '' ? '-' : String(value); }
+function fmtDate(value) {
+  if (!value) return '-';
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+}
+function statusLabel(value) {
+  return {
+    checkout_visit: 'Checkout',
+    form_submitted: 'Cadastro',
+    pix_generated: 'Pix gerado',
+    payment_pending: 'Pendente',
+    paid: 'Pago',
+    abandoned: 'Abandonado',
+  }[value] || value || '-';
+}
+function panelUser() { return sessionStorage.getItem('dl_panel_user') || ''; }
+function password() { return sessionStorage.getItem('dl_panel_password') || ''; }
+
+async function loadLeads() {
+  $('statusText').textContent = 'Carregando...';
+  const params = new URLSearchParams({
+    status: $('status').value,
+    q: $('search').value.trim(),
+    limit: '300',
+  });
+  const res = await fetch(`/api/leads?${params.toString()}`, {
+    headers: {
+      'X-Admin-User': panelUser(),
+      'X-Admin-Password': password(),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Nao foi possivel carregar.');
+  leads = data.leads || [];
+  renderSummary(data.summary || {});
+  renderRows();
+  $('statusText').textContent = `${leads.length} registros`;
+}
+
+function renderSummary(s) {
+  $('sTotal').textContent = s.total || 0;
+  $('sCheckout').textContent = s.checkout_visit || 0;
+  $('sPix').textContent = s.pix_generated || 0;
+  $('sPaid').textContent = s.paid || 0;
+  $('sAbandoned').textContent = s.abandoned || 0;
+  $('sOpenPix').textContent = s.open_pix || 0;
+}
+
+function cell(row, value, className) {
+  const td = document.createElement('td');
+  if (className) td.className = className;
+  if (value instanceof Node) td.appendChild(value);
+  else td.textContent = text(value);
+  row.appendChild(td);
+}
+
+function stack(lines) {
+  const box = document.createElement('div');
+  lines.filter(Boolean).forEach((line, index) => {
+    const div = document.createElement('div');
+    div.className = index ? 'details' : '';
+    if (line instanceof Node) div.appendChild(line);
+    else div.textContent = line;
+    box.appendChild(div);
+  });
+  return box;
+}
+
+function renderRows() {
+  const tbody = $('rows');
+  tbody.innerHTML = '';
+  leads.forEach((lead) => {
+    const row = document.createElement('tr');
+    const pill = document.createElement('span');
+    pill.className = `pill ${lead.funnel_status || ''}`;
+    pill.textContent = statusLabel(lead.funnel_status);
+
+    const whatsapp = lead.phone ? document.createElement('a') : null;
+    if (whatsapp) {
+      const digits = lead.phone.replace(/\D/g, '');
+      whatsapp.href = `https://wa.me/55${digits}`;
+      whatsapp.target = '_blank';
+      whatsapp.rel = 'noopener';
+      whatsapp.textContent = lead.phone;
+    }
+
+    cell(row, pill);
+    cell(row, stack([fmtDate(lead.created_at), `Atualizado: ${fmtDate(lead.updated_at)}`]), 'nowrap');
+    cell(row, stack([lead.name || 'Visitante sem cadastro', lead.cpf ? `CPF: ${lead.cpf}` : '']));
+    cell(row, stack([lead.email, whatsapp || lead.phone]));
+    cell(row, stack([lead.kit_name, money.format(Number(lead.amount || 0))]));
+    cell(row, stack([
+      lead.payment_method ? lead.payment_method.toUpperCase() : '',
+      lead.payment_status ? `Status: ${lead.payment_status}` : '',
+      lead.payment_id ? `MP: ${lead.payment_id}` : '',
+      lead.recovery_stage ? `Recuperacao: ${lead.recovery_stage}/3` : '',
+    ]));
+    const attr = lead.attribution || {};
+    cell(row, stack([
+      attr.utm_campaign || attr.utm_source || '-',
+      attr.utm_medium ? `Meio: ${attr.utm_medium}` : '',
+      attr.fbclid ? 'Tem fbclid' : '',
+      attr.gclid ? 'Tem gclid' : '',
+    ]));
+    cell(row, stack([
+      lead.street ? `${lead.street}, ${lead.number || ''}` : '',
+      lead.neighborhood,
+      lead.city || lead.state ? `${lead.city || ''}/${lead.state || ''}` : '',
+      lead.zip_code,
+    ]));
+    tbody.appendChild(row);
+  });
+}
+
+function exportCsv() {
+  const headers = ['status','created_at','name','email','phone','cpf','kit','amount','payment_method','payment_status','payment_id','city','state','utm_source','utm_campaign'];
+  const lines = [headers.join(',')].concat(leads.map((lead) => {
+    const attr = lead.attribution || {};
+    const values = [
+      lead.funnel_status, lead.created_at, lead.name, lead.email, lead.phone, lead.cpf,
+      lead.kit_name, lead.amount, lead.payment_method, lead.payment_status, lead.payment_id,
+      lead.city, lead.state, attr.utm_source, attr.utm_campaign,
+    ];
+    return values.map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',');
+  }));
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'duralibid-leads.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+$('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  sessionStorage.setItem('dl_panel_user', $('user').value);
+  sessionStorage.setItem('dl_panel_password', $('password').value);
+  try {
+    await loadLeads();
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+  } catch (err) {
+    $('loginError').textContent = err.message;
+    $('loginError').classList.remove('hidden');
+  }
+});
+$('logout').addEventListener('click', () => {
+  sessionStorage.removeItem('dl_panel_user');
+  sessionStorage.removeItem('dl_panel_password');
+  location.reload();
+});
+$('refresh').addEventListener('click', () => loadLeads().catch((err) => $('statusText').textContent = err.message));
+$('status').addEventListener('change', () => loadLeads().catch((err) => $('statusText').textContent = err.message));
+$('search').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') loadLeads().catch((err) => $('statusText').textContent = err.message);
+});
+$('exportCsv').addEventListener('click', exportCsv);
+
+if (password()) {
+  loadLeads().then(() => {
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+  }).catch(() => {
+    sessionStorage.removeItem('dl_panel_user');
+    sessionStorage.removeItem('dl_panel_password');
+  });
+}
+</script>
+</body>
+</html>

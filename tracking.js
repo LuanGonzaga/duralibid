@@ -38,6 +38,19 @@
     return ['dl', name, nowBase36(), randomBase36()].join('_');
   }
 
+  function getLeadId() {
+    var key = 'dl_lead_id';
+    try {
+      var existing = sessionStorage.getItem(key);
+      if (existing) return existing;
+      var created = eventId('lead');
+      sessionStorage.setItem(key, created);
+      return created;
+    } catch (e) {
+      return eventId('lead');
+    }
+  }
+
   function getCookie(name) {
     var match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.$?*|{}()[\]\\/+^]/g, '\\$&') + '=([^;]*)'));
     return match ? decodeURIComponent(match[1]) : undefined;
@@ -169,6 +182,7 @@
   window.DLTracking = {
     eventId: eventId,
     getAttribution: getAttribution,
+    getLeadId: getLeadId,
     getMetaCookies: getMetaCookies,
     kitPayload: kitPayload,
     productPayload: productPayload,

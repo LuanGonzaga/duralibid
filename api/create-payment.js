@@ -1,4 +1,5 @@
 import { sendCapiEvent } from './capi.js';
+import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
 
 const KITS = {
   1: { name: 'DuraLibid — 1 Frasco (1 mês)',    quantity: 1, price: 89.90  },
@@ -189,7 +190,9 @@ export default async function handler(req, res) {
     if (!kitData) return res.status(400).json({ error: 'Kit inválido' });
 
     const trackingData = tracking && typeof tracking === 'object' ? tracking : {};
+    const leadId = normalizeLeadId(trackingData.leadId);
     const metadata = { kit: parseInt(kit) };
+    metadata.lead_id = leadId;
     if (trackingData.fbp) metadata.fbp = trackingData.fbp;
     if (trackingData.fbc) metadata.fbc = trackingData.fbc;
     if (trackingData.eventId) metadata.add_payment_info_event_id = trackingData.eventId;
@@ -279,6 +282,47 @@ export default async function handler(req, res) {
 
     if (mpRes.ok) {
       const order = { name, email, cpf, phone, zipCode, street, number, complement, neighborhood, city, state };
+      const pixCode = data.point_of_interaction?.transaction_data?.qr_code;
+      const pixExpiresAt = paymentMethod === 'pix'
+        ? payload.date_of_expiration
+        : null;
+
+      await upsertLeadByLeadId({
+        lead_id: leadId,
+        funnel_status: paymentMethod === 'pix'
+          ? 'pix_generated'
+          : (data.status === 'approved' ? 'paid' : 'payment_pending'),
+        payment_status: data.status,
+        payment_method: paymentMethod,
+        payment_id: data.id?.toString(),
+        kit_id: parseInt(kit, 10),
+        kit_name: kitData.name,
+        amount: kitData.price,
+        name,
+        email,
+        phone,
+        cpf,
+        zip_code: zipCode,
+        street,
+        number,
+        complement,
+        neighborhood,
+        city,
+        state,
+        pix_code: pixCode,
+        pix_generated_at: paymentMethod === 'pix' ? new Date().toISOString() : null,
+        pix_expires_at: pixExpiresAt,
+        recovery_stage: 0,
+        attribution: trackingData.attribution || {},
+        tracking: {
+          fbp: trackingData.fbp,
+          fbc: trackingData.fbc,
+          event_id: trackingData.eventId,
+          source_url: trackingData.sourceUrl,
+        },
+        metadata: { last_event: 'payment_created', status_detail: data.status_detail },
+      });
+
       const adminLeadEmail = sendEmail({
         to: adminEmail(),
         subject: `Cadastro concluido - ${name} - ${formatMoney(kitData.price)}`,
@@ -295,8 +339,6 @@ export default async function handler(req, res) {
       });
 
       if (paymentMethod === 'pix') {
-        const pixCode = data.point_of_interaction?.transaction_data?.qr_code;
-
         await Promise.allSettled([
           adminLeadEmail,
           sendEmail({
