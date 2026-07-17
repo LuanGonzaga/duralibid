@@ -247,7 +247,6 @@
   .market-carousel-footer { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: var(--space-2); }
   .market-carousel-meter { width: min(220px, 58vw); height: 4px; overflow: hidden; border-radius: var(--radius-pill); background: rgba(255,255,255,.12); }
   .market-carousel-fill { display: block; width: 8%; height: 100%; border-radius: inherit; background: var(--grad-fire); transition: width .2s ease; }
-  .market-carousel-count { color: var(--duo-mute); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; }
   .market-review-note { color: var(--duo-mute); font-size: var(--fs-xs); text-align: center; margin-top: var(--space-3); }
 
   /* ===== pricing — SaaS-style table ===== */
@@ -473,7 +472,7 @@
     <h2 class="sec reveal">Resultados que eles sentiram</h2>
     <div class="market-carousel reveal" data-review-carousel>
       <button class="market-carousel-btn prev" type="button" aria-label="Avaliações anteriores" data-review-prev>&lsaquo;</button>
-      <div class="market-reviews" aria-label="17 avaliações reais de compradores no Mercado Livre e Shopee" data-review-track>
+      <div class="market-reviews" aria-label="Avaliações reais de compradores no Mercado Livre e Shopee" data-review-track>
         <figure class="market-review">
           <figcaption>Mercado Livre</figcaption>
           <img src="images/reviews/av1-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre relatando melhor desempenho após usar o produto." loading="lazy">
@@ -546,10 +545,9 @@
       <button class="market-carousel-btn next" type="button" aria-label="Próximas avaliações" data-review-next>&rsaquo;</button>
       <div class="market-carousel-footer" aria-hidden="true">
         <span class="market-carousel-meter"><span class="market-carousel-fill" data-review-fill></span></span>
-        <span class="market-carousel-count" data-review-count>1 / 17</span>
       </div>
     </div>
-    <p class="market-review-note">17 recortes reais de avaliações públicas no Mercado Livre e na Shopee. Dados pessoais removidos.</p>
+    <p class="market-review-note">Recortes reais de avaliações públicas no Mercado Livre e na Shopee. Dados pessoais removidos.</p>
   </div>
 </section>
 
@@ -911,7 +909,6 @@
       var prev = carousel.querySelector('[data-review-prev]');
       var next = carousel.querySelector('[data-review-next]');
       var fill = carousel.querySelector('[data-review-fill]');
-      var count = carousel.querySelector('[data-review-count]');
       if (!track || !prev || !next) return;
 
       var cards = Array.prototype.slice.call(track.querySelectorAll('.market-review'));
@@ -927,32 +924,14 @@
         return first.getBoundingClientRect().width + getGap();
       }
 
-      function getActiveIndex() {
-        var leftEdge = track.scrollLeft + 4;
-        var bestIndex = 0;
-        var bestDistance = Infinity;
-
-        cards.forEach(function(card, index){
-          var distance = Math.abs(leftEdge - card.offsetLeft);
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            bestIndex = index;
-          }
-        });
-
-        return bestIndex;
-      }
-
       function update() {
         var max = Math.max(0, track.scrollWidth - track.clientWidth);
         var progress = max ? track.scrollLeft / max : 1;
-        var active = getActiveIndex();
 
         prev.disabled = track.scrollLeft <= 4;
         next.disabled = track.scrollLeft >= max - 4;
 
         if (fill) fill.style.width = Math.max(8, Math.min(100, progress * 100)) + '%';
-        if (count) count.textContent = (active + 1) + ' / ' + cards.length;
       }
 
       function move(direction) {
