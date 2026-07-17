@@ -230,6 +230,11 @@
   .proof-bar div { text-align: center; }
   .proof-bar b { font-family: var(--font-display); font-size: 2rem; color: var(--duo-white); display: block; line-height: 1; }
   .proof-bar span { font-size: var(--fs-xs); color: var(--duo-mute); text-transform: uppercase; letter-spacing: .12em; }
+  .market-reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+  .market-review { background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); min-height: 132px; display: flex; align-items: center; }
+  .market-review img { display: block; width: 100%; height: auto; border-radius: 10px; }
+  .market-review.photo { min-height: 188px; }
+  .market-review-note { color: var(--duo-mute); font-size: var(--fs-xs); text-align: center; margin-top: var(--space-3); }
 
   /* ===== pricing — SaaS-style table ===== */
   .pricing { background: var(--grad-stage); }
@@ -312,6 +317,8 @@
     .hero .rating { margin-bottom: var(--space-3); }
     .btn { padding: 16px 20px; font-size: .95rem; width: 100%; }
     .g3, .g2 { grid-template-columns: 1fr; }
+    .market-reviews { display: flex; overflow-x: auto; gap: var(--space-3); padding-bottom: 4px; scroll-snap-type: x mandatory; }
+    .market-review { min-width: 280px; scroll-snap-align: start; }
     .vs { grid-template-columns: 1fr; gap: var(--space-3); }
     .ativo { flex-direction: row; }
     .lead { font-size: 1rem; }
@@ -643,24 +650,27 @@
       <div><b>130+</b><span>Avaliações no Mercado Livre</span></div>
       <div><b>7 dias</b><span>Garantia total</span></div>
     </div>
-    <div class="grid g3 reveal" style="margin-top:var(--space-4)">
-      <div class="review">
-        <div class="stars">★★★★★</div>
-        <p>"Fui cético no começo, mas resolvi tentar. Em dois dias já notei diferença no controle. Minha parceira também percebeu."</p>
-        <div class="who">Carlos, 38 anos · São Paulo · <span class="badge">✓ Compra verificada</span></div>
-      </div>
-      <div class="review">
-        <div class="stars">★★★★★</div>
-        <p>"Já tentei outros produtos e nenhum funcionou direito. O DuraLibid foi diferente — absorção rápida, sem cheiro e o efeito dura mesmo."</p>
-        <div class="who">Marcos, 44 anos · Belo Horizonte · <span class="badge">✓ Compra verificada</span></div>
-      </div>
-      <div class="review">
-        <div class="stars">★★★★★</div>
-        <p>"O que me convenceu foi o registro na ANVISA. Sei que é seguro. E funcionou bem melhor do que eu esperava."</p>
-        <div class="who">Rafael, 51 anos · Curitiba · <span class="badge">✓ Compra verificada</span></div>
-      </div>
+    <div class="market-reviews reveal" aria-label="Avaliações reais de compradores no Mercado Livre">
+      <figure class="market-review">
+        <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre: produto chegou certinho, bem embalado e excelente." loading="lazy">
+      </figure>
+      <figure class="market-review">
+        <img src="images/reviews/av1-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre relatando melhor desempenho após usar o produto." loading="lazy">
+      </figure>
+      <figure class="market-review">
+        <img src="images/reviews/av7-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que a qualidade é ótima e vale o custo-benefício." loading="lazy">
+      </figure>
+      <figure class="market-review photo">
+        <img src="images/reviews/av2-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre mostrando o DuraLibid recebido." loading="lazy">
+      </figure>
+      <figure class="market-review">
+        <img src="images/reviews/av6-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que o produto funciona." loading="lazy">
+      </figure>
+      <figure class="market-review photo">
+        <img src="images/reviews/av8-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre com o produto DuraLibid." loading="lazy">
+      </figure>
     </div>
-    <p class="microcopy" style="text-align:center;margin-top:var(--space-3)">Produto também vendido em marketplaces, com mais de 130 avaliações no Mercado Livre.</p>
+    <p class="market-review-note">Recortes reais de avaliações públicas no Mercado Livre. Dados pessoais removidos.</p>
   </div>
 </section>
 

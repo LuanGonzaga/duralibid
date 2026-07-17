@@ -98,6 +98,10 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .support-box{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.26);border-radius:var(--radius-sm);padding:var(--space-3);margin-top:var(--space-3)}
 .support-box b{display:block;color:#2ecc71;font-size:var(--fs-sm);margin-bottom:4px}
 .support-box p{color:var(--duo-silver);font-size:var(--fs-xs);line-height:1.5;margin:0}
+.checkout-reviews{display:grid;gap:8px;margin-top:var(--space-3)}
+.checkout-reviews-title{color:var(--duo-silver);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.checkout-review-shot{background:#fff;border:1px solid rgba(245,245,245,.08);border-radius:var(--radius-sm);padding:8px;box-shadow:0 12px 28px rgba(0,0,0,.20)}
+.checkout-review-shot img{display:block;width:100%;height:auto;border-radius:8px}
 #feedback{display:none;padding:var(--space-4);border-radius:var(--radius-lg);margin-top:var(--space-4);text-align:center}
 #feedback.success{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)}
 #feedback.error{background:rgba(225,29,38,.1);border:1px solid rgba(225,29,38,.3)}
@@ -336,6 +340,15 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
           <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Registro ANVISA ativo</div>
           <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Entrega discreta com embalagem neutra</div>
           <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M12 8v4l3 3"/></svg>Garantia de 7 dias para testar</div>
+        </div>
+        <div class="checkout-reviews" aria-label="Avaliações de compradores">
+          <div class="checkout-reviews-title">Compradores no Mercado Livre</div>
+          <div class="checkout-review-shot">
+            <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas: produto chegou certinho, bem embalado e excelente." loading="lazy">
+          </div>
+          <div class="checkout-review-shot">
+            <img src="images/reviews/av7-ml.PNG" alt="Avaliação 5 estrelas: qualidade ótima e bom custo-benefício." loading="lazy">
+          </div>
         </div>
         <div class="safe-box">
           <h4>O que acontece depois de finalizar?</h4>
