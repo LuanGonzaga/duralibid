@@ -20,18 +20,18 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--duo-black);color:var(--duo-white);font-family:var(--font-body);line-height:1.6;min-height:100vh}
-.wrap{max-width:960px;margin:0 auto;padding:0 var(--space-4)}
+body{background:#090a0c;color:var(--duo-white);font-family:var(--font-body);line-height:1.6;min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding:0 var(--space-4)}
 h1,h2,h3{font-family:var(--font-display);text-transform:uppercase;line-height:1;letter-spacing:0.02em;font-weight:400}
-.topbar{background:var(--grad-fire);text-align:center;font-size:var(--fs-xs);font-weight:700;letter-spacing:var(--ls-caps);text-transform:uppercase;padding:8px;color:#fff}
+.topbar{background:#101216;border-bottom:1px solid #23262b;text-align:center;font-size:var(--fs-xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:8px;color:var(--duo-silver)}
 nav{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) 0;border-bottom:1px solid #23262b}
 nav .logo{display:flex;align-items:center;gap:10px}
 nav img{height:36px;width:36px;object-fit:cover;border-radius:50%}
 nav .brand{font-family:var(--font-display);font-size:1.4rem;letter-spacing:0.01em}
 nav .brand b{color:var(--duo-red)}
 nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-items:center;gap:6px}
-.checkout-grid{display:grid;grid-template-columns:1fr 420px;gap:var(--space-5);padding:var(--space-5) 0 var(--space-6)}
-.form-section h2{font-size:var(--fs-h3);margin-bottom:var(--space-4);color:var(--duo-white)}
+.checkout-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--space-5);padding:var(--space-5) 0 var(--space-6)}
+.form-section h2{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:1.05rem;font-weight:800;line-height:1.25;margin-bottom:var(--space-3);color:var(--duo-white)}
 .field{margin-bottom:var(--space-3)}
 .field label{display:block;font-size:var(--fs-sm);font-weight:600;color:var(--duo-silver);margin-bottom:6px}
 .field input,.field select{width:100%;background:var(--duo-graphite);border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:12px 14px;color:var(--duo-white);font-family:var(--font-body);font-size:1rem;transition:border-color .2s;-webkit-appearance:none;appearance:none}
@@ -46,12 +46,12 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .field.has-error input,.field.has-error select{border-color:var(--duo-red)}
 .field.has-error .error{display:block}
 .separator{border:none;border-top:1px solid #23262b;margin:var(--space-4) 0}
-.checkout-trust{background:linear-gradient(180deg,rgba(217,164,65,.10),rgba(30,33,38,.62));border:1px solid rgba(217,164,65,.32);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4)}
-.checkout-trust h1{font-size:1.35rem;color:var(--duo-white);margin-bottom:8px}
-.checkout-trust p{color:var(--duo-silver);font-size:var(--fs-sm);margin:0 0 var(--space-3)}
-.trust-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.trust-step{background:rgba(10,10,10,.35);border:1px solid rgba(245,245,245,.09);border-radius:var(--radius-sm);padding:12px;color:var(--duo-silver);font-size:var(--fs-xs);line-height:1.45}
-.trust-step b{display:block;color:var(--duo-white);font-size:var(--fs-sm);margin-bottom:3px}
+.checkout-head{background:rgba(255,255,255,.035);border:1px solid #23262b;border-radius:var(--radius);padding:var(--space-4);margin-bottom:var(--space-4)}
+.checkout-head h1{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:1.35rem;font-weight:800;line-height:1.2;color:var(--duo-white);margin-bottom:8px}
+.checkout-head p{color:var(--duo-silver);font-size:var(--fs-sm);margin:0 0 var(--space-3)}
+.security-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.security-chip{background:#12151a;border:1px solid #272b32;border-radius:var(--radius-sm);padding:10px;color:var(--duo-mute);font-size:11px;line-height:1.35}
+.security-chip b{display:block;color:var(--duo-white);font-size:12px;margin-bottom:2px}
 </style>
 <style>
 .pay-tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-4)}
@@ -61,11 +61,11 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 #cardPaymentBrick_container,.pix-panel{min-height:60px}
 .pix-panel{background:var(--duo-graphite);border:1px solid #23262b;border-radius:var(--radius);padding:var(--space-4);text-align:center}
 .pix-panel p{color:var(--duo-mute);font-size:var(--fs-sm);margin-top:var(--space-2)}
-.btn-submit{width:100%;background:var(--grad-fire);color:#fff;border:none;border-radius:var(--radius-pill);padding:18px;font-family:var(--font-display);text-transform:uppercase;font-size:1.15rem;letter-spacing:0.04em;cursor:pointer;box-shadow:var(--glow-red);transition:transform .15s,box-shadow .15s;margin-top:var(--space-4)}
-.btn-submit:hover{transform:translateY(-2px);box-shadow:0 0 36px rgba(225,29,38,.65)}
+.btn-submit{width:100%;background:var(--duo-red);color:#fff;border:none;border-radius:var(--radius-sm);padding:17px;font-family:var(--font-display);text-transform:uppercase;font-size:1.08rem;letter-spacing:0.04em;cursor:pointer;box-shadow:none;transition:transform .15s,background .15s;margin-top:var(--space-4)}
+.btn-submit:hover{transform:translateY(-1px);background:#f12832}
 .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.order-card{background:var(--duo-graphite);border:1px solid #23262b;border-radius:var(--radius-lg);padding:var(--space-4);position:sticky;top:var(--space-4)}
-.order-card h3{font-size:var(--fs-h3);margin-bottom:var(--space-4);color:var(--duo-white)}
+.order-card{background:#111419;border:1px solid #2a2e34;border-radius:var(--radius);padding:var(--space-4);position:sticky;top:var(--space-4)}
+.order-card h3{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:1.05rem;font-weight:800;line-height:1.25;margin-bottom:var(--space-3);color:var(--duo-white)}
 .kit-selector{display:grid;gap:10px;margin-bottom:var(--space-4)}
 .kit-option{border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:var(--space-3);cursor:pointer;transition:all .2s;position:relative}
 .kit-option:hover{border-color:rgba(225,29,38,.4)}
@@ -78,30 +78,27 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .kit-option .kit-off{background:var(--duo-ink);border:1px solid #23262b;color:var(--duo-mute);font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--radius-pill);display:inline-block;margin-left:6px}
 .order-summary{border-top:1px solid #23262b;padding-top:var(--space-3);margin-top:var(--space-2)}
 .order-summary .row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:var(--fs-sm)}
-.order-summary .row.total{font-family:var(--font-display);font-size:1.4rem;color:var(--duo-white);border-top:1px solid #23262b;margin-top:var(--space-2);padding-top:var(--space-2)}
+.order-summary .row.total{font-family:var(--font-body);font-size:1.05rem;font-weight:800;color:var(--duo-white);border-top:1px solid #23262b;margin-top:var(--space-2);padding-top:var(--space-2)}
 .order-summary .row.total span:last-child{color:var(--duo-red)}
 .order-summary .row.discount{color:#2ecc71}
-.coupon-box{border:1px solid #23262b;background:var(--duo-ink);border-radius:var(--radius-sm);padding:var(--space-3);margin-top:var(--space-3)}
-.coupon-box label{display:block;color:var(--duo-silver);font-size:var(--fs-xs);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+.coupon-box{border:1px solid #23262b;background:#0d0f13;border-radius:var(--radius-sm);padding:var(--space-3);margin-top:var(--space-3)}
+.coupon-box summary{cursor:pointer;color:var(--duo-silver);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em;list-style:none}
+.coupon-box summary::-webkit-details-marker{display:none}
+.coupon-box summary::after{content:"+";float:right;color:var(--duo-mute)}
+.coupon-box[open] summary{margin-bottom:10px;color:var(--duo-white)}
+.coupon-box[open] summary::after{content:"-"}
 .coupon-line{display:flex;gap:8px}
 .coupon-line input{min-width:0;flex:1;background:var(--duo-graphite);border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:10px 12px;color:var(--duo-white);font-family:var(--font-body);font-size:var(--fs-sm);text-transform:uppercase}
 .coupon-line button{border:1.5px solid var(--duo-red);background:transparent;color:var(--duo-red);border-radius:var(--radius-sm);padding:0 13px;font-family:var(--font-display);text-transform:uppercase;cursor:pointer}
 .coupon-msg{display:block;min-height:18px;margin-top:6px;color:var(--duo-mute);font-size:var(--fs-xs)}
 .coupon-msg.ok{color:#2ecc71}
 .coupon-msg.error{color:var(--duo-red)}
-.trust-badges{display:flex;flex-direction:column;gap:8px;margin-top:var(--space-3)}
-.trust-badge{display:flex;align-items:center;gap:8px;font-size:var(--fs-xs);color:var(--duo-mute)}
-.trust-badge svg{width:16px;height:16px;stroke:var(--duo-mute);fill:none;stroke-width:2;flex-shrink:0}
-.safe-box{background:var(--duo-ink);border:1px solid #23262b;border-radius:var(--radius-sm);padding:var(--space-3);margin-top:var(--space-3)}
-.safe-box h4{font-family:var(--font-body);font-size:var(--fs-sm);color:var(--duo-white);margin:0 0 8px}
-.safe-box p{color:var(--duo-mute);font-size:var(--fs-xs);line-height:1.55;margin:0}
-.support-box{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.26);border-radius:var(--radius-sm);padding:var(--space-3);margin-top:var(--space-3)}
-.support-box b{display:block;color:#2ecc71;font-size:var(--fs-sm);margin-bottom:4px}
-.support-box p{color:var(--duo-silver);font-size:var(--fs-xs);line-height:1.5;margin:0}
-.checkout-reviews{display:grid;gap:8px;margin-top:var(--space-3)}
-.checkout-reviews-title{color:var(--duo-silver);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-.checkout-review-shot{background:#fff;border:1px solid rgba(245,245,245,.08);border-radius:var(--radius-sm);padding:8px;box-shadow:0 12px 28px rgba(0,0,0,.20)}
-.checkout-review-shot img{display:block;width:100%;height:auto;border-radius:8px}
+.assurance-box{border-top:1px solid #23262b;margin-top:var(--space-3);padding-top:var(--space-3);display:grid;gap:10px}
+.assurance-title{font-size:var(--fs-xs);font-weight:800;color:var(--duo-silver);text-transform:uppercase;letter-spacing:.08em}
+.assurance-row{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;color:var(--duo-mute);font-size:var(--fs-xs);line-height:1.45}
+.assurance-row svg{width:18px;height:18px;stroke:#2ecc71;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.support-line{border-top:1px solid #23262b;margin-top:var(--space-3);padding-top:var(--space-3);color:var(--duo-mute);font-size:var(--fs-xs);line-height:1.5}
+.support-line b{color:var(--duo-white)}
 #feedback{display:none;padding:var(--space-4);border-radius:var(--radius-lg);margin-top:var(--space-4);text-align:center}
 #feedback.success{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)}
 #feedback.error{background:rgba(225,29,38,.1);border:1px solid rgba(225,29,38,.3)}
@@ -117,7 +114,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
   .checkout-grid{grid-template-columns:1fr}
   .checkout-grid>aside{order:-1}
   .order-card{position:static;order:-1}
-  .trust-steps{grid-template-columns:1fr}
+  .security-strip{grid-template-columns:1fr}
   .field-row,.field-row-3{grid-template-columns:1fr}
 }
 @media(max-width:620px){
@@ -152,7 +149,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 </style>
 </head>
 <body>
-<div class="topbar">Pagamento 100% seguro · Mercado Pago · Entrega discreta</div>
+<div class="topbar">Mercado Pago · Pix no banco · Entrega discreta</div>
 <header class="wrap">
   <nav>
     <div class="logo">
@@ -170,13 +167,13 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
   <div class="checkout-grid">
     <!-- FORMULÁRIO -->
     <div class="form-section">
-      <section class="checkout-trust" aria-label="Compra segura">
-        <h1>Finalize com segurança</h1>
-        <p>Seu pedido é processado pelo Mercado Pago. Primeiro você confere os dados, depois gera o Pix ou paga no cartão. A confirmação chega por e-mail.</p>
-        <div class="trust-steps">
-          <div class="trust-step"><b>1. Dados protegidos</b>Usamos conexão segura e seus dados de pagamento são processados pelo Mercado Pago.</div>
-          <div class="trust-step"><b>2. Entrega discreta</b>O produto vai em embalagem neutra, sem identificação externa do conteúdo.</div>
-          <div class="trust-step"><b>3. Produto avaliado</b>Também vendido em marketplaces, com avaliações públicas no Mercado Livre e na Shopee.</div>
+      <section class="checkout-head" aria-label="Compra segura">
+        <h1>Checkout seguro</h1>
+        <p>Preencha os dados de entrega. O pagamento é processado pelo Mercado Pago e, no Pix, você paga somente no app do seu banco.</p>
+        <div class="security-strip">
+          <div class="security-chip"><b>Mercado Pago</b>Processamento seguro</div>
+          <div class="security-chip"><b>Pix oficial</b>Pagamento no banco</div>
+          <div class="security-chip"><b>Entrega discreta</b>Embalagem neutra</div>
         </div>
       </section>
 
@@ -285,7 +282,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn">Finalizar pedido →</button>
-        <p style="text-align:center;font-size:var(--fs-xs);color:var(--duo-mute);margin-top:var(--space-2)">🔒 Ao finalizar, você recebe a confirmação e os dados do pedido por e-mail.</p>
+        <p style="text-align:center;font-size:var(--fs-xs);color:var(--duo-mute);margin-top:var(--space-2)">Você recebe a confirmação e os dados do pedido por e-mail.</p>
 
       </form>
 
@@ -326,38 +323,21 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
           <div class="row"><span>Frete</span><span style="color:#2ecc71">Grátis</span></div>
           <div class="row total"><span>Total</span><span id="summaryTotal">R$ —</span></div>
         </div>
-        <div class="coupon-box">
-          <label for="couponCode">Cupom de desconto</label>
+        <details class="coupon-box">
+          <summary>Tenho cupom de desconto</summary>
           <div class="coupon-line">
             <input type="text" id="couponCode" placeholder="Digite seu cupom" autocomplete="off">
             <button type="button" id="applyCoupon">Aplicar</button>
           </div>
           <span class="coupon-msg" id="couponMsg"></span>
+        </details>
+        <div class="assurance-box" aria-label="Informações de segurança">
+          <div class="assurance-title">Compra protegida</div>
+          <div class="assurance-row"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-5"/></svg><span>Pagamento processado pelo Mercado Pago. Não pedimos senha do banco.</span></div>
+          <div class="assurance-row"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 18v2h10v-2"/></svg><span>No Pix, o QR Code é pago diretamente no aplicativo do seu banco.</span></div>
+          <div class="assurance-row"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg><span>Entrega em embalagem neutra, frete grátis e garantia de 7 dias.</span></div>
         </div>
-        <div class="trust-badges">
-          <div class="trust-badge"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Pagamento processado pelo Mercado Pago</div>
-          <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M12 17.3l-6.2 3.7 1.7-7-5.5-4.7 7.2-.6L12 2l2.8 6.4 7.2.6-5.5 4.7 1.7 7z"/></svg>Avaliações no Mercado Livre e Shopee</div>
-          <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Registro ANVISA ativo</div>
-          <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Entrega discreta com embalagem neutra</div>
-          <div class="trust-badge"><svg viewBox="0 0 24 24"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M12 8v4l3 3"/></svg>Garantia de 7 dias para testar</div>
-        </div>
-        <div class="checkout-reviews" aria-label="Avaliações de compradores">
-          <div class="checkout-reviews-title">Compradores em marketplaces</div>
-          <div class="checkout-review-shot">
-            <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas: produto chegou certinho, bem embalado e excelente." loading="lazy">
-          </div>
-          <div class="checkout-review-shot">
-            <img src="images/reviews/av4-shopee.PNG" alt="Avaliação 5 estrelas na Shopee: chegou corretamente e bem embalado." loading="lazy">
-          </div>
-        </div>
-        <div class="safe-box">
-          <h4>O que acontece depois de finalizar?</h4>
-          <p>No Pix, geramos um QR Code oficial para você pagar no app do seu banco. No cartão, o pagamento é processado pelo Mercado Pago. Em ambos os casos, você recebe os detalhes do pedido por e-mail.</p>
-        </div>
-        <div class="support-box">
-          <b>Precisa de ajuda?</b>
-          <p>Fale com o suporte pelo e-mail suporte@duralibid.com.br. Se preferir, responda qualquer e-mail recebido da DuraLibid.</p>
-        </div>
+        <div class="support-line"><b>Atendimento:</b> suporte@duralibid.com.br</div>
       </div>
     </aside>
   </div>
@@ -437,6 +417,7 @@ const urlKit = new URLSearchParams(location.search).get('kit');
 selectKit(urlKit && KITS[urlKit] ? urlKit : '2');
 const urlCoupon = normalizeCoupon(new URLSearchParams(location.search).get('coupon'));
 if (urlCoupon) {
+  document.querySelector('.coupon-box').open = true;
   document.getElementById('couponCode').value = urlCoupon;
   if (urlCoupon === 'DURA5') {
     appliedCoupon = urlCoupon;
