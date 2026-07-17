@@ -231,7 +231,9 @@
   .proof-bar b { font-family: var(--font-display); font-size: 2rem; color: var(--duo-white); display: block; line-height: 1; }
   .proof-bar span { font-size: var(--fs-xs); color: var(--duo-mute); text-transform: uppercase; letter-spacing: .12em; }
   .market-reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
-  .market-review { background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); min-height: 132px; display: flex; align-items: center; }
+  .market-review { background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); min-height: 132px; display: grid; gap: 8px; align-content: start; }
+  .market-review.wide { grid-column: span 2; }
+  .market-review figcaption { color: #6f7682; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
   .market-review img { display: block; width: 100%; height: auto; border-radius: 10px; }
   .market-review.photo { min-height: 188px; }
   .market-review-note { color: var(--duo-mute); font-size: var(--fs-xs); text-align: center; margin-top: var(--space-3); }
@@ -319,6 +321,7 @@
     .g3, .g2 { grid-template-columns: 1fr; }
     .market-reviews { display: flex; overflow-x: auto; gap: var(--space-3); padding-bottom: 4px; scroll-snap-type: x mandatory; }
     .market-review { min-width: 280px; scroll-snap-align: start; }
+    .market-review.wide { min-width: 420px; }
     .vs { grid-template-columns: 1fr; gap: var(--space-3); }
     .ativo { flex-direction: row; }
     .lead { font-size: 1rem; }
@@ -390,12 +393,12 @@
           </ul>
           <div class="rating">
             <span class="stars">★★★★★</span>
-            <small>4,9/5 · mais de 130 avaliações no Mercado Livre</small>
+            <small>4,9/5 · avaliações públicas no Mercado Livre e Shopee</small>
           </div>
           <a class="btn btn-primary" href="#confianca" data-track-cta="hero_entender_antes">Entender antes de comprar →</a>
           <p class="microcopy">🔒 Frete grátis e discreto · Garantia de 7 dias · Registro ANVISA</p>
           <div class="trust">
-            <span><b>130+</b> avaliações no ML</span>
+            <span><b>ML + Shopee</b> avaliações públicas</span>
             <span><b>4,9 ★</b> avaliação</span>
             <span><b>7 dias</b> de garantia</span>
           </div>
@@ -441,7 +444,7 @@
 
     <div class="proof-bar reveal">
       <div><b>4,9★</b><span>Avaliações</span></div>
-      <div><b>130+</b><span>Avaliações no Mercado Livre</span></div>
+      <div><b>ML + Shopee</b><span>Avaliações públicas</span></div>
       <div><b>ANVISA</b><span>Registro ativo</span></div>
       <div><b>7 dias</b><span>Garantia</span></div>
     </div>
@@ -647,30 +650,40 @@
     <div class="proof-bar reveal">
       <div><b>4,9★</b><span>Avaliação real</span></div>
       <div><b>+12 mil</b><span>Homens atendidos</span></div>
-      <div><b>130+</b><span>Avaliações no Mercado Livre</span></div>
+      <div><b>ML + Shopee</b><span>Avaliações públicas</span></div>
       <div><b>7 dias</b><span>Garantia total</span></div>
     </div>
-    <div class="market-reviews reveal" aria-label="Avaliações reais de compradores no Mercado Livre">
+    <div class="market-reviews reveal" aria-label="Avaliações reais de compradores no Mercado Livre e Shopee">
       <figure class="market-review">
+        <figcaption>Mercado Livre</figcaption>
         <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre: produto chegou certinho, bem embalado e excelente." loading="lazy">
       </figure>
       <figure class="market-review">
+        <figcaption>Mercado Livre</figcaption>
         <img src="images/reviews/av1-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre relatando melhor desempenho após usar o produto." loading="lazy">
       </figure>
       <figure class="market-review">
+        <figcaption>Mercado Livre</figcaption>
         <img src="images/reviews/av7-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que a qualidade é ótima e vale o custo-benefício." loading="lazy">
       </figure>
-      <figure class="market-review photo">
-        <img src="images/reviews/av2-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre mostrando o DuraLibid recebido." loading="lazy">
+      <figure class="market-review wide">
+        <figcaption>Shopee</figcaption>
+        <img src="images/reviews/av2-shopee.PNG" alt="Avaliação 5 estrelas na Shopee destacando entrega rápida, segura e produto recebido." loading="lazy">
       </figure>
       <figure class="market-review">
-        <img src="images/reviews/av6-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que o produto funciona." loading="lazy">
+        <figcaption>Shopee</figcaption>
+        <img src="images/reviews/av4-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que chegou corretamente e bem embalado." loading="lazy">
       </figure>
-      <figure class="market-review photo">
-        <img src="images/reviews/av8-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre com o produto DuraLibid." loading="lazy">
+      <figure class="market-review wide">
+        <figcaption>Shopee</figcaption>
+        <img src="images/reviews/av3-shopee.PNG" alt="Avaliação 5 estrelas na Shopee com notas de sensibilidade, prolongamento e eficácia." loading="lazy">
+      </figure>
+      <figure class="market-review">
+        <figcaption>Shopee</figcaption>
+        <img src="images/reviews/av6-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que a entrega foi no prazo e o produto é ótimo." loading="lazy">
       </figure>
     </div>
-    <p class="market-review-note">Recortes reais de avaliações públicas no Mercado Livre. Dados pessoais removidos.</p>
+    <p class="market-review-note">Recortes reais de avaliações públicas no Mercado Livre e na Shopee. Dados pessoais removidos.</p>
   </div>
 </section>
 
@@ -749,7 +762,7 @@
     <span class="eyebrow">Sem desculpa pra não testar</span>
     <h2 class="sec reveal">As dúvidas que travam — resolvidas</h2>
     <div class="grid reveal" style="gap:14px;margin-top:var(--space-4)">
-      <div class="card"><h3 style="font-size:1.05rem">"Será que funciona pra mim?"</h3><p>O produto também é vendido em marketplaces e já soma mais de 130 avaliações no Mercado Livre. Se não funcionar para você, a garantia cobre o pedido em 7 dias.</p></div>
+      <div class="card"><h3 style="font-size:1.05rem">"Será que funciona pra mim?"</h3><p>O produto também é vendido em marketplaces, com avaliações públicas no Mercado Livre e na Shopee. Se não funcionar para você, a garantia cobre o pedido em 7 dias.</p></div>
       <div class="card"><h3 style="font-size:1.05rem">"É seguro? Tem efeito colateral?"</h3><p>Fórmula com ativos naturais, sem os efeitos pesados de soluções sintéticas. Uso tópico íntimo, sem receita.</p></div>
       <div class="card"><h3 style="font-size:1.05rem">"Tenho vergonha de comprar."</h3><p>Entrega 100% discreta: embalagem neutra, sem nome do produto. Ninguém além de você sabe o que chegou.</p></div>
       <div class="card"><h3 style="font-size:1.05rem">"É caro?"</h3><p>No kit com 3 frascos sai por R$ 79,97 cada — e com garantia total de 7 dias.</p></div>
