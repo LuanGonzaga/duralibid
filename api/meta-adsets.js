@@ -79,6 +79,57 @@ function normalizeEvent(value) {
   return allowed.has(event) ? event : 'LEAD';
 }
 
+async function pauseAllDelivery() {
+  const account = normalizeAccountId(process.env.META_AD_ACCOUNT_ID);
+  const campaignsData = await metaRequest(`${account}/campaigns`, {
+    fields: 'id,name,status,effective_status',
+    limit: 200,
+  });
+  const campaigns = campaignsData.data || [];
+  const activeCampaigns = campaigns.filter((item) => (
+    item.status === 'ACTIVE' || item.effective_status === 'ACTIVE'
+  ));
+  const pausedCampaigns = [];
+  for (const campaign of activeCampaigns) {
+    const result = await metaRequest(campaign.id, { status: 'PAUSED' }, 'POST');
+    pausedCampaigns.push({
+      id: campaign.id,
+      name: campaign.name,
+      status_before: campaign.status,
+      effective_status_before: campaign.effective_status,
+      paused: result.success === true,
+    });
+  }
+
+  const adsetsData = await metaRequest(`${account}/adsets`, {
+    fields: 'id,name,status,effective_status,campaign_id',
+    limit: 300,
+  });
+  const adsets = adsetsData.data || [];
+  const activeAdsets = adsets.filter((item) => (
+    item.status === 'ACTIVE' || item.effective_status === 'ACTIVE'
+  ));
+  const pausedAdsets = [];
+  for (const adset of activeAdsets) {
+    const result = await metaRequest(adset.id, { status: 'PAUSED' }, 'POST');
+    pausedAdsets.push({
+      id: adset.id,
+      name: adset.name,
+      campaign_id: adset.campaign_id,
+      status_before: adset.status,
+      effective_status_before: adset.effective_status,
+      paused: result.success === true,
+    });
+  }
+
+  return {
+    paused_campaigns_count: pausedCampaigns.length,
+    paused_adsets_count: pausedAdsets.length,
+    paused_campaigns: pausedCampaigns,
+    paused_adsets: pausedAdsets,
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -122,6 +173,11 @@ export default async function handler(req, res) {
         graph_version: graphVersion(),
         adsets: (data.data || []).map(parseAdset),
       });
+    }
+
+    if (req.body?.action === 'pause_all') {
+      const result = await pauseAllDelivery();
+      return res.status(200).json({ ok: true, ...result });
     }
 
     const { adset_id: adsetId, event = 'LEAD', dry_run: dryRun = true } = req.body || {};
