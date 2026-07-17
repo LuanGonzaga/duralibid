@@ -46,12 +46,6 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .field.has-error input,.field.has-error select{border-color:var(--duo-red)}
 .field.has-error .error{display:block}
 .separator{border:none;border-top:1px solid #23262b;margin:var(--space-4) 0}
-.checkout-head{background:rgba(255,255,255,.035);border:1px solid #23262b;border-radius:var(--radius);padding:var(--space-4);margin-bottom:var(--space-4)}
-.checkout-head h1{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:1.35rem;font-weight:800;line-height:1.2;color:var(--duo-white);margin-bottom:8px}
-.checkout-head p{color:var(--duo-silver);font-size:var(--fs-sm);margin:0 0 var(--space-3)}
-.security-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.security-chip{background:#12151a;border:1px solid #272b32;border-radius:var(--radius-sm);padding:10px;color:var(--duo-mute);font-size:11px;line-height:1.35}
-.security-chip b{display:block;color:var(--duo-white);font-size:12px;margin-bottom:2px}
 </style>
 <style>
 .pay-tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-4)}
@@ -125,7 +119,6 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
   .checkout-grid{grid-template-columns:1fr}
   .checkout-grid>aside{order:-1}
   .order-card{position:static;order:-1}
-  .security-strip{grid-template-columns:1fr}
   .field-row,.field-row-3{grid-template-columns:1fr}
 }
 @media(max-width:620px){
@@ -178,16 +171,6 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
   <div class="checkout-grid">
     <!-- FORMULÁRIO -->
     <div class="form-section">
-      <section class="checkout-head" aria-label="Compra segura">
-        <h1>Checkout seguro</h1>
-        <p>Preencha os dados de entrega. O pagamento é processado pelo Mercado Pago e, no Pix, você paga somente no app do seu banco.</p>
-        <div class="security-strip">
-          <div class="security-chip"><b>Mercado Pago</b>Pagamento seguro</div>
-          <div class="security-chip"><b>Pix oficial</b>Pagamento no banco</div>
-          <div class="security-chip"><b>Frete grátis</b>Até 5 dias úteis</div>
-        </div>
-      </section>
-
       <form id="checkoutForm" novalidate>
 
         <h2>Dados pessoais</h2>
