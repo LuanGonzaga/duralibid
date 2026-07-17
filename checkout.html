@@ -66,16 +66,23 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .order-card{background:#111419;border:1px solid #2a2e34;border-radius:var(--radius);padding:var(--space-4);position:sticky;top:var(--space-4)}
 .order-card h3{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:1.05rem;font-weight:800;line-height:1.25;margin-bottom:var(--space-3);color:var(--duo-white)}
-.kit-selector{display:grid;gap:10px;margin-bottom:var(--space-4)}
-.kit-option{border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:var(--space-3);cursor:pointer;transition:all .2s;position:relative}
+.kit-details{border:1px solid #23262b;background:#0d0f13;border-radius:var(--radius-sm);padding:var(--space-3);margin-bottom:var(--space-3)}
+.kit-details summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--duo-silver);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.kit-details summary::-webkit-details-marker{display:none}
+.kit-details summary::after{content:"+";color:var(--duo-mute);font-size:14px}
+.kit-details[open] summary{margin-bottom:10px}
+.kit-details[open] summary::after{content:"-"}
+.kit-details strong{display:block;color:var(--duo-white);font-size:var(--fs-sm);font-weight:800;text-transform:none;letter-spacing:0;margin-top:2px}
+.kit-selector{display:grid;gap:8px;margin-bottom:0}
+.kit-option{border:1.5px solid #2a2e34;border-radius:var(--radius-sm);padding:11px 12px;cursor:pointer;transition:all .2s;position:relative;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
 .kit-option:hover{border-color:rgba(225,29,38,.4)}
 .kit-option.active{border-color:var(--duo-red);background:rgba(225,29,38,.06)}
-.kit-option .kit-name{font-weight:700;color:var(--duo-white);font-size:var(--fs-sm)}
-.kit-option .kit-price{color:var(--duo-red);font-family:var(--font-display);font-size:1.3rem}
+.kit-option .kit-name{font-weight:800;color:var(--duo-white);font-size:var(--fs-sm);grid-column:1;line-height:1.25}
+.kit-option .kit-price{color:var(--duo-red);font-family:var(--font-display);font-size:1.25rem;grid-column:2;grid-row:1 / span 3;text-align:right;align-self:center;white-space:nowrap}
 .kit-option .kit-old{color:var(--duo-mute);font-size:var(--fs-xs);text-decoration:line-through}
-.kit-option .kit-per{color:var(--duo-gold);font-size:var(--fs-xs)}
-.kit-option .kit-badge{position:absolute;top:-10px;right:12px;background:var(--grad-fire);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:.08em}
-.kit-option .kit-off{background:var(--duo-ink);border:1px solid #23262b;color:var(--duo-mute);font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--radius-pill);display:inline-block;margin-left:6px}
+.kit-option .kit-per{color:var(--duo-gold);font-size:11px;grid-column:1}
+.kit-option .kit-badge{position:absolute;top:-9px;right:10px;background:var(--grad-fire);color:#fff;font-size:9px;font-weight:800;padding:2px 9px;border-radius:var(--radius-pill);text-transform:uppercase;letter-spacing:.06em}
+.kit-option .kit-off{background:var(--duo-ink);border:1px solid #23262b;color:var(--duo-mute);font-size:9px;font-weight:800;padding:1px 7px;border-radius:var(--radius-pill);display:inline-block;width:max-content;margin:0 0 2px}
 .order-summary{border-top:1px solid #23262b;padding-top:var(--space-3);margin-top:var(--space-2)}
 .order-summary .row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:var(--fs-sm)}
 .order-summary .row.total{font-family:var(--font-body);font-size:1.05rem;font-weight:800;color:var(--duo-white);border-top:1px solid #23262b;margin-top:var(--space-2);padding-top:var(--space-2)}
@@ -101,20 +108,6 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 .mp-mark{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#00a1e0;color:#fff;font-weight:900;font-size:13px;letter-spacing:-.03em}
 .mp-seal b{display:block;color:var(--duo-white);font-size:var(--fs-sm);line-height:1.2}
 .mp-seal span{display:block;color:var(--duo-silver);font-size:var(--fs-xs);line-height:1.35;margin-top:2px}
-.review-proof{border-top:1px solid #23262b;margin-top:var(--space-3);padding-top:var(--space-3);display:grid;gap:8px}
-.review-score{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.review-score b{color:var(--duo-white);font-size:var(--fs-sm)}
-.review-score span{color:var(--duo-gold);font-size:var(--fs-sm);letter-spacing:1px;white-space:nowrap}
-.review-proof p{color:var(--duo-mute);font-size:var(--fs-xs);line-height:1.45;margin:0}
-.review-proof small{color:var(--duo-silver);font-size:11px}
-.review-gallery{border:1px solid #23262b;background:#0d0f13;border-radius:var(--radius-sm);padding:10px;margin-top:2px}
-.review-gallery summary{cursor:pointer;color:var(--duo-silver);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em;list-style:none}
-.review-gallery summary::-webkit-details-marker{display:none}
-.review-gallery summary::after{content:"+";float:right;color:var(--duo-mute)}
-.review-gallery[open] summary{margin-bottom:10px;color:var(--duo-white)}
-.review-gallery[open] summary::after{content:"-"}
-.review-shots{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:320px;overflow:auto;padding-right:2px}
-.review-shots img{display:block;width:100%;height:78px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid rgba(255,255,255,.08)}
 .support-line{border-top:1px solid #23262b;margin-top:var(--space-3);padding-top:var(--space-3);color:var(--duo-mute);font-size:var(--fs-xs);line-height:1.5}
 .support-line b{color:var(--duo-white)}
 #feedback{display:none;padding:var(--space-4);border-radius:var(--radius-lg);margin-top:var(--space-4);text-align:center}
@@ -311,30 +304,33 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
     <aside>
       <div class="order-card">
         <h3>Seu pedido</h3>
-        <div class="kit-selector" id="kitSelector">
-          <div class="kit-option" data-kit="1" data-price="89.90">
-            <span class="kit-off">36% OFF</span>
-            <div class="kit-name">1 Unidade — 1 frasco 30ml</div>
-            <div><span class="kit-old">R$ 139,90</span></div>
-            <div class="kit-price">R$ 89,90</div>
-            <div class="kit-per">R$ 89,90 por frasco</div>
+        <details class="kit-details" id="kitDetails">
+          <summary><span>Kit selecionado<strong id="selectedKitSummary">2 Unidades — 2 frascos 30ml</strong></span></summary>
+          <div class="kit-selector" id="kitSelector">
+            <div class="kit-option" data-kit="1" data-price="89.90">
+              <span class="kit-off">36% OFF</span>
+              <div class="kit-name">1 Unidade — 1 frasco 30ml</div>
+              <div><span class="kit-old">R$ 139,90</span></div>
+              <div class="kit-price">R$ 89,90</div>
+              <div class="kit-per">R$ 89,90 por frasco</div>
+            </div>
+            <div class="kit-option" data-kit="2" data-price="165.90">
+              <div class="kit-badge">Mais popular</div>
+              <span class="kit-off">41% OFF</span>
+              <div class="kit-name">2 Unidades — 2 frascos 30ml</div>
+              <div><span class="kit-old">R$ 279,90</span></div>
+              <div class="kit-price">R$ 165,90</div>
+              <div class="kit-per">R$ 82,95 por frasco</div>
+            </div>
+            <div class="kit-option" data-kit="3" data-price="239.90">
+              <span class="kit-off">43% OFF</span>
+              <div class="kit-name">3 Unidades — 3 frascos 30ml</div>
+              <div><span class="kit-old">R$ 419,90</span></div>
+              <div class="kit-price">R$ 239,90</div>
+              <div class="kit-per">R$ 79,97 por frasco</div>
+            </div>
           </div>
-          <div class="kit-option" data-kit="2" data-price="165.90">
-            <div class="kit-badge">Mais popular</div>
-            <span class="kit-off">41% OFF</span>
-            <div class="kit-name">2 Unidades — 2 frascos 30ml</div>
-            <div><span class="kit-old">R$ 279,90</span></div>
-            <div class="kit-price">R$ 165,90</div>
-            <div class="kit-per">R$ 82,95 por frasco</div>
-          </div>
-          <div class="kit-option" data-kit="3" data-price="239.90">
-            <span class="kit-off">43% OFF</span>
-            <div class="kit-name">3 Unidades — 3 frascos 30ml</div>
-            <div><span class="kit-old">R$ 419,90</span></div>
-            <div class="kit-price">R$ 239,90</div>
-            <div class="kit-per">R$ 79,97 por frasco</div>
-          </div>
-        </div>
+        </details>
         <div class="order-summary">
           <div class="row discount" id="summaryDiscountRow" style="display:none"><span>Desconto</span><span id="summaryDiscount">-R$ 0,00</span></div>
           <div class="row"><span>Subtotal</span><span id="summarySubtotal">R$ —</span></div>
@@ -358,33 +354,6 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
         <div class="mp-seal" aria-label="Selo de segurança Mercado Pago">
           <div class="mp-mark">MP</div>
           <div><b>Pagamento seguro Mercado Pago</b><span>Pix ou cartão processados em ambiente protegido.</span></div>
-        </div>
-        <div class="review-proof" aria-label="Avaliações de compradores">
-          <div class="review-score"><b>Avaliado por compradores</b><span>★★★★★</span></div>
-          <p>4,9/5 em avaliações públicas no Mercado Livre e na Shopee.</p>
-          <small>17 avaliações reais disponíveis para consulta.</small>
-          <details class="review-gallery">
-            <summary>Ver 17 avaliações reais</summary>
-            <div class="review-shots">
-              <img src="images/reviews/av1-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av2-ml.PNG" alt="Avaliação com foto do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av3-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av4-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre sobre entrega e embalagem" loading="lazy">
-              <img src="images/reviews/av5-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av6-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av7-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre sobre custo-benefício" loading="lazy">
-              <img src="images/reviews/av8-ml.PNG" alt="Avaliação com foto do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av9-ml.PNG" alt="Avaliação real do DuraLibid no Mercado Livre" loading="lazy">
-              <img src="images/reviews/av1-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee" loading="lazy">
-              <img src="images/reviews/av2-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee sobre entrega rápida e segura" loading="lazy">
-              <img src="images/reviews/av3-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee sobre experiência de uso" loading="lazy">
-              <img src="images/reviews/av4-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee sobre entrega e embalagem" loading="lazy">
-              <img src="images/reviews/av5-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee" loading="lazy">
-              <img src="images/reviews/av6-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee sobre entrega no prazo" loading="lazy">
-              <img src="images/reviews/av7-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee" loading="lazy">
-              <img src="images/reviews/av8-shopee.PNG" alt="Avaliação real do DuraLibid na Shopee sobre entrega rápida" loading="lazy">
-            </div>
-          </details>
         </div>
         <div class="support-line"><b>Atendimento:</b> suporte@duralibid.com.br</div>
       </div>
@@ -453,12 +422,18 @@ function selectKit(kit) {
   document.querySelectorAll('.kit-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.kit) === selectedKit);
   });
+  const selectedKitSummary = document.getElementById('selectedKitSummary');
+  if (selectedKitSummary) selectedKitSummary.textContent = document.querySelector(`.kit-option[data-kit="${selectedKit}"] .kit-name`)?.textContent || KITS[selectedKit].name;
   updateOrderSummary();
   refreshCardBrick();
 }
 
 document.querySelectorAll('.kit-option').forEach(el => {
-  el.addEventListener('click', () => selectKit(el.dataset.kit));
+  el.addEventListener('click', () => {
+    selectKit(el.dataset.kit);
+    const kitDetails = document.getElementById('kitDetails');
+    if (kitDetails) kitDetails.open = false;
+  });
 });
 
 // Init from URL param
