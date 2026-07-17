@@ -230,13 +230,13 @@
   .proof-bar div { text-align: center; }
   .proof-bar b { font-family: var(--font-display); font-size: 2rem; color: var(--duo-white); display: block; line-height: 1; }
   .proof-bar span { font-size: var(--fs-xs); color: var(--duo-mute); text-transform: uppercase; letter-spacing: .12em; }
-  .market-carousel { position: relative; margin-top: var(--space-4); }
+  .market-carousel { position: relative; width: min(720px, 100%); margin: var(--space-4) auto 0; }
   .market-reviews { display: flex; gap: var(--space-3); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 2px 2px 12px; }
   .market-reviews::-webkit-scrollbar { display: none; }
-  .market-review { flex: 0 0 clamp(245px, 27vw, 330px); scroll-snap-align: start; background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); height: 214px; display: grid; gap: 8px; align-content: start; }
-  .market-review.wide { flex-basis: clamp(300px, 38vw, 460px); }
+  .market-review { flex: 0 0 100%; scroll-snap-align: start; background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 12px; box-shadow: 0 14px 36px rgba(0,0,0,.22); height: 376px; display: grid; gap: 8px; align-content: start; cursor: zoom-in; transition: transform .2s, box-shadow .2s; }
+  .market-review:hover { transform: translateY(-2px); box-shadow: 0 20px 48px rgba(0,0,0,.3); }
   .market-review figcaption { color: #6f7682; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-  .market-review img { display: block; width: 100%; height: 162px; object-fit: contain; object-position: top left; border-radius: 10px; background: #fff; }
+  .market-review img { display: block; width: 100%; height: 318px; object-fit: contain; object-position: top center; border-radius: 10px; background: #fff; cursor: zoom-in; }
   .market-carousel-btn { position: absolute; top: calc(50% - 18px); z-index: 2; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; background: rgba(16,17,19,.92); color: var(--duo-white); box-shadow: 0 14px 34px rgba(0,0,0,.36); cursor: pointer; font-size: 30px; line-height: 1; transition: transform .2s, opacity .2s, border-color .2s; }
   .market-carousel-btn:hover { transform: translateY(-50%) scale(1.05); border-color: rgba(225,29,38,.45); }
   .market-carousel-btn:disabled { opacity: .35; cursor: default; }
@@ -248,6 +248,11 @@
   .market-carousel-meter { width: min(220px, 58vw); height: 4px; overflow: hidden; border-radius: var(--radius-pill); background: rgba(255,255,255,.12); }
   .market-carousel-fill { display: block; width: 8%; height: 100%; border-radius: inherit; background: var(--grad-fire); transition: width .2s ease; }
   .market-review-note { color: var(--duo-mute); font-size: var(--fs-xs); text-align: center; margin-top: var(--space-3); }
+  .review-lightbox { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; padding: var(--space-4); background: rgba(0,0,0,.86); backdrop-filter: blur(8px); }
+  .review-lightbox.show { display: flex; }
+  .review-lightbox img { display: block; width: auto; max-width: min(960px, 96vw); max-height: 84vh; object-fit: contain; background: #fff; border-radius: var(--radius); box-shadow: 0 28px 90px rgba(0,0,0,.6); }
+  .review-lightbox-close { position: fixed; top: 18px; right: 18px; z-index: 81; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; background: rgba(16,17,19,.9); color: var(--duo-white); cursor: pointer; font-size: 24px; line-height: 1; }
+  body.review-lightbox-open { overflow: hidden; }
 
   /* ===== pricing — SaaS-style table ===== */
   .pricing { background: var(--grad-stage); }
@@ -330,12 +335,13 @@
     .hero .rating { margin-bottom: var(--space-3); }
     .btn { padding: 16px 20px; font-size: .95rem; width: 100%; }
     .g3, .g2 { grid-template-columns: 1fr; }
-    .market-carousel { margin-inline: calc(var(--space-3) * -1); padding-inline: var(--space-3); }
+    .market-carousel { width: 100%; margin-inline: 0; }
     .market-carousel-btn { display: none; }
-    .market-reviews { scroll-padding-left: var(--space-3); padding-bottom: 10px; }
-    .market-review { flex-basis: 276px; height: 206px; }
-    .market-review.wide { flex-basis: 318px; }
-    .market-review img { height: 154px; }
+    .market-reviews { scroll-padding-left: 0; padding-bottom: 10px; }
+    .market-review { height: 288px; }
+    .market-review img { height: 230px; }
+    .review-lightbox { padding: var(--space-3); }
+    .review-lightbox-close { top: 12px; right: 12px; }
     .vs { grid-template-columns: 1fr; gap: var(--space-3); }
     .ativo { flex-direction: row; }
     .lead { font-size: 1rem; }
@@ -877,6 +883,11 @@
   </div>
 </div>
 
+<div class="review-lightbox" id="reviewLightbox" aria-hidden="true">
+  <button class="review-lightbox-close" type="button" id="reviewLightboxClose" aria-label="Fechar">x</button>
+  <img id="reviewLightboxImage" src="" alt="">
+</div>
+
 <!-- STICKY -->
 <div class="sticky">
   <span class="txt"><b>DURALIBID</b> · a partir de R$ 89,90</span>
@@ -904,6 +915,38 @@
 
   // Carrossel de avaliações reais
   (function(){
+    var lightbox = document.getElementById('reviewLightbox');
+    var lightboxImage = document.getElementById('reviewLightboxImage');
+    var lightboxClose = document.getElementById('reviewLightboxClose');
+
+    function openLightbox(img) {
+      if (!lightbox || !lightboxImage || !img) return;
+      lightboxImage.src = img.currentSrc || img.src;
+      lightboxImage.alt = img.alt || 'Avaliação real de comprador';
+      lightbox.classList.add('show');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('review-lightbox-open');
+      if (lightboxClose) lightboxClose.focus();
+    }
+
+    function closeLightbox() {
+      if (!lightbox || !lightboxImage) return;
+      lightbox.classList.remove('show');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('review-lightbox-open');
+      lightboxImage.removeAttribute('src');
+    }
+
+    if (lightbox) {
+      lightbox.addEventListener('click', function(event){
+        if (event.target === lightbox) closeLightbox();
+      });
+    }
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function(event){
+      if (event.key === 'Escape' && lightbox && lightbox.classList.contains('show')) closeLightbox();
+    });
+
     document.querySelectorAll('[data-review-carousel]').forEach(function(carousel){
       var track = carousel.querySelector('[data-review-track]');
       var prev = carousel.querySelector('[data-review-prev]');
@@ -913,6 +956,20 @@
 
       var cards = Array.prototype.slice.call(track.querySelectorAll('.market-review'));
       if (!cards.length) return;
+
+      cards.forEach(function(card){
+        var img = card.querySelector('img');
+        if (!img) return;
+        img.setAttribute('role', 'button');
+        img.setAttribute('tabindex', '0');
+        img.addEventListener('click', function(){ openLightbox(img); });
+        img.addEventListener('keydown', function(event){
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openLightbox(img);
+          }
+        });
+      });
 
       function getGap() {
         var styles = window.getComputedStyle(track);
@@ -935,8 +992,7 @@
       }
 
       function move(direction) {
-        var visibleCards = window.innerWidth >= 900 ? 2 : 1;
-        track.scrollBy({ left: direction * getStep() * visibleCards, behavior: 'smooth' });
+        track.scrollBy({ left: direction * getStep(), behavior: 'smooth' });
       }
 
       var ticking = false;
