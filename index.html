@@ -230,12 +230,24 @@
   .proof-bar div { text-align: center; }
   .proof-bar b { font-family: var(--font-display); font-size: 2rem; color: var(--duo-white); display: block; line-height: 1; }
   .proof-bar span { font-size: var(--fs-xs); color: var(--duo-mute); text-transform: uppercase; letter-spacing: .12em; }
-  .market-reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
-  .market-review { background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); min-height: 132px; display: grid; gap: 8px; align-content: start; }
-  .market-review.wide { grid-column: span 2; }
+  .market-carousel { position: relative; margin-top: var(--space-4); }
+  .market-reviews { display: flex; gap: var(--space-3); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 2px 2px 12px; }
+  .market-reviews::-webkit-scrollbar { display: none; }
+  .market-review { flex: 0 0 clamp(245px, 27vw, 330px); scroll-snap-align: start; background: #fff; border: 1px solid rgba(245,245,245,.08); border-radius: var(--radius); padding: 10px; box-shadow: 0 14px 36px rgba(0,0,0,.22); height: 214px; display: grid; gap: 8px; align-content: start; }
+  .market-review.wide { flex-basis: clamp(300px, 38vw, 460px); }
   .market-review figcaption { color: #6f7682; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-  .market-review img { display: block; width: 100%; height: auto; border-radius: 10px; }
-  .market-review.photo { min-height: 188px; }
+  .market-review img { display: block; width: 100%; height: 162px; object-fit: contain; object-position: top left; border-radius: 10px; background: #fff; }
+  .market-carousel-btn { position: absolute; top: calc(50% - 18px); z-index: 2; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; background: rgba(16,17,19,.92); color: var(--duo-white); box-shadow: 0 14px 34px rgba(0,0,0,.36); cursor: pointer; font-size: 30px; line-height: 1; transition: transform .2s, opacity .2s, border-color .2s; }
+  .market-carousel-btn:hover { transform: translateY(-50%) scale(1.05); border-color: rgba(225,29,38,.45); }
+  .market-carousel-btn:disabled { opacity: .35; cursor: default; }
+  .market-carousel-btn.prev { left: -18px; transform: translateY(-50%); }
+  .market-carousel-btn.next { right: -18px; transform: translateY(-50%); }
+  .market-carousel-btn.prev:hover, .market-carousel-btn.next:hover { transform: translateY(-50%) scale(1.05); }
+  .market-carousel-btn.prev:disabled:hover, .market-carousel-btn.next:disabled:hover { transform: translateY(-50%); }
+  .market-carousel-footer { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: var(--space-2); }
+  .market-carousel-meter { width: min(220px, 58vw); height: 4px; overflow: hidden; border-radius: var(--radius-pill); background: rgba(255,255,255,.12); }
+  .market-carousel-fill { display: block; width: 8%; height: 100%; border-radius: inherit; background: var(--grad-fire); transition: width .2s ease; }
+  .market-carousel-count { color: var(--duo-mute); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; }
   .market-review-note { color: var(--duo-mute); font-size: var(--fs-xs); text-align: center; margin-top: var(--space-3); }
 
   /* ===== pricing — SaaS-style table ===== */
@@ -319,9 +331,12 @@
     .hero .rating { margin-bottom: var(--space-3); }
     .btn { padding: 16px 20px; font-size: .95rem; width: 100%; }
     .g3, .g2 { grid-template-columns: 1fr; }
-    .market-reviews { display: flex; overflow-x: auto; gap: var(--space-3); padding-bottom: 4px; scroll-snap-type: x mandatory; }
-    .market-review { min-width: 280px; scroll-snap-align: start; }
-    .market-review.wide { min-width: 420px; }
+    .market-carousel { margin-inline: calc(var(--space-3) * -1); padding-inline: var(--space-3); }
+    .market-carousel-btn { display: none; }
+    .market-reviews { scroll-padding-left: var(--space-3); padding-bottom: 10px; }
+    .market-review { flex-basis: 276px; height: 206px; }
+    .market-review.wide { flex-basis: 318px; }
+    .market-review img { height: 154px; }
     .vs { grid-template-columns: 1fr; gap: var(--space-3); }
     .ativo { flex-direction: row; }
     .lead { font-size: 1rem; }
@@ -456,75 +471,83 @@
   <div class="wrap">
     <span class="eyebrow">Quem usa, recomenda</span>
     <h2 class="sec reveal">Resultados que eles sentiram</h2>
-    <div class="market-reviews reveal" aria-label="17 avaliações reais de compradores no Mercado Livre e Shopee">
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av1-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre relatando melhor desempenho após usar o produto." loading="lazy">
-      </figure>
-      <figure class="market-review photo">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av2-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre mostrando o DuraLibid recebido." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av3-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre recomendando o produto." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre: produto chegou certinho, bem embalado e excelente." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av5-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo excelente gostei." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av6-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que o produto funciona." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av7-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que a qualidade é ótima e vale o custo-benefício." loading="lazy">
-      </figure>
-      <figure class="market-review photo">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av8-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre com o produto DuraLibid." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Mercado Livre</figcaption>
-        <img src="images/reviews/av9-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo excelente produto." loading="lazy">
-      </figure>
-      <figure class="market-review wide">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av1-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto e o vendedor." loading="lazy">
-      </figure>
-      <figure class="market-review wide">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av2-shopee.PNG" alt="Avaliação 5 estrelas na Shopee destacando entrega rápida, segura e produto recebido." loading="lazy">
-      </figure>
-      <figure class="market-review wide">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av3-shopee.PNG" alt="Avaliação 5 estrelas na Shopee com notas de sensibilidade, prolongamento e eficácia." loading="lazy">
-      </figure>
-      <figure class="market-review wide">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av4-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que chegou corretamente e bem embalado." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av5-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av6-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que a entrega foi no prazo e o produto é ótimo." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av7-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto." loading="lazy">
-      </figure>
-      <figure class="market-review">
-        <figcaption>Shopee</figcaption>
-        <img src="images/reviews/av8-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto e destacando entrega rápida." loading="lazy">
-      </figure>
+    <div class="market-carousel reveal" data-review-carousel>
+      <button class="market-carousel-btn prev" type="button" aria-label="Avaliações anteriores" data-review-prev>&lsaquo;</button>
+      <div class="market-reviews" aria-label="17 avaliações reais de compradores no Mercado Livre e Shopee" data-review-track>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av1-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre relatando melhor desempenho após usar o produto." loading="lazy">
+        </figure>
+        <figure class="market-review photo">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av2-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre mostrando o DuraLibid recebido." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av3-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre recomendando o produto." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av4-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre: produto chegou certinho, bem embalado e excelente." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av5-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo excelente gostei." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av6-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que o produto funciona." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av7-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo que a qualidade é ótima e vale o custo-benefício." loading="lazy">
+        </figure>
+        <figure class="market-review photo">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av8-ml.PNG" alt="Fotos reais enviadas por comprador do Mercado Livre com o produto DuraLibid." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Mercado Livre</figcaption>
+          <img src="images/reviews/av9-ml.PNG" alt="Avaliação 5 estrelas no Mercado Livre dizendo excelente produto." loading="lazy">
+        </figure>
+        <figure class="market-review wide">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av1-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto e o vendedor." loading="lazy">
+        </figure>
+        <figure class="market-review wide">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av2-shopee.PNG" alt="Avaliação 5 estrelas na Shopee destacando entrega rápida, segura e produto recebido." loading="lazy">
+        </figure>
+        <figure class="market-review wide">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av3-shopee.PNG" alt="Avaliação 5 estrelas na Shopee com notas de sensibilidade, prolongamento e eficácia." loading="lazy">
+        </figure>
+        <figure class="market-review wide">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av4-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que chegou corretamente e bem embalado." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av5-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av6-shopee.PNG" alt="Avaliação 5 estrelas na Shopee dizendo que a entrega foi no prazo e o produto é ótimo." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av7-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto." loading="lazy">
+        </figure>
+        <figure class="market-review">
+          <figcaption>Shopee</figcaption>
+          <img src="images/reviews/av8-shopee.PNG" alt="Avaliação 5 estrelas na Shopee recomendando o produto e destacando entrega rápida." loading="lazy">
+        </figure>
+      </div>
+      <button class="market-carousel-btn next" type="button" aria-label="Próximas avaliações" data-review-next>&rsaquo;</button>
+      <div class="market-carousel-footer" aria-hidden="true">
+        <span class="market-carousel-meter"><span class="market-carousel-fill" data-review-fill></span></span>
+        <span class="market-carousel-count" data-review-count>1 / 17</span>
+      </div>
     </div>
     <p class="market-review-note">17 recortes reais de avaliações públicas no Mercado Livre e na Shopee. Dados pessoais removidos.</p>
   </div>
@@ -879,6 +902,79 @@
       entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.18 });
     document.querySelectorAll('.reveal, .showcase-frame').forEach(function(el){ io.observe(el); });
+  })();
+
+  // Carrossel de avaliações reais
+  (function(){
+    document.querySelectorAll('[data-review-carousel]').forEach(function(carousel){
+      var track = carousel.querySelector('[data-review-track]');
+      var prev = carousel.querySelector('[data-review-prev]');
+      var next = carousel.querySelector('[data-review-next]');
+      var fill = carousel.querySelector('[data-review-fill]');
+      var count = carousel.querySelector('[data-review-count]');
+      if (!track || !prev || !next) return;
+
+      var cards = Array.prototype.slice.call(track.querySelectorAll('.market-review'));
+      if (!cards.length) return;
+
+      function getGap() {
+        var styles = window.getComputedStyle(track);
+        return parseFloat(styles.columnGap || styles.gap || 0) || 0;
+      }
+
+      function getStep() {
+        var first = cards[0];
+        return first.getBoundingClientRect().width + getGap();
+      }
+
+      function getActiveIndex() {
+        var leftEdge = track.scrollLeft + 4;
+        var bestIndex = 0;
+        var bestDistance = Infinity;
+
+        cards.forEach(function(card, index){
+          var distance = Math.abs(leftEdge - card.offsetLeft);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = index;
+          }
+        });
+
+        return bestIndex;
+      }
+
+      function update() {
+        var max = Math.max(0, track.scrollWidth - track.clientWidth);
+        var progress = max ? track.scrollLeft / max : 1;
+        var active = getActiveIndex();
+
+        prev.disabled = track.scrollLeft <= 4;
+        next.disabled = track.scrollLeft >= max - 4;
+
+        if (fill) fill.style.width = Math.max(8, Math.min(100, progress * 100)) + '%';
+        if (count) count.textContent = (active + 1) + ' / ' + cards.length;
+      }
+
+      function move(direction) {
+        var visibleCards = window.innerWidth >= 900 ? 2 : 1;
+        track.scrollBy({ left: direction * getStep() * visibleCards, behavior: 'smooth' });
+      }
+
+      var ticking = false;
+      track.addEventListener('scroll', function(){
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function(){
+          update();
+          ticking = false;
+        });
+      });
+
+      prev.addEventListener('click', function(){ move(-1); });
+      next.addEventListener('click', function(){ move(1); });
+      window.addEventListener('resize', update);
+      update();
+    });
   })();
 
   // Urgency timer — 20 min por sessão, persiste via sessionStorage
