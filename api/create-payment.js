@@ -32,6 +32,21 @@ function roundMoney(value) {
   return Math.round(Number(value || 0) * 100) / 100;
 }
 
+function phoneDigits(value) {
+  let digits = String(value || '').replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length > 11) digits = digits.slice(2);
+  return digits.slice(0, 11);
+}
+
+function formatPhone(value) {
+  const digits = phoneDigits(value);
+  if (digits.length < 10) return String(value || '').trim();
+  const ddd = digits.slice(0, 2);
+  const number = digits.slice(2);
+  if (number.length === 8) return `(${ddd}) ${number.slice(0, 4)}-${number.slice(4)}`;
+  return `(${ddd}) ${number.slice(0, 5)}-${number.slice(5, 9)}`;
+}
+
 function priceWithCoupon(price, couponCode) {
   const code = normalizeCoupon(couponCode);
   const discountPercent = code === 'DURA5' ? 5 : 0;
@@ -215,6 +230,11 @@ export default async function handler(req, res) {
     const kitData = KITS[kit];
     if (!kitData) return res.status(400).json({ error: 'Kit inválido' });
 
+    const normalizedPhoneDigits = phoneDigits(phone);
+    if (![10, 11].includes(normalizedPhoneDigits.length)) {
+      return res.status(400).json({ error: 'Telefone inválido' });
+    }
+    const normalizedPhone = formatPhone(phone);
     const pricing = priceWithCoupon(kitData.price, couponCode);
     const trackingData = tracking && typeof tracking === 'object' ? tracking : {};
     const leadId = normalizeLeadId(trackingData.leadId);
@@ -238,8 +258,8 @@ export default async function handler(req, res) {
       last_name: name.split(' ').slice(1).join(' ') || name.split(' ')[0],
       identification: { type: 'CPF', number: cpf.replace(/\D/g, '') },
       phone: {
-        area_code: phone.replace(/\D/g, '').slice(0, 2),
-        number: phone.replace(/\D/g, '').slice(2),
+        area_code: normalizedPhoneDigits.slice(0, 2),
+        number: normalizedPhoneDigits.slice(2),
       },
       address: {
         zip_code: zipCode.replace(/\D/g, ''),
@@ -289,7 +309,7 @@ export default async function handler(req, res) {
       },
       userData: {
         email: email,
-        phone: phone,
+        phone: normalizedPhone,
         firstName: name.split(' ')[0],
         lastName: name.split(' ').slice(1).join(' '),
         city: city,
@@ -317,7 +337,7 @@ export default async function handler(req, res) {
     const data = await mpRes.json();
 
     if (mpRes.ok) {
-      const order = { name, email, cpf, phone, zipCode, street, number, complement, neighborhood, city, state };
+      const order = { name, email, cpf, phone: normalizedPhone, zipCode, street, number, complement, neighborhood, city, state };
       const pixCode = data.point_of_interaction?.transaction_data?.qr_code;
       const pixExpiresAt = paymentMethod === 'pix'
         ? payload.date_of_expiration
@@ -336,7 +356,7 @@ export default async function handler(req, res) {
         amount: pricing.total,
         name,
         email,
-        phone,
+        phone: normalizedPhone,
         cpf,
         zip_code: zipCode,
         street,

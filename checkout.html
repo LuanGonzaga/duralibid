@@ -527,8 +527,22 @@ document.getElementById('zipCode').addEventListener('blur', async function () {
 
 // --- Masks ---
 function mask(el, fn) { el.addEventListener('input', () => { el.value = fn(el.value); }); }
+function phoneDigits(value) {
+  let digits = String(value || '').replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length > 11) digits = digits.slice(2);
+  return digits.slice(0, 11);
+}
+function formatPhone(value) {
+  const digits = phoneDigits(value);
+  if (digits.length <= 2) return digits ? `(${digits}` : '';
+  const ddd = digits.slice(0, 2);
+  const number = digits.slice(2);
+  if (number.length <= 4) return `(${ddd}) ${number}`;
+  if (number.length <= 8) return `(${ddd}) ${number.slice(0, 4)}-${number.slice(4)}`;
+  return `(${ddd}) ${number.slice(0, 5)}-${number.slice(5, 9)}`;
+}
 mask(document.getElementById('cpf'), v => v.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2').slice(0,14));
-mask(document.getElementById('phone'), v => v.replace(/\D/g,'').replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2').slice(0,15));
+mask(document.getElementById('phone'), formatPhone);
 mask(document.getElementById('zipCode'), v => v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9));
 
 // --- Validation ---
@@ -547,6 +561,10 @@ function validate() {
   }
   const cpf = document.getElementById('cpf').value.replace(/\D/g,'');
   if (cpf.length !== 11) { document.getElementById('cpf').closest('.field').classList.add('has-error'); ok = false; }
+  const phone = document.getElementById('phone');
+  const phoneSize = phoneDigits(phone.value).length;
+  if (![10, 11].includes(phoneSize)) { phone.closest('.field').classList.add('has-error'); ok = false; }
+  else phone.value = formatPhone(phone.value);
   return ok;
 }
 
@@ -598,6 +616,8 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     payment_method: paymentMethod,
   });
   const metaCookies = DLTracking.getMetaCookies();
+  const phoneValue = formatPhone(document.getElementById('phone').value);
+  document.getElementById('phone').value = phoneValue;
 
   const body = {
     kit: selectedKit,
@@ -605,7 +625,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     name: document.getElementById('name').value,
     email: document.getElementById('email').value,
     cpf: document.getElementById('cpf').value,
-    phone: document.getElementById('phone').value,
+    phone: phoneValue,
     zipCode: document.getElementById('zipCode').value,
     street: document.getElementById('street').value,
     number: document.getElementById('number').value,
