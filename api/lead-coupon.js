@@ -1,5 +1,6 @@
 import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
+import { emailValidationErrorMessage, validateEmailAddress } from '../lib/email-validation.js';
 
 const COUPON_CODE = 'DURA5';
 const DISCOUNT_PERCENT = 5;
@@ -32,10 +33,6 @@ function cleanObject(value) {
     acc[key] = cleanString(item);
     return acc;
   }, {});
-}
-
-function validEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
 }
 
 function couponLink() {
@@ -129,8 +126,14 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body || {};
-    const email = String(body.email || '').trim().toLowerCase();
-    if (!validEmail(email)) return res.status(400).json({ error: 'E-mail invalido.' });
+    const emailValidation = await validateEmailAddress(body.email);
+    if (!emailValidation.accepted) {
+      return res.status(400).json({
+        error: emailValidationErrorMessage(emailValidation),
+        email_validation: emailValidation,
+      });
+    }
+    const email = emailValidation.normalized;
 
     const ip = firstHeaderValue(req.headers['x-forwarded-for'] || req.socket?.remoteAddress);
     const userAgent = req.headers['user-agent'] || '';
@@ -157,6 +160,7 @@ export default async function handler(req, res) {
         last_event: 'coupon_requested',
         coupon_code: COUPON_CODE,
         coupon_discount_percent: DISCOUNT_PERCENT,
+        email_validation: emailValidation,
         events: [{
           name: 'coupon_requested',
           at: new Date().toISOString(),

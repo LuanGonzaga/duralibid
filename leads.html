@@ -122,6 +122,10 @@ a{color:inherit;text-decoration:none}
 .contact-person strong{display:block;color:var(--ink);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contact-person span,.contact-meta{display:block;color:var(--muted);font-size:.76rem;line-height:1.4;margin-top:3px}
 .contact-email a{display:block;color:#2456D6;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.email-badge{display:inline-flex;align-items:center;min-height:22px;border-radius:999px;padding:0 8px;margin-top:5px;font-size:.68rem;font-weight:950;background:#EEF2F7;color:#566173}
+.email-badge.valid{background:#E4F8ED;color:#0F7A48}
+.email-badge.invalid{background:#FFE7E7;color:#B91C1C}
+.email-badge.unknown{background:#F0F3F8;color:#6B7484}
 .contact-phone a{display:inline-flex;align-items:center;min-height:30px;border-radius:7px;background:#E4F8ED;color:#0F7A48;font-weight:950;padding:0 9px}
 .contact-copy{height:30px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text);font-size:.76rem;font-weight:950;padding:0 9px}
 .contact-copy:hover{border-color:var(--line-strong)}
@@ -1184,6 +1188,21 @@ function registeredContacts() {
     .sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
 }
 
+function emailValidationInfo(lead) {
+  if (!lead.email) return { label: 'Sem e-mail', cls: 'unknown' };
+  const info = lead.metadata?.email_validation;
+  if (!info) return { label: 'Nao verificado', cls: 'unknown' };
+  if (info.deliverable || info.has_mx || info.reason === 'mx_found') return { label: 'E-mail validado', cls: 'valid' };
+  if (info.accepted) return { label: 'Validacao parcial', cls: 'unknown' };
+  if (info.suggestion) return { label: `Possivel erro: ${info.suggestion}`, cls: 'invalid' };
+  return { label: info.message || 'E-mail invalido', cls: 'invalid' };
+}
+
+function emailBadge(lead) {
+  const info = emailValidationInfo(lead);
+  return `<span class="email-badge ${escapeHtml(info.cls)}">${escapeHtml(info.label)}</span>`;
+}
+
 function renderRegisteredContacts() {
   const list = $('registeredList');
   const empty = $('registeredEmpty');
@@ -1211,6 +1230,7 @@ function renderRegisteredContacts() {
       </div>
       <div class="contact-email">
         ${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '<span class="contact-meta">E-mail nao informado</span>'}
+        ${emailBadge(lead)}
       </div>
       <div class="contact-phone">
         ${digits ? `<a href="https://wa.me/${digits}" target="_blank" rel="noopener">${escapeHtml(phone || digits)}</a>` : '<span class="contact-meta">Sem telefone</span>'}
@@ -1260,6 +1280,7 @@ function renderRows() {
       <td class="client">
         <strong>${escapeHtml(lead.name || 'Visitante sem cadastro')}</strong>
         <span>${escapeHtml(lead.email || '-')}</span>
+        ${lead.email ? emailBadge(lead) : ''}
         <span>${escapeHtml(lead.phone || '')}</span>
         <span>${lead.cpf ? `CPF: ${escapeHtml(lead.cpf)}` : ''}</span>
       </td>
@@ -1292,11 +1313,15 @@ function setStatus(status) {
 }
 
 function exportCsv() {
-  const headers = ['status','created_at','updated_at','name','email','phone','cpf','kit','amount','payment_method','payment_status','payment_id','recovery_stage','city','state','utm_source','utm_campaign'];
+  const headers = ['status','created_at','updated_at','name','email','email_validation','email_validation_reason','phone','cpf','kit','amount','payment_method','payment_status','payment_id','recovery_stage','city','state','utm_source','utm_campaign'];
   const lines = [headers.join(',')].concat(state.filtered.map((lead) => {
     const attr = lead.attribution || {};
+    const emailInfo = emailValidationInfo(lead);
+    const emailValidation = lead.metadata?.email_validation || {};
     const values = [
-      lead.funnel_status, lead.created_at, lead.updated_at, lead.name, lead.email, lead.phone, lead.cpf,
+      lead.funnel_status, lead.created_at, lead.updated_at, lead.name, lead.email,
+      emailInfo.label, emailValidation.reason,
+      lead.phone, lead.cpf,
       lead.kit_name, lead.amount, lead.payment_method, lead.payment_status, lead.payment_id,
       lead.recovery_stage, lead.city, lead.state, attr.utm_source, attr.utm_campaign,
     ];

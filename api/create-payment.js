@@ -1,5 +1,6 @@
 import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
+import { emailValidationErrorMessage, validateEmailAddress } from '../lib/email-validation.js';
 
 const KITS = {
   1: { name: 'DuraLibid — 1 Frasco (1 mês)',    quantity: 1, price: 89.90  },
@@ -230,18 +231,43 @@ export default async function handler(req, res) {
     const kitData = KITS[kit];
     if (!kitData) return res.status(400).json({ error: 'Kit inválido' });
 
+    const trackingData = tracking && typeof tracking === 'object' ? tracking : {};
+    const leadId = normalizeLeadId(trackingData.leadId);
+    const emailValidation = await validateEmailAddress(email);
+    const normalizedEmail = emailValidation.normalized;
+    if (!emailValidation.accepted) {
+      await upsertLeadByLeadId({
+        lead_id: leadId,
+        funnel_status: 'form_submitted',
+        name,
+        email: normalizedEmail,
+        phone,
+        cpf,
+        metadata: {
+          last_event: 'email_validation_failed',
+          email_validation: emailValidation,
+        },
+      }).catch((crmErr) => {
+        console.error('Falha ao registrar e-mail invalido:', crmErr);
+      });
+
+      return res.status(400).json({
+        error: emailValidationErrorMessage(emailValidation),
+        email_validation: emailValidation,
+      });
+    }
+
     const normalizedPhoneDigits = phoneDigits(phone);
     if (![10, 11].includes(normalizedPhoneDigits.length)) {
       return res.status(400).json({ error: 'Telefone inválido' });
     }
     const normalizedPhone = formatPhone(phone);
     const pricing = priceWithCoupon(kitData.price, couponCode);
-    const trackingData = tracking && typeof tracking === 'object' ? tracking : {};
-    const leadId = normalizeLeadId(trackingData.leadId);
     const metadata = { kit: parseInt(kit) };
     metadata.lead_id = leadId;
     metadata.order_amount = pricing.total;
     metadata.order_subtotal = pricing.subtotal;
+    metadata.email_validation = emailValidation;
     if (pricing.couponCode) {
       metadata.coupon_code = pricing.couponCode;
       metadata.discount_amount = pricing.discount;
@@ -253,7 +279,7 @@ export default async function handler(req, res) {
     if (trackingData.sourceUrl) metadata.source_url = String(trackingData.sourceUrl).slice(0, 500);
 
     const payer = {
-      email,
+      email: normalizedEmail,
       first_name: name.split(' ')[0],
       last_name: name.split(' ').slice(1).join(' ') || name.split(' ')[0],
       identification: { type: 'CPF', number: cpf.replace(/\D/g, '') },
@@ -308,7 +334,7 @@ export default async function handler(req, res) {
         discount: pricing.discount,
       },
       userData: {
-        email: email,
+        email: normalizedEmail,
         phone: normalizedPhone,
         firstName: name.split(' ')[0],
         lastName: name.split(' ').slice(1).join(' '),
@@ -337,7 +363,7 @@ export default async function handler(req, res) {
     const data = await mpRes.json();
 
     if (mpRes.ok) {
-      const order = { name, email, cpf, phone: normalizedPhone, zipCode, street, number, complement, neighborhood, city, state };
+      const order = { name, email: normalizedEmail, cpf, phone: normalizedPhone, zipCode, street, number, complement, neighborhood, city, state };
       const pixCode = data.point_of_interaction?.transaction_data?.qr_code;
       const pixExpiresAt = paymentMethod === 'pix'
         ? payload.date_of_expiration
@@ -355,7 +381,7 @@ export default async function handler(req, res) {
         kit_name: kitData.name,
         amount: pricing.total,
         name,
-        email,
+        email: normalizedEmail,
         phone: normalizedPhone,
         cpf,
         zip_code: zipCode,
@@ -384,6 +410,7 @@ export default async function handler(req, res) {
           discount_percent: pricing.discountPercent,
           subtotal: pricing.subtotal,
           total: pricing.total,
+          email_validation: emailValidation,
         },
       });
 
@@ -407,7 +434,7 @@ export default async function handler(req, res) {
         await Promise.allSettled([
           adminLeadEmail,
           sendEmail({
-            to: email,
+            to: normalizedEmail,
             subject: 'Seu Pix foi gerado - DuraLibid',
             html: emailPixGerado({
               order,
