@@ -112,6 +112,21 @@ a{color:inherit;text-decoration:none}
 .source-meter{grid-column:1/-1;height:7px;border-radius:999px;background:#EEF2F7;overflow:hidden}
 .source-meter span{display:block;height:100%;border-radius:999px;background:var(--blue)}
 
+.contacts-panel{margin-bottom:14px;overflow:hidden}
+.contacts-head{align-items:center}
+.contacts-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.contacts-count{display:inline-flex;align-items:center;min-height:32px;border-radius:999px;background:#F0F3F8;color:#3F4A5B;font-size:.78rem;font-weight:950;padding:0 11px}
+.contacts-list{display:grid;gap:8px}
+.contact-row{display:grid;grid-template-columns:minmax(180px,1.15fr) minmax(220px,1.35fr) minmax(132px,.8fr) minmax(170px,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:11px}
+.contact-row:hover{border-color:var(--line-strong);background:#FFF}
+.contact-person strong{display:block;color:var(--ink);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-person span,.contact-meta{display:block;color:var(--muted);font-size:.76rem;line-height:1.4;margin-top:3px}
+.contact-email a{display:block;color:#2456D6;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-phone a{display:inline-flex;align-items:center;min-height:30px;border-radius:7px;background:#E4F8ED;color:#0F7A48;font-weight:950;padding:0 9px}
+.contact-copy{height:30px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text);font-size:.76rem;font-weight:950;padding:0 9px}
+.contact-copy:hover{border-color:var(--line-strong)}
+.contacts-empty{border:1px dashed var(--line-strong);border-radius:8px;background:#FAFBFD;color:var(--muted);padding:18px;text-align:center;font-size:.86rem}
+
 .filters{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:8px;padding:12px;box-shadow:var(--shadow-soft)}
 .search{min-width:260px;flex:1;position:relative}
 .search input{width:100%;height:40px;border:1px solid var(--line);border-radius:7px;padding:0 13px;background:#fff;color:var(--text);outline:none}
@@ -215,6 +230,9 @@ tr:hover td{background:#FFF7F7}
   .bridge-metrics{grid-template-columns:1fr}
   .funnel-row{grid-template-columns:1fr;gap:7px}
   .funnel-value{text-align:left}
+  .contacts-head{align-items:flex-start}
+  .contacts-head-actions{justify-content:flex-start}
+  .contact-row{grid-template-columns:1fr}
   .search{min-width:100%;width:100%}
   .segments{width:100%}
   .segment{flex:1}
@@ -442,12 +460,30 @@ tr:hover td{background:#FFF7F7}
       </article>
     </section>
 
+    <section class="panel contacts-panel" aria-label="Cadastros capturados">
+      <div class="panel-head contacts-head">
+        <div>
+          <div class="panel-title">Cadastros capturados</div>
+          <div class="panel-sub">Nome, e-mail e telefone dos usuarios que ja deixaram dados no site.</div>
+        </div>
+        <div class="contacts-head-actions">
+          <span id="registeredCount" class="contacts-count">0 cadastrados</span>
+          <button id="showRegistered" class="btn" type="button">Ver todos cadastrados</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="registeredList" class="contacts-list"></div>
+        <div id="registeredEmpty" class="contacts-empty hidden">Quando alguem pedir cupom ou preencher o checkout, nome, e-mail e telefone aparecem aqui.</div>
+      </div>
+    </section>
+
     <section class="filters" aria-label="Filtros de leads">
       <div class="search">
         <input id="search" type="search" placeholder="Buscar nome, e-mail, telefone, CPF ou ID do pagamento">
       </div>
       <div id="segments" class="segments">
         <button class="segment active" type="button" data-status="all">Todos</button>
+        <button class="segment" type="button" data-status="registered">Cadastrados</button>
         <button class="segment" type="button" data-status="site_visit">Visita</button>
         <button class="segment" type="button" data-status="cta_click">Clique</button>
         <button class="segment" type="button" data-status="coupon_requested">Cupom</button>
@@ -500,6 +536,7 @@ const state = { leads: [], filtered: [], status: 'all', query: '', metaAds: null
 const AUTH_KEY = 'dl_panel_auth_v1';
 
 const STATUS = {
+  registered: 'Cadastrados',
   site_visit: 'Visita',
   cta_click: 'Clique',
   coupon_requested: 'Cupom',
@@ -601,7 +638,8 @@ function authError(message) {
 function statusLabel(value) { return STATUS[value] || value || '-'; }
 function isPaid(lead) { return lead.funnel_status === 'paid' || lead.payment_status === 'approved'; }
 function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status); }
-function isRegistered(lead) { return Boolean(lead.email || lead.phone || lead.name || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
+function hasContact(lead) { return Boolean(lead.email || lead.phone || lead.name); }
+function isRegistered(lead) { return Boolean(hasContact(lead) || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
 function statusRank(value) { return STATUS_RANK[value] || 0; }
 function reached(lead, status) { return statusRank(lead.funnel_status) >= statusRank(status); }
 function amount(lead) { return Number(lead.amount || 0); }
@@ -725,7 +763,11 @@ async function loadMetaAds() {
 function applyFilters() {
   const q = state.query.trim().toLowerCase();
   state.filtered = state.leads.filter((lead) => {
-    if (state.status !== 'all' && lead.funnel_status !== state.status) return false;
+    if (state.status === 'registered') {
+      if (!hasContact(lead)) return false;
+    } else if (state.status !== 'all' && lead.funnel_status !== state.status) {
+      return false;
+    }
     if (!q) return true;
     const attr = lead.attribution || {};
     const haystack = [
@@ -744,6 +786,7 @@ function render() {
   renderInsights(s);
   renderSources();
   renderSpark();
+  renderRegisteredContacts();
   renderRows();
   renderBridgeMetrics(s);
   $('statusText').textContent = `${number.format(state.filtered.length)} de ${number.format(state.leads.length)} registros`;
@@ -1121,11 +1164,67 @@ function escapeHtml(value) {
   }[char]));
 }
 
+function whatsappDigits(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('55') ? digits : `55${digits}`;
+}
+
 function contactLink(lead) {
   if (!lead.phone) return '-';
-  const digits = lead.phone.replace(/\D/g, '');
+  const digits = whatsappDigits(lead.phone);
   if (!digits) return '-';
-  return `<a class="whats" href="https://wa.me/55${digits}" target="_blank" rel="noopener">WhatsApp</a>`;
+  return `<a class="whats" href="https://wa.me/${digits}" target="_blank" rel="noopener">WhatsApp</a>`;
+}
+
+function registeredContacts() {
+  return state.leads
+    .filter(hasContact)
+    .slice()
+    .sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+}
+
+function renderRegisteredContacts() {
+  const list = $('registeredList');
+  const empty = $('registeredEmpty');
+  const count = $('registeredCount');
+  if (!list || !empty || !count) return;
+
+  const contacts = registeredContacts();
+  const withEmail = contacts.filter((lead) => lead.email).length;
+  count.textContent = `${number.format(contacts.length)} cadastrados · ${number.format(withEmail)} com e-mail`;
+  list.innerHTML = '';
+  empty.classList.toggle('hidden', contacts.length > 0);
+
+  contacts.slice(0, 10).forEach((lead) => {
+    const attr = lead.attribution || {};
+    const email = String(lead.email || '').trim();
+    const phone = String(lead.phone || '').trim();
+    const digits = whatsappDigits(phone);
+    const source = attr.utm_source || attr.utm_campaign || sourceName(lead);
+    const row = document.createElement('div');
+    row.className = 'contact-row';
+    row.innerHTML = `
+      <div class="contact-person">
+        <strong>${escapeHtml(lead.name || 'Usuario sem nome')}</strong>
+        <span>${escapeHtml(statusLabel(lead.funnel_status))} · ${escapeHtml(fmtDate(lead.updated_at || lead.created_at))}</span>
+      </div>
+      <div class="contact-email">
+        ${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '<span class="contact-meta">E-mail nao informado</span>'}
+      </div>
+      <div class="contact-phone">
+        ${digits ? `<a href="https://wa.me/${digits}" target="_blank" rel="noopener">${escapeHtml(phone || digits)}</a>` : '<span class="contact-meta">Sem telefone</span>'}
+      </div>
+      <div>
+        <span class="contact-meta">${escapeHtml(lead.kit_name || 'Sem kit escolhido')}</span>
+        <span class="contact-meta">${escapeHtml(source)}</span>
+      </div>
+      <div>
+        ${email ? `<button class="contact-copy" type="button" data-copy-email="${escapeHtml(email)}">Copiar e-mail</button>` : ''}
+      </div>
+    `;
+    list.appendChild(row);
+  });
 }
 
 function renderRows() {
@@ -1244,6 +1343,7 @@ $('refresh').addEventListener('click', () => loadDashboard().catch((err) => {
   $('statusText').textContent = err.message;
 }));
 $('exportCsv').addEventListener('click', exportCsv);
+$('showRegistered').addEventListener('click', () => setStatus('registered'));
 $('adsPeriod').addEventListener('change', (event) => {
   state.metaPeriod = event.target.value;
   loadMetaAds().catch((err) => {
@@ -1264,6 +1364,21 @@ document.querySelectorAll('.segment').forEach((button) => {
 });
 document.querySelectorAll('[data-nav-filter]').forEach((button) => {
   button.addEventListener('click', () => setStatus(button.dataset.navFilter));
+});
+document.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-copy-email]');
+  if (!button) return;
+  const email = button.dataset.copyEmail || '';
+  if (!email) return;
+
+  try {
+    await navigator.clipboard.writeText(email);
+    const previous = button.textContent;
+    button.textContent = 'Copiado';
+    setTimeout(() => { button.textContent = previous; }, 1400);
+  } catch (err) {
+    window.prompt('Copie o e-mail:', email);
+  }
 });
 
 async function boot() {
