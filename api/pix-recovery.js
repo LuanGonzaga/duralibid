@@ -56,14 +56,14 @@ async function getMercadoPagoPayment(paymentId) {
   return res.json();
 }
 
-function nextStage(lead) {
+export function nextStage(lead) {
   const startedAt = new Date(lead.pix_generated_at || lead.created_at).getTime();
   const elapsedMinutes = (Date.now() - startedAt) / 60000;
   const current = Number(lead.recovery_stage || 0);
 
-  if (current < 1 && elapsedMinutes >= 8) return 1;
-  if (current < 2 && elapsedMinutes >= 20) return 2;
-  if (current < 3 && elapsedMinutes >= 35) return 3;
+  if (current < 1 && elapsedMinutes >= 10) return 1;
+  if (current < 2 && elapsedMinutes >= 25) return 2;
+  if (current < 3 && elapsedMinutes >= 45) return 3;
   return 0;
 }
 
@@ -72,24 +72,24 @@ function checkoutUrl(lead) {
   return `https://www.duralibid.com.br/checkout.html?kit=${encodeURIComponent(kit)}&utm_source=pix_recovery&utm_medium=email`;
 }
 
-function subjectForStage(stage) {
-  if (stage === 1) return 'Seu Pix ainda esta reservado - DuraLibid';
-  if (stage === 2) return 'Faltam poucos minutos para pagar seu Pix';
-  return 'Precisa de ajuda para finalizar seu pedido?';
+export function subjectForStage(stage) {
+  if (stage === 1) return 'Seu Pix está pronto para pagamento - DuraLibid';
+  if (stage === 2) return 'Seu Pix está perto de vencer - DuraLibid';
+  return 'Seu Pix venceu: gere um novo código - DuraLibid';
 }
 
 function emailForStage(lead, stage) {
   const name = escapeHtml((lead.name || 'cliente').split(' ')[0]);
   const title = stage === 1
-    ? 'Seu Pix ainda esta reservado'
+    ? 'Seu Pix está pronto'
     : stage === 2
       ? 'Faltam poucos minutos'
-      : 'Quer finalizar seu pedido?';
+      : 'Seu código venceu?';
   const intro = stage === 1
-    ? `Ola, ${name}. Vimos que voce gerou o Pix do seu pedido, mas o pagamento ainda nao foi confirmado.`
+    ? `Olá, ${name}. Seu código Pix está pronto, mas o pagamento ainda não foi confirmado.`
     : stage === 2
-      ? `Ola, ${name}. Seu Pix esta perto de vencer. Para garantir o pedido, finalize o pagamento agora.`
-      : `Ola, ${name}. Seu Pix pode ter vencido, mas voce ainda pode voltar ao checkout e gerar um novo codigo.`;
+      ? `Olá, ${name}. Seu Pix está perto de vencer. Para concluir o pedido, finalize o pagamento agora.`
+      : `Olá, ${name}. O código anterior venceu, mas você pode voltar ao checkout e gerar um novo Pix com segurança.`;
   const pixBlock = stage < 3 && lead.pix_code
     ? `
     <div style="background:#141518;border-radius:8px;padding:18px;margin:20px 0">
@@ -145,7 +145,7 @@ export default async function handler(req, res) {
       await updateLeadByPaymentId(lead.payment_id, {
         funnel_status: 'paid',
         payment_status: 'approved',
-        recovery_stage: 3,
+        recovery_stage: Number(lead.recovery_stage || 0),
         paid_at: new Date().toISOString(),
         metadata: { last_event: 'payment_approved_by_recovery_check' },
       });
@@ -161,6 +161,7 @@ export default async function handler(req, res) {
       });
     }
 
+    const sentAt = new Date().toISOString();
     const sent = await sendEmail({
       to: lead.email,
       subject: subjectForStage(stage),
@@ -171,8 +172,11 @@ export default async function handler(req, res) {
       await updateLeadById(lead.id, {
         funnel_status: stage >= 3 ? 'abandoned' : 'pix_generated',
         recovery_stage: stage,
-        recovery_last_sent_at: new Date().toISOString(),
-        metadata: { last_event: `pix_recovery_${stage}` },
+        recovery_last_sent_at: sentAt,
+        metadata: {
+          last_event: `pix_recovery_${stage}`,
+          [`pix_recovery_${stage}_sent_at`]: sentAt,
+        },
       });
       result.sent++;
     } else {

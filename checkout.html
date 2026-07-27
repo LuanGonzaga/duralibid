@@ -4,16 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checkout — DuraLibid</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="Finalize seu pedido DuraLibid com Pix ou cartão processado pelo Mercado Pago. Frete grátis e entrega discreta.">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="brand/tokens.css">
 <!-- Meta Pixel -->
 <script src="tracking.js"></script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=918376947924562&ev=PageView&noscript=1"/></noscript>
-<!-- UTMify -->
-<script>window.pixelId="6a5121ed882e6adbfb3d7934";var a=document.createElement("script");a.setAttribute("async","");a.setAttribute("defer","");a.setAttribute("src","https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);</script>
+<!-- UTMify: preserva UTMs; o pixel legado foi removido por retornar HTTP 400. -->
 <script
   src="https://cdn.utmify.com.br/scripts/utms/latest.js"
   data-utmify-prevent-xcod-sck
@@ -21,8 +19,6 @@
   async
   defer
 ></script>
-<!-- Mercado Pago Bricks SDK -->
-<script src="https://sdk.mercadopago.com/js/v2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -163,7 +159,7 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
 <header class="wrap">
   <nav>
     <div class="logo">
-      <img src="images/mm6-logo.PNG" alt="DuraLibid">
+      <img src="images/optimized/logo-96.webp" width="96" height="96" alt="DuraLibid" decoding="async">
       <span class="brand">DURA<b>LIBID</b></span>
     </div>
     <div class="secure">
@@ -350,9 +346,17 @@ nav .secure{font-size:var(--fs-xs);color:var(--duo-mute);display:flex;align-item
   </div>
 </main>
 
+<footer style="max-width:1040px;margin:0 auto;padding:24px 16px 48px;color:var(--duo-mute);font-size:12px;text-align:center">
+  <a href="/politica-de-privacidade.html">Privacidade</a> ·
+  <a href="/termos-de-compra.html">Termos de compra</a> ·
+  <a href="/trocas-devolucoes.html">Trocas, devoluções e garantia</a> ·
+  Notificação Anvisa nº 25351117215202576 · AFE nº 20099142
+</footer>
+
 <script>
 const MP_PUBLIC_KEY = 'APP_USR-d20df047-383d-4404-8123-c027d4edc976';
-const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+let mp = null;
+let mercadoPagoLoader = null;
 
 const KITS = {
   1: { name: 'DuraLibid — 1 Frasco', price: 89.90,  old: 139.90, qtd: 1 },
@@ -529,7 +533,23 @@ document.querySelectorAll('.pay-tab').forEach(tab => {
 });
 
 // --- Card Brick ---
+function loadMercadoPagoSdk() {
+  if (window.MercadoPago) return Promise.resolve(window.MercadoPago);
+  if (mercadoPagoLoader) return mercadoPagoLoader;
+  mercadoPagoLoader = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    script.addEventListener('load', () => resolve(window.MercadoPago), { once: true });
+    script.addEventListener('error', () => reject(new Error('Não foi possível carregar o pagamento por cartão.')), { once: true });
+    document.head.appendChild(script);
+  });
+  return mercadoPagoLoader;
+}
+
 async function initCardBrick() {
+  const MercadoPagoSdk = await loadMercadoPagoSdk();
+  if (!mp) mp = new MercadoPagoSdk(MP_PUBLIC_KEY, { locale: 'pt-BR' });
   const bricks = mp.bricks();
   cardBrick = await bricks.create('cardPayment', 'cardPaymentBrick_container', {
     initialization: { amount: pricingFor(selectedKit).total },
@@ -605,6 +625,61 @@ function validate() {
   if (![10, 11].includes(phoneSize)) { phone.closest('.field').classList.add('has-error'); ok = false; }
   else phone.value = formatPhone(phone.value);
   return ok;
+}
+
+function renderFeedback(container, kind, title, message) {
+  container.className = kind;
+  container.style.display = 'block';
+  const heading = document.createElement('h3');
+  heading.textContent = title;
+  const paragraph = document.createElement('p');
+  paragraph.style.color = 'var(--duo-silver)';
+  paragraph.textContent = message;
+  container.replaceChildren(heading, paragraph);
+}
+
+function renderPixFeedback(container, data) {
+  container.className = 'success';
+  container.style.display = 'block';
+  const heading = document.createElement('h3');
+  heading.textContent = '✓ Pix gerado com sucesso!';
+  const intro = document.createElement('p');
+  intro.style.color = 'var(--duo-silver)';
+  intro.textContent = 'Escaneie o QR Code ou copie o código abaixo. O prazo para pagamento é de 30 minutos.';
+  const result = document.createElement('div');
+  result.className = 'pix-result';
+
+  if (/^[A-Za-z0-9+/=]+$/.test(String(data.pix_qr_base64 || ''))) {
+    const qr = document.createElement('img');
+    qr.className = 'pix-qr';
+    qr.src = `data:image/png;base64,${data.pix_qr_base64}`;
+    qr.alt = 'QR Code Pix';
+    qr.width = 240;
+    qr.height = 240;
+    result.appendChild(qr);
+  }
+
+  const code = document.createElement('div');
+  code.className = 'pix-copy';
+  code.textContent = String(data.pix_copy_paste || '');
+  result.appendChild(code);
+
+  const copy = document.createElement('button');
+  copy.className = 'btn-copy';
+  copy.type = 'button';
+  copy.textContent = 'Copiar código Pix';
+  copy.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(String(data.pix_copy_paste || ''));
+    copy.textContent = 'Copiado ✓';
+  });
+  result.appendChild(copy);
+
+  const note = document.createElement('p');
+  note.style.color = 'var(--duo-mute)';
+  note.style.fontSize = 'var(--fs-xs)';
+  note.style.marginTop = 'var(--space-3)';
+  note.textContent = 'Após o pagamento você receberá um e-mail de confirmação com os detalhes do pedido.';
+  container.replaceChildren(heading, intro, result, note);
 }
 
 // --- Submit ---
@@ -707,31 +782,17 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
           ...DLTracking.kitPayload(selectedKit),
           payment_id: data.payment_id,
         });
-        fb.className = 'success';
-        fb.style.display = 'block';
-        fb.innerHTML = `
-          <h3>✓ Pix gerado com sucesso!</h3>
-          <p style="color:var(--duo-silver)">Escaneie o QR Code ou copie o código abaixo. O prazo para pagamento é de 30 minutos.</p>
-          <div class="pix-result">
-            ${data.pix_qr_base64 ? `<img class="pix-qr" src="data:image/png;base64,${data.pix_qr_base64}" alt="QR Code Pix">` : ''}
-            <div class="pix-copy">${data.pix_copy_paste}</div>
-            <button class="btn-copy" onclick="navigator.clipboard.writeText('${data.pix_copy_paste}').then(()=>this.textContent='Copiado ✓')">Copiar código Pix</button>
-          </div>
-          <p style="color:var(--duo-mute);font-size:var(--fs-xs);margin-top:var(--space-3)">Após o pagamento você receberá um e-mail de confirmação com os detalhes do pedido.</p>`;
+        renderPixFeedback(fb, data);
       } else if (paymentMethod === 'credit_card' && data.status === 'approved') {
         location.href = `obrigado.html?id=${data.payment_id}&kit=${selectedKit}`;
       } else {
-        fb.className = 'error';
-        fb.style.display = 'block';
-        fb.innerHTML = `<h3>Pagamento em análise</h3><p style="color:var(--duo-silver)">Seu pagamento está sendo processado. Você receberá uma confirmação por e-mail em breve.</p>`;
+        renderFeedback(fb, 'error', 'Pagamento em análise', 'Seu pagamento está sendo processado. Você receberá uma confirmação por e-mail em breve.');
       }
     } else {
       throw new Error(data.error || 'Erro ao processar');
     }
   } catch (err) {
-    fb.className = 'error';
-    fb.style.display = 'block';
-    fb.innerHTML = `<h3>Erro no pagamento</h3><p style="color:var(--duo-silver)">${err.message || 'Tente novamente ou use outro método de pagamento.'}</p>`;
+    renderFeedback(fb, 'error', 'Erro no pagamento', err.message || 'Tente novamente ou use outro método de pagamento.');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Finalizar pedido →';

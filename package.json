@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "test": "node --test test/security.test.js"
+    "test": "node --test test/security.test.js test/recovery.test.js test/site.test.js"
   },
   "devDependencies": {
     "sharp": "^0.35.3"

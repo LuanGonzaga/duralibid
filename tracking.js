@@ -4,7 +4,7 @@
 
   function initMetaPixel() {
     if (window.fbq) return;
-    !function(f,b,e,v,n,t,s){
+    !function(f,n){
       if(f.fbq)return;
       n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;
@@ -12,13 +12,33 @@
       n.loaded=!0;
       n.version='2.0';
       n.queue=[];
-      t=b.createElement(e);
-      t.async=!0;
-      t.src=v;
-      s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s);
-    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    }(window);
     window.fbq('init', META_PIXEL_ID);
+  }
+
+  function loadMetaPixelScript() {
+    if (document.querySelector('script[data-dl-meta-pixel]')) return;
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    script.setAttribute('data-dl-meta-pixel', '1');
+    document.head.appendChild(script);
+  }
+
+  function scheduleMetaPixel() {
+    var loaded = false;
+    var load = function () {
+      if (loaded) return;
+      loaded = true;
+      loadMetaPixelScript();
+      window.removeEventListener('pointerdown', load);
+      window.removeEventListener('keydown', load);
+    };
+    window.addEventListener('pointerdown', load, { once: true, passive: true });
+    window.addEventListener('keydown', load, { once: true });
+    var afterLoad = function () { window.setTimeout(load, 5000); };
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
   }
 
   function nowBase36() {
@@ -267,6 +287,7 @@
   }
 
   initMetaPixel();
+  scheduleMetaPixel();
   var pageViewEventId = track('PageView', {});
   recordFunnelEvent('page_view', { pageType: detectPageType(), eventId: pageViewEventId }, {
     onceKey: 'page_view_' + window.location.pathname,

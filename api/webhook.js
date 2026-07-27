@@ -265,7 +265,6 @@ export default async function handler(req, res) {
       funnel_status: 'paid',
       payment_status: payment.status,
       amount: kit.price,
-      recovery_stage: 3,
       paid_at: new Date().toISOString(),
       metadata: {
         last_event: 'payment_approved',

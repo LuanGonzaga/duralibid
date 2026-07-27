@@ -84,6 +84,12 @@ a{color:inherit;text-decoration:none}
 .dot.gold{background:var(--gold)}.dot.green{background:var(--green)}.dot.blue{background:var(--blue)}.dot.orange{background:var(--orange)}
 .kpi-value{margin-top:14px;font-size:1.78rem;font-weight:950;color:var(--ink);letter-spacing:0;line-height:1.05}
 .kpi small{display:block;margin-top:7px;color:var(--muted);font-size:.82rem;line-height:1.35}
+.recovery-panel{margin-bottom:14px}
+.recovery-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px}
+.recovery-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:var(--shadow-soft)}
+.recovery-card span{display:block;color:var(--muted);font-size:.75rem;font-weight:900;text-transform:uppercase}
+.recovery-card strong{display:block;margin-top:8px;color:var(--ink);font-size:1.45rem}
+.recovery-card small{display:block;margin-top:5px;color:var(--muted)}
 
 .grid{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(330px,.72fr);gap:14px;margin-bottom:14px}
 .panel{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
@@ -242,6 +248,7 @@ tr:hover td{background:#FFF7F7}
   .nav,.side-card{display:none}
   .main{padding:16px}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .recovery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid{grid-template-columns:1fr}
   .ads-shell{grid-template-columns:1fr}
   .funnel-chart-wrap{grid-template-columns:1fr}
@@ -251,6 +258,7 @@ tr:hover td{background:#FFF7F7}
   .actions{width:100%;justify-content:flex-start}
   .btn{flex:1;min-width:130px}
   .kpis{grid-template-columns:1fr}
+  .recovery-grid{grid-template-columns:1fr}
   .ad-metrics{grid-template-columns:1fr}
   .bridge-metrics{grid-template-columns:1fr}
   .x1-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -454,6 +462,25 @@ tr:hover td{background:#FFF7F7}
           <small id="kRecoveryHint">Sequencias de e-mail enviadas</small>
         </div>
       </article>
+    </section>
+
+    <section class="panel recovery-panel" aria-label="Resultados da recuperação automática de Pix">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Recuperação automática de Pix</div>
+          <div class="panel-sub">Três contatos protegidos: lembrete, reforço antes do vencimento e geração de novo código.</div>
+        </div>
+        <span id="recoveryStatus" class="status-text">Aguardando dados</span>
+      </div>
+      <div class="panel-body">
+        <div class="recovery-grid">
+          <article class="recovery-card"><span>1º lembrete</span><strong id="rStage1" class="mono">0</strong><small>Pix pronto para pagar</small></article>
+          <article class="recovery-card"><span>2º reforço</span><strong id="rStage2" class="mono">0</strong><small>Próximo do vencimento</small></article>
+          <article class="recovery-card"><span>3º encerramento</span><strong id="rStage3" class="mono">0</strong><small>Novo código oferecido</small></article>
+          <article class="recovery-card"><span>Pedidos recuperados</span><strong id="rRecovered" class="mono">0</strong><small>Pagos após contato</small></article>
+          <article class="recovery-card"><span>Receita recuperada</span><strong id="rRevenue" class="mono">R$ 0,00</strong><small>Valor confirmado</small></article>
+        </div>
+      </div>
     </section>
 
     <section class="panel x1-panel" aria-label="Operacao comercial X1">
@@ -776,7 +803,20 @@ function summary(leads) {
       acc.openPix += 1;
       acc.openPixValue += amount(lead);
     }
-    acc.recoverySent += Number(lead.recovery_stage || 0);
+    const metadata = lead.metadata || {};
+    const sentStages = [1, 2, 3].filter((stage) => Boolean(metadata[`pix_recovery_${stage}_sent_at`]));
+    const legacyStage = !sentStages.length && !isPaid(lead)
+      ? Math.min(Math.max(Number(lead.recovery_stage || 0), 0), 3)
+      : 0;
+    const effectiveStages = sentStages.length
+      ? sentStages
+      : Array.from({ length: legacyStage }, (_, index) => index + 1);
+    effectiveStages.forEach((stage) => { acc.recoveryStages[stage] += 1; });
+    acc.recoverySent += effectiveStages.length;
+    if (isPaid(lead) && sentStages.length) {
+      acc.recoveredPaid += 1;
+      acc.recoveredRevenue += amount(lead);
+    }
     return acc;
   }, {
     total: 0,
@@ -792,6 +832,9 @@ function summary(leads) {
     openPixValue: 0,
     revenue: 0,
     recoverySent: 0,
+    recoveryStages: { 1: 0, 2: 0, 3: 0 },
+    recoveredPaid: 0,
+    recoveredRevenue: 0,
     byStatus: {},
   });
 }
@@ -1155,6 +1198,14 @@ function renderKpis(s) {
   $('kPixRate').textContent = `${percent(s.pix, s.total)}%`;
   $('kRecovery').textContent = number.format(s.recoverySent);
   $('kRecoveryHint').textContent = s.openPix ? `${s.openPix} Pix ainda podem converter` : 'Nenhum Pix pendente agora';
+  $('rStage1').textContent = number.format(s.recoveryStages[1]);
+  $('rStage2').textContent = number.format(s.recoveryStages[2]);
+  $('rStage3').textContent = number.format(s.recoveryStages[3]);
+  $('rRecovered').textContent = number.format(s.recoveredPaid);
+  $('rRevenue').textContent = money.format(s.recoveredRevenue);
+  $('recoveryStatus').textContent = s.recoverySent
+    ? `${number.format(s.recoverySent)} contatos enviados`
+    : 'Nenhum contato enviado';
   $('sideRevenue').textContent = money.format(s.revenue);
   $('sideHint').textContent = s.openPix ? `${s.openPix} Pix em aberto para recuperar.` : 'Sem Pix pendente no momento.';
 }

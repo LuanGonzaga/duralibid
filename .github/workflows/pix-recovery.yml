@@ -1,18 +1,26 @@
-name: Pix recovery
+name: Recuperacao de Pix
 
 on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
 
+concurrency:
+  group: duralibid-pix-recovery
+  cancel-in-progress: false
+
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
-      - name: Trigger Pix recovery
+      - name: Acionar recuperacao protegida
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --max-time 90 \
+            --header "Authorization: Bearer $CRON_SECRET" \
             https://www.duralibid.com.br/api/pix-recovery
