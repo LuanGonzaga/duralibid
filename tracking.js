@@ -90,7 +90,7 @@
 
   function pickUrlParams() {
     var params = new URLSearchParams(window.location.search);
-    var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'src', 'sck'];
+    var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'seller', 'fbclid', 'gclid', 'src', 'sck'];
     return keys.reduce(function (acc, key) {
       var value = params.get(key);
       if (value) acc[key] = value;

@@ -762,6 +762,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
   };
 
   if (paymentMethod === 'credit_card') {
+    if (!cardBrickData && cardBrick && typeof cardBrick.getFormData === 'function') {
+      try {
+        cardBrickData = await cardBrick.getFormData();
+      } catch (error) {
+        cardBrickData = null;
+      }
+    }
     if (!cardBrickData) {
       alert('Preencha os dados do cartão antes de finalizar.');
       btn.disabled = false; btn.textContent = 'Finalizar pedido →'; return;
@@ -769,6 +776,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     body.token = cardBrickData.token;
     body.installments = cardBrickData.installments;
     body.issuer_id = cardBrickData.issuer_id;
+    body.payment_method_id = cardBrickData.payment_method_id;
   }
 
   try {

@@ -19,6 +19,27 @@ test('checkout renders external payment data without innerHTML', () => {
   assert.doesNotMatch(checkout, /\binnerHTML\b/);
   assert.doesNotMatch(checkout, /\bonclick\s*=/i);
   assert.match(checkout, /renderPixFeedback/);
+  assert.match(checkout, /cardBrick\.getFormData\(\)/);
+  assert.match(checkout, /body\.payment_method_id = cardBrickData\.payment_method_id/);
+});
+
+test('administrative funnel exposes commercial metrics and seller attribution', () => {
+  const leads = fs.readFileSync('leads.html', 'utf8');
+  const tracking = fs.readFileSync('tracking.js', 'utf8');
+  const paymentApi = fs.readFileSync('api/create-payment.js', 'utf8');
+  [
+    'kWhatsapp',
+    'kCheckout',
+    'kPix',
+    'kPaid',
+    'kConversion',
+    'campaignPerformance',
+    'sellerPerformance',
+  ].forEach((id) => assert.match(leads, new RegExp(`id="${id}"`)));
+  assert.match(leads, /url\.searchParams\.set\('seller', panelUser\(\)/);
+  assert.match(tracking, /'seller'/);
+  assert.match(paymentApi, /payload\.payment_method_id = cardMethod/);
+  assert.doesNotMatch(paymentApi, /payload\.payment_method_id = 'credit_card'/);
 });
 
 test('optimized hero and regulatory identifiers are published', () => {
@@ -40,4 +61,3 @@ test('legal pages and automated Pix workflow exist', () => {
     assert.equal(fs.existsSync(file), true, file);
   }
 });
-

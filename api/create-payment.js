@@ -225,7 +225,7 @@ export default async function handler(req, res) {
       kit, paymentMethod,
       name, email, cpf, phone,
       zipCode, street, number, complement, neighborhood, city, state,
-      token, installments, issuer_id,
+      token, installments, issuer_id, payment_method_id,
       couponCode,
       tracking = {},
     } = req.body;
@@ -311,11 +311,18 @@ export default async function handler(req, res) {
       notification_url: `${baseUrl}/api/webhook`,
     };
 
+    if (!['pix', 'credit_card'].includes(paymentMethod)) {
+      return res.status(400).json({ error: 'Forma de pagamento invalida' });
+    }
     if (paymentMethod === 'pix') {
       payload.payment_method_id = 'pix';
       payload.date_of_expiration = new Date(Date.now() + 30 * 60 * 1000).toISOString();
     } else {
-      payload.payment_method_id = 'credit_card';
+      const cardMethod = String(payment_method_id || '').trim().toLowerCase();
+      if (!token || !/^[a-z0-9_-]{2,40}$/.test(cardMethod)) {
+        return res.status(400).json({ error: 'Dados do cartao incompletos ou invalidos' });
+      }
+      payload.payment_method_id = cardMethod;
       payload.token = token;
       payload.installments = parseInt(installments) || 1;
       if (issuer_id) payload.issuer_id = issuer_id;

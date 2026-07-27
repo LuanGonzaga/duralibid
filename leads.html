@@ -77,7 +77,7 @@ a{color:inherit;text-decoration:none}
 .btn.primary{background:var(--red);border-color:var(--red);color:#fff}
 .btn.dark{background:#111827;border-color:#111827;color:#fff}
 
-.kpis{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:14px}
 .kpi{min-height:118px;background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:8px;padding:15px;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;justify-content:space-between}
 .kpi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:.76rem;font-weight:900;text-transform:uppercase}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--red)}
@@ -241,6 +241,13 @@ tr:hover td{background:#FFF7F7}
 .campaign-meter span{display:block;height:100%;border-radius:999px;background:var(--red)}
 .setup{border:1px dashed var(--line-strong);background:#FFF8E7;border-radius:8px;padding:14px;color:#7A4B00;line-height:1.5}
 .setup strong{display:block;color:#4A2D00;margin-bottom:4px}
+.performance-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.performance-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.performance-table th,.performance-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.performance-table th:first-child,.performance-table td:first-child{text-align:left;white-space:normal}
+.performance-table th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
+.performance-table td{color:var(--text)}
+.performance-table td strong{color:var(--ink)}
 
 @media(max-width:1180px){
   .app{grid-template-columns:1fr}
@@ -250,6 +257,7 @@ tr:hover td{background:#FFF7F7}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .recovery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid{grid-template-columns:1fr}
+  .performance-grid{grid-template-columns:1fr}
   .ads-shell{grid-template-columns:1fr}
   .funnel-chart-wrap{grid-template-columns:1fr}
 }
@@ -428,17 +436,52 @@ tr:hover td{background:#FFF7F7}
 
     <section class="kpis" aria-label="Indicadores">
       <article class="kpi">
-        <div class="kpi-head"><span>Receita paga</span><i class="dot green"></i></div>
+        <div class="kpi-head"><span>Visitantes</span><i class="dot blue"></i></div>
         <div>
-          <div id="kRevenue" class="kpi-value mono">R$ 0,00</div>
-          <small id="kPaidHint">0 pedidos pagos</small>
+          <div id="kTotal" class="kpi-value mono">0</div>
+          <small>Visitantes únicos rastreados</small>
         </div>
       </article>
       <article class="kpi">
-        <div class="kpi-head"><span>Visitantes CRM</span><i class="dot blue"></i></div>
+        <div class="kpi-head"><span>Cliques WhatsApp</span><i class="dot green"></i></div>
         <div>
-          <div id="kTotal" class="kpi-value mono">0</div>
-          <small id="kTotalHint">0 entraram no checkout</small>
+          <div id="kWhatsapp" class="kpi-value mono">0</div>
+          <small id="kWhatsappHint">0% dos visitantes</small>
+        </div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><span>Checkouts iniciados</span><i class="dot blue"></i></div>
+        <div>
+          <div id="kCheckout" class="kpi-value mono">0</div>
+          <small id="kTotalHint">0% dos visitantes</small>
+        </div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><span>Pix gerados</span><i class="dot gold"></i></div>
+        <div>
+          <div id="kPix" class="kpi-value mono">0</div>
+          <small id="kPixHint">0% dos checkouts</small>
+        </div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><span>Pagamentos aprovados</span><i class="dot green"></i></div>
+        <div>
+          <div id="kPaid" class="kpi-value mono">0</div>
+          <small id="kPaidHint">Pedidos confirmados</small>
+        </div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><span>Taxa de conversão</span><i class="dot"></i></div>
+        <div>
+          <div id="kConversion" class="kpi-value mono">0%</div>
+          <small>Pagamentos / visitantes</small>
+        </div>
+      </article>
+      <article class="kpi">
+        <div class="kpi-head"><span>Faturamento</span><i class="dot green"></i></div>
+        <div>
+          <div id="kRevenue" class="kpi-value mono">R$ 0,00</div>
+          <small>Somente pagamentos aprovados</small>
         </div>
       </article>
       <article class="kpi">
@@ -449,18 +492,32 @@ tr:hover td{background:#FFF7F7}
         </div>
       </article>
       <article class="kpi">
-        <div class="kpi-head"><span>Conversao Pix</span><i class="dot"></i></div>
-        <div>
-          <div id="kPixRate" class="kpi-value mono">0%</div>
-          <small>Checkout que virou Pix</small>
-        </div>
-      </article>
-      <article class="kpi">
         <div class="kpi-head"><span>Recuperacao</span><i class="dot orange"></i></div>
         <div>
           <div id="kRecovery" class="kpi-value mono">0</div>
           <small id="kRecoveryHint">Sequencias de e-mail enviadas</small>
         </div>
+      </article>
+    </section>
+
+    <section class="performance-grid" aria-label="Desempenho por origem e vendedor">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Origem e campanha</div>
+            <div class="panel-sub">Conversão e faturamento pelos parâmetros UTM capturados.</div>
+          </div>
+        </div>
+        <div class="panel-body" id="campaignPerformance"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Desempenho por vendedor</div>
+            <div class="panel-sub">Links individuais passam a identificar vendedor, vendas e receita.</div>
+          </div>
+        </div>
+        <div class="panel-body" id="sellerPerformance"></div>
       </article>
     </section>
 
@@ -734,9 +791,17 @@ function authError(message) {
 }
 function statusLabel(value) { return STATUS[value] || value || '-'; }
 function isPaid(lead) { return lead.funnel_status === 'paid' || lead.payment_status === 'approved'; }
-function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status); }
+function hasPix(lead) { return lead.payment_method === 'pix' || lead.funnel_status === 'pix_generated'; }
 function hasContact(lead) { return Boolean(lead.email || lead.phone || lead.name); }
 function isRegistered(lead) { return Boolean(hasContact(lead) || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
+function hasWhatsAppClick(lead) {
+  const events = Array.isArray(lead.metadata?.events) ? lead.metadata.events : [];
+  return events.some((event) => {
+    const cta = String(event.cta_name || '').toLowerCase();
+    const destination = String(event.destination || '').toLowerCase();
+    return cta.includes('whatsapp') || cta.includes('falar_vendas') || destination.includes('wa.me') || destination.includes('whatsapp');
+  });
+}
 function statusRank(value) { return STATUS_RANK[value] || 0; }
 function reached(lead, status) {
   const effectiveStatus = String(lead.funnel_status || '').startsWith('x1_')
@@ -790,6 +855,7 @@ function summary(leads) {
     acc.byStatus[status] = (acc.byStatus[status] || 0) + 1;
     if (reached(lead, 'site_visit')) acc.site += 1;
     if (reached(lead, 'cta_click')) acc.cta += 1;
+    if (hasWhatsAppClick(lead)) acc.whatsapp += 1;
     if (reached(lead, 'checkout_visit')) acc.checkout += 1;
     if (reached(lead, 'form_started')) acc.formStarted += 1;
     if (isRegistered(lead)) acc.registered += 1;
@@ -797,6 +863,7 @@ function summary(leads) {
     if (isPaid(lead)) {
       acc.paid += 1;
       acc.revenue += amount(lead);
+      if (hasPix(lead)) acc.pixPaid += 1;
     }
     if (status === 'abandoned') acc.abandoned += 1;
     if (lead.payment_method === 'pix' && !isPaid(lead)) {
@@ -822,11 +889,13 @@ function summary(leads) {
     total: 0,
     site: 0,
     cta: 0,
+    whatsapp: 0,
     checkout: 0,
     formStarted: 0,
     registered: 0,
     pix: 0,
     paid: 0,
+    pixPaid: 0,
     abandoned: 0,
     openPix: 0,
     openPixValue: 0,
@@ -916,6 +985,7 @@ function render() {
   renderFunnel(s);
   renderInsights(s);
   renderSources();
+  renderCommercialPerformance();
   renderSpark();
   renderRegisteredContacts();
   renderRows();
@@ -1016,7 +1086,7 @@ function renderBridgeMetrics(s) {
   $('bRealRoas').textContent = `${decimal(adSpend ? s.revenue / adSpend : 0)}x`;
   $('bCostLead').textContent = money.format(adSpend && s.total ? adSpend / s.total : 0);
   $('bCostPix').textContent = money.format(adSpend && s.pix ? adSpend / s.pix : 0);
-  $('bPixPaidRate').textContent = `${percent(s.paid, s.pix)}%`;
+  $('bPixPaidRate').textContent = `${percent(s.pixPaid, s.pix)}%`;
 }
 
 function resetMetaNumbers() {
@@ -1190,12 +1260,18 @@ function renderCampaigns(campaigns, totalSpend) {
 
 function renderKpis(s) {
   $('kRevenue').textContent = money.format(s.revenue);
-  $('kPaidHint').textContent = `${number.format(s.paid)} pedidos pagos`;
   $('kTotal').textContent = number.format(s.total);
-  $('kTotalHint').textContent = `${number.format(s.checkout)} chegaram ao checkout`;
+  $('kWhatsapp').textContent = number.format(s.whatsapp);
+  $('kWhatsappHint').textContent = `${percent(s.whatsapp, s.total)}% dos visitantes`;
+  $('kCheckout').textContent = number.format(s.checkout);
+  $('kTotalHint').textContent = `${percent(s.checkout, s.total)}% dos visitantes`;
+  $('kPix').textContent = number.format(s.pix);
+  $('kPixHint').textContent = `${percent(s.pix, s.checkout)}% dos checkouts`;
+  $('kPaid').textContent = number.format(s.paid);
+  $('kPaidHint').textContent = `${number.format(s.paid)} pedidos confirmados`;
+  $('kConversion').textContent = `${percent(s.paid, s.total)}%`;
   $('kOpenPix').textContent = number.format(s.openPix);
   $('kOpenPixHint').textContent = `${money.format(s.openPixValue)} aguardando pagamento`;
-  $('kPixRate').textContent = `${percent(s.pix, s.total)}%`;
   $('kRecovery').textContent = number.format(s.recoverySent);
   $('kRecoveryHint').textContent = s.openPix ? `${s.openPix} Pix ainda podem converter` : 'Nenhum Pix pendente agora';
   $('rStage1').textContent = number.format(s.recoveryStages[1]);
@@ -1294,7 +1370,7 @@ function renderFunnelDonut(s) {
 }
 
 function renderInsights(s) {
-  const pixPaidRate = percent(s.paid, s.pix);
+  const pixPaidRate = percent(s.pixPaid, s.pix);
   const openValue = money.format(s.openPixValue);
   const items = [
     {
@@ -1303,7 +1379,7 @@ function renderInsights(s) {
     },
     {
       title: `${pixPaidRate}% dos Pix pagos`,
-      body: s.pix ? `${s.paid} de ${s.pix} Pix chegaram ao pagamento aprovado.` : 'Ainda nao ha Pix gerado para medir conversao.',
+      body: s.pix ? `${s.pixPaid} de ${s.pix} Pix chegaram ao pagamento aprovado.` : 'Ainda nao ha Pix gerado para medir conversao.',
     },
     {
       title: `${s.recoverySent} emails de recuperacao`,
@@ -1321,6 +1397,64 @@ function renderInsights(s) {
 function sourceName(lead) {
   const attr = lead.attribution || {};
   return attr.utm_source || attr.utm_campaign || attr.utm_medium || (attr.fbclid ? 'facebook' : '') || (attr.gclid ? 'google' : '') || 'direto';
+}
+
+function campaignName(lead) {
+  const attr = lead.attribution || {};
+  const source = sourceName(lead);
+  return attr.utm_campaign ? `${source} / ${attr.utm_campaign}` : source;
+}
+
+function sellerName(lead) {
+  const attr = lead.attribution || {};
+  return attr.seller || lead.metadata?.seller || (attr.utm_medium === 'x1' ? 'X1 sem vendedor' : 'Sem vendedor');
+}
+
+function performanceRows(keyFn) {
+  const rows = new Map();
+  state.leads.forEach((lead) => {
+    const key = keyFn(lead);
+    const row = rows.get(key) || { name: key, leads: 0, checkout: 0, pix: 0, paid: 0, revenue: 0 };
+    row.leads += 1;
+    if (reached(lead, 'checkout_visit')) row.checkout += 1;
+    if (hasPix(lead)) row.pix += 1;
+    if (isPaid(lead)) {
+      row.paid += 1;
+      row.revenue += amount(lead);
+    }
+    rows.set(key, row);
+  });
+  return Array.from(rows.values()).sort((a, b) => b.revenue - a.revenue || b.leads - a.leads);
+}
+
+function renderPerformanceTable(target, rows, emptyText) {
+  if (!rows.length) {
+    $(target).innerHTML = `<div class="insight"><strong>Sem dados</strong><span>${escapeHtml(emptyText)}</span></div>`;
+    return;
+  }
+  $(target).innerHTML = `
+    <div style="overflow-x:auto">
+      <table class="performance-table">
+        <thead><tr><th>Nome</th><th>Leads</th><th>Checkout</th><th>Pix</th><th>Pagos</th><th>Conv.</th><th>Receita</th></tr></thead>
+        <tbody>${rows.slice(0, 12).map((row) => `
+          <tr>
+            <td><strong>${escapeHtml(row.name)}</strong></td>
+            <td>${number.format(row.leads)}</td>
+            <td>${number.format(row.checkout)}</td>
+            <td>${number.format(row.pix)}</td>
+            <td>${number.format(row.paid)}</td>
+            <td>${percent(row.paid, row.leads)}%</td>
+            <td class="mono">${money.format(row.revenue)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderCommercialPerformance() {
+  renderPerformanceTable('campaignPerformance', performanceRows(campaignName), 'UTMs serão exibidas assim que houver tráfego identificado.');
+  const sellerRows = performanceRows(sellerName).filter((row) => row.name !== 'Sem vendedor');
+  renderPerformanceTable('sellerPerformance', sellerRows, 'Os próximos links de pagamento identificarão automaticamente o vendedor.');
 }
 
 function renderSources() {
@@ -1442,6 +1576,7 @@ function individualPaymentLink(lead, kit) {
   url.searchParams.set('utm_medium', 'x1');
   url.searchParams.set('utm_campaign', 'x1_vendas');
   url.searchParams.set('utm_content', reference);
+  url.searchParams.set('seller', panelUser() || 'equipe');
   return url.toString();
 }
 
