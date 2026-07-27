@@ -1,4 +1,29 @@
-import { listLeads } from '../lib/crm.js';
+import {
+  getLeadById,
+  listLeads,
+  updateLeadById,
+} from '../lib/crm.js';
+
+const X1_STATUS = new Set([
+  'x1_contacted',
+  'x1_qualified',
+  'x1_offer_sent',
+  'x1_payment_sent',
+  'x1_lost',
+]);
+const LOST_REASONS = new Set([
+  'nao_respondeu',
+  'preco',
+  'sem_dinheiro',
+  'nao_confia',
+  'frete_prazo',
+  'desistiu',
+  'outro',
+]);
+
+function clean(value, max = 500) {
+  return String(value || '').trim().slice(0, max);
+}
 
 function authorized(req) {
   const user = process.env.ADMIN_PANEL_USER;
@@ -26,21 +51,73 @@ function summarize(leads) {
     paid: 0,
     abandoned: 0,
     payment_pending: 0,
+    x1_contacted: 0,
+    x1_qualified: 0,
+    x1_offer_sent: 0,
+    x1_payment_sent: 0,
+    x1_lost: 0,
     open_pix: 0,
   });
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-User, X-Admin-Password');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
 
   if (!process.env.ADMIN_PANEL_USER || !process.env.ADMIN_PANEL_PASSWORD) {
     return res.status(503).json({ error: 'ADMIN_PANEL_USER ou ADMIN_PANEL_PASSWORD nao configurada.' });
   }
   if (!authorized(req)) return res.status(401).json({ error: 'Usuario ou senha invalido.' });
+
+  if (req.method === 'POST') {
+    const id = clean(req.body?.id, 80);
+    const status = clean(req.body?.status, 40);
+    const note = clean(req.body?.note, 1000);
+    const lostReason = clean(req.body?.lost_reason, 300);
+    const paymentUrl = clean(req.body?.payment_url, 1000);
+    const channel = clean(req.body?.channel, 40);
+    const kitId = Math.min(Math.max(parseInt(req.body?.kit_id, 10) || 0, 0), 3) || undefined;
+    if (!id || !X1_STATUS.has(status)) {
+      return res.status(400).json({ error: 'Lead ou etapa X1 invalida.' });
+    }
+    if (status === 'x1_lost' && !LOST_REASONS.has(lostReason)) {
+      return res.status(400).json({ error: 'Selecione um motivo de perda valido.' });
+    }
+
+    const existing = await getLeadById(id);
+    if (!existing) return res.status(404).json({ error: 'Lead nao encontrado.' });
+    const event = {
+      status,
+      at: new Date().toISOString(),
+      note: note || undefined,
+      lost_reason: lostReason || undefined,
+      payment_url: paymentUrl || undefined,
+      kit_id: kitId,
+      channel: channel || undefined,
+    };
+    const history = Array.isArray(existing.metadata?.x1_events)
+      ? existing.metadata.x1_events
+      : [];
+    const lead = await updateLeadById(id, {
+      funnel_status: status,
+      metadata: {
+        x1_origin_status: existing.metadata?.x1_origin_status || existing.funnel_status,
+        x1_last_status: status,
+        x1_last_note: note || undefined,
+        x1_lost_reason: lostReason || undefined,
+        x1_payment_url: paymentUrl || undefined,
+        x1_payment_kit: kitId,
+        x1_last_channel: channel || undefined,
+        x1_payment_sent_at: status === 'x1_payment_sent' ? event.at : undefined,
+        x1_events: history.concat(event).slice(-40),
+      },
+    });
+    if (!lead) return res.status(500).json({ error: 'Nao foi possivel atualizar o lead.' });
+    return res.status(200).json({ ok: true, lead });
+  }
 
   const { status = 'all', q = '', limit = '200' } = req.query || {};
   const result = await listLeads({ status, q, limit });

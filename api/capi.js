@@ -15,6 +15,13 @@ function firstHeaderValue(value) {
   return String(value).split(',')[0].trim() || undefined;
 }
 
+function normalizeBrazilPhone(value) {
+  let digits = String(value || '').replace(/\D/g, '');
+  if (!digits) return undefined;
+  if (!digits.startsWith('55') && [10, 11].includes(digits.length)) digits = `55${digits}`;
+  return digits;
+}
+
 /**
  * Envia um evento para a API de Conversões do Meta (server-side)
  * @param {string} eventName  - Ex: 'Purchase', 'InitiateCheckout', 'PageView'
@@ -22,19 +29,30 @@ function firstHeaderValue(value) {
  * @param {object} userData   - Dados do usuário (serão hasheados)
  * @param {object} req        - Request object (para IP e user agent)
  */
-export async function sendCapiEvent({ eventName, eventData = {}, userData = {}, clientIp, userAgent, eventSourceUrl, eventId }) {
+export async function sendCapiEvent({
+  eventName,
+  eventData = {},
+  userData = {},
+  clientIp,
+  userAgent,
+  eventSourceUrl,
+  eventId,
+  eventTime,
+}) {
   if (!PIXEL_ID || !TOKEN) return;
 
   const payload = {
     data: [{
       event_name: eventName,
       event_id: eventId || undefined,
-      event_time: Math.floor(Date.now() / 1000),
+      event_time: Number.isFinite(Number(eventTime))
+        ? Math.floor(Number(eventTime))
+        : Math.floor(Date.now() / 1000),
       event_source_url: eventSourceUrl || 'https://duralibid.com.br',
       action_source: 'website',
       user_data: {
         em:  hash(userData.email),
-        ph:  hash(userData.phone?.replace(/\D/g, '')),
+        ph:  hash(normalizeBrazilPhone(userData.phone)),
         fn:  hash(userData.firstName),
         ln:  hash(userData.lastName),
         ct:  hash(userData.city),

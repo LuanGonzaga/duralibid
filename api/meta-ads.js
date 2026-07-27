@@ -95,6 +95,18 @@ function actionValue(items, names) {
   }, 0);
 }
 
+// Meta may return the same conversion under purchase, omni_purchase and
+// offsite_conversion.fb_pixel_purchase. Pick one canonical value instead of
+// adding aliases and inflating purchases, revenue and ROAS.
+function preferredActionValue(items, names) {
+  if (!Array.isArray(items)) return 0;
+  for (const name of names) {
+    const row = items.find((item) => item.action_type === name && item.value != null);
+    if (row) return toNumber(row.value);
+  }
+  return 0;
+}
+
 function actionCost(items, names) {
   if (!Array.isArray(items)) return 0;
   const wanted = new Set(names);
@@ -113,19 +125,19 @@ function firstRoas(items) {
   return toNumber(row?.value);
 }
 
-function parseInsight(row = {}) {
+export function parseInsight(row = {}) {
   const spend = toNumber(row.spend);
-  const purchases = actionValue(row.actions, [
+  const purchases = preferredActionValue(row.actions, [
+    'offsite_conversion.fb_pixel_purchase',
     'purchase',
     'omni_purchase',
-    'offsite_conversion.fb_pixel_purchase',
   ]);
-  const leads = actionValue(row.actions, [
+  const leads = preferredActionValue(row.actions, [
+    'offsite_conversion.fb_pixel_lead',
     'lead',
     'omni_lead',
-    'offsite_conversion.fb_pixel_lead',
-    'complete_registration',
     'offsite_conversion.fb_pixel_complete_registration',
+    'complete_registration',
   ]);
   const landingPageViews = actionValue(row.actions, [
     'landing_page_view',
@@ -145,10 +157,10 @@ function parseInsight(row = {}) {
     'offsite_conversion.fb_pixel_initiate_checkout',
     'omni_initiated_checkout',
   ]);
-  const purchaseValue = actionValue(row.action_values, [
+  const purchaseValue = preferredActionValue(row.action_values, [
+    'offsite_conversion.fb_pixel_purchase',
     'purchase',
     'omni_purchase',
-    'offsite_conversion.fb_pixel_purchase',
   ]);
   const roas = firstRoas(row.purchase_roas) || (spend ? purchaseValue / spend : 0);
 
@@ -166,14 +178,14 @@ function parseInsight(row = {}) {
     frequency: toNumber(row.frequency),
     clicks: toNumber(row.clicks),
     unique_clicks: toNumber(row.unique_clicks),
-    link_clicks: toNumber(row.inline_link_clicks || row.clicks),
+    link_clicks: toNumber(row.inline_link_clicks ?? 0),
     unique_link_clicks: toNumber(row.unique_inline_link_clicks),
     outbound_clicks: sumActionField(row.outbound_clicks),
     ctr: toNumber(row.ctr),
     unique_ctr: toNumber(row.unique_ctr),
-    link_ctr: toNumber(row.inline_link_click_ctr || row.ctr),
+    link_ctr: toNumber(row.inline_link_click_ctr ?? 0),
     cpc: toNumber(row.cpc),
-    cost_per_link_click: toNumber(row.cost_per_inline_link_click || row.cpc),
+    cost_per_link_click: toNumber(row.cost_per_inline_link_click ?? 0),
     cpm: toNumber(row.cpm),
     cpp: toNumber(row.cpp),
     purchases,

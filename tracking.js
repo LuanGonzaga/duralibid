@@ -41,6 +41,11 @@
   function getLeadId() {
     var key = 'dl_lead_id';
     try {
+      var linked = new URLSearchParams(window.location.search).get('lead_id');
+      if (linked && /^[a-zA-Z0-9_-]{8,120}$/.test(linked)) {
+        sessionStorage.setItem(key, linked);
+        return linked;
+      }
       var existing = sessionStorage.getItem(key);
       if (existing) return existing;
       var created = eventId('lead');

@@ -30,7 +30,13 @@
 
 <!-- UTMify -->
 <script>window.pixelId = "6a5121ed882e6adbfb3d7934";var a = document.createElement("script");a.setAttribute("async", "");a.setAttribute("defer", "");a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);</script>
-<script src="https://cdn.utmify.com.br/scripts/utms/latest.js" async defer></script>
+<script
+  src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+  data-utmify-prevent-xcod-sck
+  data-utmify-prevent-subids
+  async
+  defer
+></script>
 <!-- End UTMify -->
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -296,6 +302,28 @@
   .sticky .txt { font-size: 1rem; color: var(--duo-silver); }
   .sticky .txt b { color: var(--duo-white); font-family: var(--font-display); font-size: 1.45rem;
     letter-spacing: 0.06em; margin-right: 4px; }
+  .mobile-whatsapp {
+    position: fixed;
+    right: 22px;
+    bottom: 88px;
+    z-index: 55;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.42);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .mobile-whatsapp:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 14px 34px rgba(0,0,0,.5);
+  }
+  .mobile-whatsapp svg { width: 31px; height: 31px; fill: currentColor; }
 
   /* ---- footer ---- */
   footer { background: #050505; padding: var(--space-5) 0 120px; color: var(--duo-mute); font-size: var(--fs-xs); }
@@ -356,6 +384,12 @@
     .sticky { padding: 10px var(--space-3); gap: var(--space-3); }
     .sticky .txt { display: none; }
     .sticky .btn { width: 100%; margin: 0; padding: 14px 20px; font-size: 1rem; }
+    .mobile-whatsapp {
+      right: 16px;
+      bottom: 76px;
+      width: 54px;
+      height: 54px;
+    }
     footer { padding-bottom: 96px; }
     .topbar { font-size: 10px; letter-spacing: 0.1em; padding: 6px var(--space-3); }
     details summary { font-size: var(--fs-sm); }
@@ -416,6 +450,15 @@
             <small>4,9/5 · avaliações públicas no Mercado Livre e Shopee</small>
           </div>
           <a class="btn btn-primary" href="#confianca" data-track-cta="hero_entender_antes">Entender antes de comprar →</a>
+          <a
+            class="btn btn-gold"
+            id="salesWhatsapp"
+            href="https://wa.me/5511947226236?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20quero%20falar%20sobre%20o%20DuraLibid."
+            target="_blank"
+            rel="noopener"
+            data-track-cta="hero_falar_vendas_x1"
+            data-sales-whatsapp
+          >Falar com vendas no WhatsApp</a>
           <p class="microcopy">🔒 Frete grátis e discreto · Garantia de 7 dias · Registro ANVISA</p>
           <div class="trust">
             <span><b>ML + Shopee</b> avaliações públicas</span>
@@ -889,6 +932,21 @@
 </div>
 
 <!-- STICKY -->
+<a
+  class="mobile-whatsapp"
+  style="position:fixed;right:22px;bottom:88px;z-index:9999;display:flex;width:58px;height:58px;border-radius:50%;background:#25d366;color:#fff;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.45)"
+  href="https://wa.me/5511947226236"
+  target="_blank"
+  rel="noopener"
+  aria-label="Falar com vendas pelo WhatsApp"
+  title="Falar com vendas pelo WhatsApp"
+  data-track-cta="mobile_falar_vendas_x1"
+  data-sales-whatsapp
+>
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M16.04 3C9.43 3 4.06 8.29 4.06 14.82c0 2.31.68 4.57 1.96 6.49L4 28.64l7.58-1.97a12.06 12.06 0 0 0 4.46.85h.01c6.6 0 11.97-5.3 11.97-11.82C28.02 9.29 22.65 3 16.04 3Zm0 22.52c-1.39 0-2.75-.37-3.94-1.07l-.28-.16-4.5 1.17 1.2-4.32-.18-.28a9.75 9.75 0 0 1-1.52-5.2c0-5.4 4.14-9.8 9.23-9.8 5.08 0 9.22 4.4 9.22 9.8 0 5.44-4.14 9.86-9.23 9.86Zm5.06-7.36c-.28-.14-1.64-.8-1.9-.89-.25-.09-.44-.14-.62.14-.18.28-.71.89-.87 1.07-.16.19-.32.21-.6.07-.27-.14-1.17-.43-2.22-1.36a8.35 8.35 0 0 1-1.53-1.89c-.16-.28-.02-.43.12-.57.12-.12.28-.32.41-.48.14-.16.19-.28.28-.46.09-.19.04-.35-.02-.49-.07-.14-.62-1.49-.85-2.04-.23-.53-.46-.46-.62-.47h-.53c-.19 0-.49.07-.74.35-.25.28-.97.94-.97 2.29s.99 2.66 1.13 2.84c.14.19 1.94 2.93 4.7 4.11.66.28 1.17.45 1.57.58.66.21 1.26.18 1.74.11.53-.08 1.64-.66 1.87-1.3.23-.64.23-1.19.16-1.3-.07-.12-.25-.19-.53-.33Z"/>
+  </svg>
+</a>
 <div class="sticky">
   <span class="txt"><b>DURALIBID</b> · a partir de R$ 89,90</span>
   <a class="btn btn-primary" href="#kits" style="padding:14px 36px;font-size:1.05rem" data-track-cta="sticky_comprar_agora">Comprar agora</a>
@@ -1174,5 +1232,18 @@
   })();
 </script>
 
+<script>
+  (function configureSalesWhatsapp() {
+    var links = document.querySelectorAll('[data-sales-whatsapp]');
+    if (!links.length || !window.DLTracking) return;
+    var leadId = DLTracking.getLeadId();
+    var reference = 'DLB-' + leadId.slice(-6).toUpperCase();
+    var message = 'Ola! Vi o DuraLibid no site e gostaria de ajuda para escolher a melhor opcao para mim.'
+      + '\n\nReferencia: ' + reference;
+    links.forEach(function (link) {
+      link.href = 'https://wa.me/5511947226236?text=' + encodeURIComponent(message);
+    });
+  })();
+</script>
 </body>
 </html>

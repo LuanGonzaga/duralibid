@@ -158,10 +158,19 @@ tr:hover td{background:#FFF7F7}
 .status-pill.checkout_visit{background:#E9F3FF;color:#1F64C8}
 .status-pill.form_started{background:#FFF0E0;color:#C45A00}
 .status-pill.form_submitted{background:#F4ECFF;color:#7C3AED}
+.status-pill.x1_contacted{background:#E8F2FF;color:#2456D6}
+.status-pill.x1_qualified{background:#E8F8F1;color:#0F7A48}
+.status-pill.x1_offer_sent{background:#F4ECFF;color:#7C3AED}
+.status-pill.x1_payment_sent{background:#FFF5DA;color:#A16207}
+.status-pill.x1_lost{background:#FFE7E7;color:#B91C1C}
 .status-pill.pix_generated,.status-pill.payment_pending{background:#FFF5DA;color:#A16207}
 .status-pill.paid{background:#E4F8ED;color:#0F7A48}
 .status-pill.abandoned{background:#FFE7E7;color:#B91C1C}
 .whats{display:inline-flex;align-items:center;justify-content:center;min-height:34px;border-radius:7px;background:#E4F8ED;color:#0F7A48;font-weight:950;padding:0 10px;margin-top:6px}
+.x1-control{display:grid;gap:6px;margin-top:8px;min-width:150px}
+.x1-control select,.x1-control button{min-height:32px;border:1px solid #D7DEE8;border-radius:7px;background:#fff;color:#182230;font:inherit;font-size:11px;font-weight:800;padding:4px 7px}
+.x1-control button{background:#172033;color:#fff;cursor:pointer}
+.x1-control .payment-send{background:#0F7A48}
 .empty{padding:42px 18px;text-align:center;color:var(--muted)}
 .empty strong{display:block;color:var(--ink);font-size:1rem;margin-bottom:6px}
 .status-text{color:var(--muted);font-size:.84rem}
@@ -194,6 +203,18 @@ tr:hover td{background:#FFF7F7}
 .ad-card:nth-child(n+7) strong{font-size:1.06rem}
 .ad-card small{display:block;margin-top:7px;color:var(--muted);font-size:.78rem;line-height:1.35}
 .bridge-metrics{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-top:14px}
+.x1-panel{margin-bottom:14px}
+.x1-kpis{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:10px}
+.x1-card{border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:12px}
+.x1-card span{display:block;color:var(--muted);font-size:.72rem;font-weight:900;text-transform:uppercase}
+.x1-card strong{display:block;margin-top:8px;color:var(--ink);font-size:1.4rem}
+.x1-card small{display:block;margin-top:5px;color:var(--muted);font-size:.75rem}
+.x1-admin-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+.x1-funnel{display:grid;gap:8px}
+.quick-replies{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quick-reply{border:1px solid var(--line);background:#fff;border-radius:7px;padding:10px;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+.quick-reply strong{display:block;font-size:.82rem}
+.quick-reply span{display:block;color:var(--muted);font-size:.75rem;margin-top:3px}
 .bridge-card{border:1px solid #DDE5EF;background:#fff;border-radius:8px;padding:12px;box-shadow:var(--shadow-soft)}
 .bridge-card span{display:block;color:var(--muted);font-size:.7rem;font-weight:950;text-transform:uppercase}
 .bridge-card strong{display:block;margin-top:8px;color:var(--ink);font-size:1.18rem;line-height:1.08}
@@ -232,6 +253,9 @@ tr:hover td{background:#FFF7F7}
   .kpis{grid-template-columns:1fr}
   .ad-metrics{grid-template-columns:1fr}
   .bridge-metrics{grid-template-columns:1fr}
+  .x1-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .x1-admin-grid{grid-template-columns:1fr}
+  .quick-replies{grid-template-columns:1fr}
   .funnel-row{grid-template-columns:1fr;gap:7px}
   .funnel-value{text-align:left}
   .contacts-head{align-items:flex-start}
@@ -301,6 +325,7 @@ tr:hover td{background:#FFF7F7}
       <button type="button" data-nav-filter="pix_generated">Pix em aberto</button>
       <button type="button" data-nav-filter="paid">Pagamentos</button>
       <button type="button" data-nav-filter="abandoned">Abandono</button>
+      <button type="button" data-nav-filter="x1_all">Operacao X1</button>
     </nav>
     <div class="side-card">
       <span>Receita paga</span>
@@ -431,6 +456,41 @@ tr:hover td{background:#FFF7F7}
       </article>
     </section>
 
+    <section class="panel x1-panel" aria-label="Operacao comercial X1">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Operacao X1</div>
+          <div class="panel-sub">Conversas, qualificacao, cobrancas, vendas e perdas do atendimento pelo WhatsApp.</div>
+        </div>
+        <span id="x1Status" class="status-text">0 oportunidades</span>
+      </div>
+      <div class="panel-body">
+        <div class="x1-kpis">
+          <article class="x1-card"><span>Conversas</span><strong id="x1Conversations" class="mono">0</strong><small>Entradas identificadas</small></article>
+          <article class="x1-card"><span>Contatados</span><strong id="x1Contacted" class="mono">0</strong><small id="x1ContactRate">0% das conversas</small></article>
+          <article class="x1-card"><span>Qualificados</span><strong id="x1Qualified" class="mono">0</strong><small id="x1QualifyRate">0% dos contatados</small></article>
+          <article class="x1-card"><span>Ofertas</span><strong id="x1Offers" class="mono">0</strong><small>Oferta apresentada</small></article>
+          <article class="x1-card"><span>Cobrancas</span><strong id="x1Payments" class="mono">0</strong><small id="x1PaymentRate">0% dos qualificados</small></article>
+          <article class="x1-card"><span>Vendas X1</span><strong id="x1Paid" class="mono">0</strong><small id="x1CloseRate">0% de fechamento</small></article>
+          <article class="x1-card"><span>Receita X1</span><strong id="x1Revenue" class="mono">R$ 0,00</strong><small id="x1Ticket">Ticket R$ 0,00</small></article>
+        </div>
+        <div class="x1-admin-grid">
+          <div>
+            <div class="panel-title">Funil comercial</div>
+            <div class="panel-sub">Etapas acumuladas do atendimento.</div>
+            <div id="x1Funnel" class="x1-funnel" style="margin-top:12px"></div>
+          </div>
+          <div>
+            <div class="panel-title">Respostas rapidas</div>
+            <div class="panel-sub">Clique para copiar e personalize antes de enviar.</div>
+            <div id="quickReplies" class="quick-replies" style="margin-top:12px"></div>
+            <div class="panel-title" style="margin-top:16px">Motivos de perda</div>
+            <div id="x1Losses" class="source-list" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="grid">
       <article class="panel">
         <div class="panel-head">
@@ -487,6 +547,10 @@ tr:hover td{background:#FFF7F7}
       </div>
       <div id="segments" class="segments">
         <button class="segment active" type="button" data-status="all">Todos</button>
+        <button class="segment" type="button" data-status="x1_all">Todos X1</button>
+        <button class="segment" type="button" data-status="x1_new">X1 novos</button>
+        <button class="segment" type="button" data-status="x1_follow_up">X1 acompanhar</button>
+        <button class="segment" type="button" data-status="x1_waiting_payment">X1 aguardando pagamento</button>
         <button class="segment" type="button" data-status="registered">Cadastrados</button>
         <button class="segment" type="button" data-status="site_visit">Visita</button>
         <button class="segment" type="button" data-status="cta_click">Clique</button>
@@ -494,6 +558,11 @@ tr:hover td{background:#FFF7F7}
         <button class="segment" type="button" data-status="checkout_visit">Checkout</button>
         <button class="segment" type="button" data-status="form_started">Formulario</button>
         <button class="segment" type="button" data-status="form_submitted">Cadastro</button>
+        <button class="segment" type="button" data-status="x1_contacted">X1 contatado</button>
+        <button class="segment" type="button" data-status="x1_qualified">X1 qualificado</button>
+        <button class="segment" type="button" data-status="x1_offer_sent">X1 oferta</button>
+        <button class="segment" type="button" data-status="x1_payment_sent">X1 pagamento</button>
+        <button class="segment" type="button" data-status="x1_lost">X1 perdido</button>
         <button class="segment" type="button" data-status="pix_generated">Pix</button>
         <button class="segment" type="button" data-status="paid">Pago</button>
         <button class="segment" type="button" data-status="abandoned">Abandono</button>
@@ -541,12 +610,21 @@ const AUTH_KEY = 'dl_panel_auth_v1';
 
 const STATUS = {
   registered: 'Cadastrados',
+  x1_all: 'Todos X1',
+  x1_new: 'X1 novos',
+  x1_follow_up: 'X1 acompanhar',
+  x1_waiting_payment: 'X1 aguardando pagamento',
   site_visit: 'Visita',
   cta_click: 'Clique',
   coupon_requested: 'Cupom',
   checkout_visit: 'Checkout',
   form_started: 'Formulario',
   form_submitted: 'Cadastro',
+  x1_contacted: 'X1 contatado',
+  x1_qualified: 'X1 qualificado',
+  x1_offer_sent: 'X1 oferta enviada',
+  x1_payment_sent: 'X1 pagamento enviado',
+  x1_lost: 'X1 perdido',
   pix_generated: 'Pix gerado',
   payment_pending: 'Pendente',
   paid: 'Pago',
@@ -559,11 +637,34 @@ const STATUS_RANK = {
   checkout_visit: 30,
   form_started: 40,
   form_submitted: 50,
+  x1_contacted: 52,
+  x1_qualified: 55,
+  x1_offer_sent: 58,
   pix_generated: 60,
+  x1_payment_sent: 62,
   payment_pending: 65,
+  x1_lost: 70,
   abandoned: 70,
   paid: 80,
 };
+const X1_STAGES = ['x1_contacted', 'x1_qualified', 'x1_offer_sent', 'x1_payment_sent'];
+const LOST_REASONS = {
+  nao_respondeu: 'Nao respondeu',
+  preco: 'Preco',
+  sem_dinheiro: 'Sem dinheiro agora',
+  nao_confia: 'Nao confia no produto',
+  frete_prazo: 'Frete ou prazo',
+  desistiu: 'Desistiu',
+  outro: 'Outro',
+};
+const QUICK_REPLIES = [
+  ['Primeiro contato', 'Ola! Sou do atendimento DuraLibid. Vi que voce demonstrou interesse e estou aqui para tirar suas duvidas. O que voce gostaria de saber primeiro?'],
+  ['Como funciona', 'O DuraLibid e um serum de uso topico, aplicado antes da relacao. Posso te explicar o modo de uso e ajudar a escolher o kit mais adequado.'],
+  ['Recomendar kit', 'Para testar com mais tranquilidade, o kit com 2 frascos costuma ser a opcao mais equilibrada. Ele sai por R$ 165,90 com frete gratis e discreto.'],
+  ['Objecao de preco', 'Entendo. Alem do frete gratis e discreto, o kit com 2 unidades reduz o valor por frasco. Se preferir, tambem temos a opcao inicial com 1 frasco.'],
+  ['Seguranca', 'A compra e processada pelo Mercado Pago e a entrega e feita em embalagem discreta, sem identificar o produto.'],
+  ['Retomar conversa', 'Ola! Passando para saber se ficou alguma duvida sobre o DuraLibid. Se quiser, posso te ajudar a escolher a melhor opcao sem compromisso.'],
+];
 
 function $(id) { return document.getElementById(id); }
 function setText(id, value) {
@@ -645,7 +746,12 @@ function hasPix(lead) { return lead.payment_method === 'pix' || ['pix_generated'
 function hasContact(lead) { return Boolean(lead.email || lead.phone || lead.name); }
 function isRegistered(lead) { return Boolean(hasContact(lead) || ['form_submitted','pix_generated','payment_pending','paid','abandoned'].includes(lead.funnel_status)); }
 function statusRank(value) { return STATUS_RANK[value] || 0; }
-function reached(lead, status) { return statusRank(lead.funnel_status) >= statusRank(status); }
+function reached(lead, status) {
+  const effectiveStatus = String(lead.funnel_status || '').startsWith('x1_')
+    ? (lead.metadata?.x1_origin_status || 'site_visit')
+    : lead.funnel_status;
+  return statusRank(effectiveStatus) >= statusRank(status);
+}
 function amount(lead) { return Number(lead.amount || 0); }
 function percent(value, total) { return total ? Math.round((value / total) * 100) : 0; }
 function decimal(value, digits) { return Number(value || 0).toFixed(digits == null ? 2 : digits); }
@@ -769,6 +875,17 @@ function applyFilters() {
   state.filtered = state.leads.filter((lead) => {
     if (state.status === 'registered') {
       if (!hasContact(lead)) return false;
+    } else if (state.status === 'x1_all') {
+      if (!isX1Lead(lead)) return false;
+    } else if (state.status === 'x1_new') {
+      if (!isX1Lead(lead) || x1Reached(lead, 'x1_contacted')) return false;
+    } else if (state.status === 'x1_follow_up') {
+      if (!x1Reached(lead, 'x1_contacted')
+        || x1Reached(lead, 'x1_payment_sent')
+        || isPaid(lead)
+        || lead.funnel_status === 'x1_lost') return false;
+    } else if (state.status === 'x1_waiting_payment') {
+      if (!x1Reached(lead, 'x1_payment_sent') || isPaid(lead) || lead.funnel_status === 'x1_lost') return false;
     } else if (state.status !== 'all' && lead.funnel_status !== state.status) {
       return false;
     }
@@ -777,6 +894,8 @@ function applyFilters() {
     const haystack = [
       lead.name, lead.email, lead.phone, lead.cpf, lead.payment_id, lead.kit_name,
       lead.city, lead.state, attr.utm_source, attr.utm_campaign, attr.utm_medium,
+      lead.metadata?.x1_ref, lead.metadata?.x1_last_note,
+      LOST_REASONS[lead.metadata?.x1_lost_reason],
     ].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(q);
   });
@@ -793,8 +912,95 @@ function render() {
   renderRegisteredContacts();
   renderRows();
   renderBridgeMetrics(s);
+  renderX1();
   $('statusText').textContent = `${number.format(state.filtered.length)} de ${number.format(state.leads.length)} registros`;
   $('activeFilter').textContent = state.status === 'all' ? 'Todos os status' : statusLabel(state.status);
+}
+
+function x1Events(lead) {
+  return Array.isArray(lead.metadata?.x1_events) ? lead.metadata.x1_events : [];
+}
+
+function isX1Lead(lead) {
+  return Boolean(
+    lead.metadata?.x1_ref
+    || lead.metadata?.x1_origin_status
+    || String(lead.funnel_status || '').startsWith('x1_')
+    || x1Events(lead).length
+  );
+}
+
+function x1Reached(lead, status) {
+  if (lead.funnel_status === status) return true;
+  return x1Events(lead).some((event) => event.status === status);
+}
+
+function x1Summary() {
+  const leads = state.leads.filter(isX1Lead);
+  const contacted = leads.filter((lead) => x1Reached(lead, 'x1_contacted')).length;
+  const qualified = leads.filter((lead) => x1Reached(lead, 'x1_qualified')).length;
+  const offers = leads.filter((lead) => x1Reached(lead, 'x1_offer_sent')).length;
+  const payments = leads.filter((lead) => x1Reached(lead, 'x1_payment_sent')).length;
+  const paidLeads = leads.filter(isPaid);
+  const lost = leads.filter((lead) => lead.funnel_status === 'x1_lost').length;
+  const revenue = paidLeads.reduce((total, lead) => total + amount(lead), 0);
+  return {
+    conversations: leads.length,
+    contacted,
+    qualified,
+    offers,
+    payments,
+    paid: paidLeads.length,
+    lost,
+    revenue,
+  };
+}
+
+function renderX1() {
+  const x = x1Summary();
+  setText('x1Status', `${number.format(x.conversations)} oportunidades`);
+  setText('x1Conversations', number.format(x.conversations));
+  setText('x1Contacted', number.format(x.contacted));
+  setText('x1ContactRate', `${percent(x.contacted, x.conversations)}% das conversas`);
+  setText('x1Qualified', number.format(x.qualified));
+  setText('x1QualifyRate', `${percent(x.qualified, x.contacted)}% dos contatados`);
+  setText('x1Offers', number.format(x.offers));
+  setText('x1Payments', number.format(x.payments));
+  setText('x1PaymentRate', `${percent(x.payments, x.qualified)}% dos qualificados`);
+  setText('x1Paid', number.format(x.paid));
+  setText('x1CloseRate', `${percent(x.paid, x.conversations)}% de fechamento`);
+  setText('x1Revenue', money.format(x.revenue));
+  setText('x1Ticket', `Ticket ${money.format(x.paid ? x.revenue / x.paid : 0)}`);
+  const base = Math.max(x.conversations, 1);
+  $('x1Funnel').innerHTML = [
+    funnelRow('Conversas', 'entrada pelo WhatsApp', x.conversations, base, 'blue'),
+    funnelRow('Contatados', 'atendimento iniciado', x.contacted, base, 'blue'),
+    funnelRow('Qualificados', 'interesse confirmado', x.qualified, base, 'green'),
+    funnelRow('Ofertas', 'kit apresentado', x.offers, base, ''),
+    funnelRow('Cobrancas', 'link enviado', x.payments, base, 'gold'),
+    funnelRow('Pagos', 'venda concluida', x.paid, base, 'green'),
+    funnelRow('Perdidos', 'com motivo registrado', x.lost, base, 'orange'),
+  ].join('');
+  $('quickReplies').innerHTML = QUICK_REPLIES.map(([title, message], index) => `
+    <button class="quick-reply" type="button" data-quick-reply="${index}">
+      <strong>${escapeHtml(title)}</strong>
+      <span>${escapeHtml(message.slice(0, 62))}...</span>
+    </button>
+  `).join('');
+  const losses = state.leads.filter((lead) => lead.funnel_status === 'x1_lost').reduce((acc, lead) => {
+    const reason = lead.metadata?.x1_lost_reason || 'outro';
+    acc[reason] = (acc[reason] || 0) + 1;
+    return acc;
+  }, {});
+  const lossRows = Object.entries(losses).sort((a, b) => b[1] - a[1]);
+  $('x1Losses').innerHTML = lossRows.length
+    ? lossRows.map(([reason, count]) => `
+      <div class="source-row">
+        <div><b>${escapeHtml(LOST_REASONS[reason] || reason)}</b><small>motivo registrado</small></div>
+        <strong class="mono">${number.format(count)}</strong>
+      </div>
+    `).join('')
+    : '<div class="insight"><strong>Sem perdas registradas</strong><span>Os motivos aparecerao aqui.</span></div>';
 }
 
 function renderBridgeMetrics(s) {
@@ -1181,6 +1387,48 @@ function contactLink(lead) {
   return `<a class="whats" href="https://wa.me/${digits}" target="_blank" rel="noopener">WhatsApp</a>`;
 }
 
+function x1Controls(lead) {
+  if (!lead.id || !hasContact(lead) || isPaid(lead)) return '';
+  const statuses = [
+    ['x1_contacted', 'Contatado'],
+    ['x1_qualified', 'Qualificado'],
+    ['x1_offer_sent', 'Oferta enviada'],
+    ['x1_payment_sent', 'Pagamento enviado'],
+    ['x1_lost', 'Perdido'],
+  ];
+  return `
+    <div class="x1-control">
+      <select data-x1-select="${escapeHtml(lead.id)}" aria-label="Etapa X1">
+        ${statuses.map(([value, label]) => `<option value="${value}"${lead.funnel_status === value ? ' selected' : ''}>${label}</option>`).join('')}
+      </select>
+      <select data-x1-lost-reason="${escapeHtml(lead.id)}" aria-label="Motivo da perda">
+        <option value="">Motivo se perdido</option>
+        ${Object.entries(LOST_REASONS).map(([value, label]) => `<option value="${value}"${lead.metadata?.x1_lost_reason === value ? ' selected' : ''}>${label}</option>`).join('')}
+      </select>
+      <button type="button" data-x1-save="${escapeHtml(lead.id)}">Salvar X1</button>
+      <select data-payment-kit="${escapeHtml(lead.id)}" aria-label="Kit do link de pagamento">
+        <option value="1"${Number(lead.kit_id) === 1 ? ' selected' : ''}>Cobrar 1 frasco</option>
+        <option value="2"${Number(lead.kit_id || 2) === 2 ? ' selected' : ''}>Cobrar 2 frascos</option>
+        <option value="3"${Number(lead.kit_id) === 3 ? ' selected' : ''}>Cobrar 3 frascos</option>
+      </select>
+      <button type="button" data-payment-copy="${escapeHtml(lead.id)}">Copiar link de pagamento</button>
+      ${lead.phone ? `<button class="payment-send" type="button" data-payment-send="${escapeHtml(lead.id)}">Enviar cobranca</button>` : ''}
+    </div>
+  `;
+}
+
+function individualPaymentLink(lead, kit) {
+  const reference = `DLB-${String(lead.lead_id || lead.id).slice(-6).toUpperCase()}`;
+  const url = new URL('/checkout.html', location.origin);
+  url.searchParams.set('kit', String(kit || 2));
+  url.searchParams.set('lead_id', lead.lead_id);
+  url.searchParams.set('utm_source', 'whatsapp');
+  url.searchParams.set('utm_medium', 'x1');
+  url.searchParams.set('utm_campaign', 'x1_vendas');
+  url.searchParams.set('utm_content', reference);
+  return url.toString();
+}
+
 function registeredContacts() {
   return state.leads
     .filter(hasContact)
@@ -1266,12 +1514,14 @@ function renderRows() {
       lead.payment_status ? `Status: ${lead.payment_status}` : '',
       lead.payment_id ? `MP: ${lead.payment_id}` : '',
       lead.recovery_stage ? `Recuperacao ${lead.recovery_stage}/3` : '',
+      lead.metadata?.x1_ref ? `Ref: ${lead.metadata.x1_ref}` : '',
     ].filter(Boolean);
     const source = [
       attr.utm_source || attr.utm_campaign || sourceName(lead),
       attr.utm_medium ? `Meio: ${attr.utm_medium}` : '',
       attr.fbclid ? 'fbclid capturado' : '',
       attr.gclid ? 'gclid capturado' : '',
+      lead.metadata?.x1_lost_reason ? `Perda: ${LOST_REASONS[lead.metadata.x1_lost_reason] || lead.metadata.x1_lost_reason}` : '',
     ].filter(Boolean);
 
     const tr = document.createElement('tr');
@@ -1295,7 +1545,7 @@ function renderRows() {
         <span class="meta">${escapeHtml(fmtDate(lead.updated_at || lead.created_at))}</span>
         <span class="meta">${escapeHtml(daysAgo(lead.updated_at || lead.created_at))}</span>
       </td>
-      <td>${contactLink(lead)}</td>
+      <td>${contactLink(lead)}${x1Controls(lead)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -1313,7 +1563,7 @@ function setStatus(status) {
 }
 
 function exportCsv() {
-  const headers = ['status','created_at','updated_at','name','email','email_validation','email_validation_reason','phone','cpf','kit','amount','payment_method','payment_status','payment_id','recovery_stage','city','state','utm_source','utm_campaign'];
+  const headers = ['status','created_at','updated_at','name','email','email_validation','email_validation_reason','phone','cpf','kit','amount','payment_method','payment_status','payment_id','recovery_stage','city','state','utm_source','utm_campaign','x1_ref','x1_origin_status','x1_last_note','x1_lost_reason','x1_payment_kit','x1_payment_sent_at','x1_payment_url'];
   const lines = [headers.join(',')].concat(state.filtered.map((lead) => {
     const attr = lead.attribution || {};
     const emailInfo = emailValidationInfo(lead);
@@ -1324,6 +1574,9 @@ function exportCsv() {
       lead.phone, lead.cpf,
       lead.kit_name, lead.amount, lead.payment_method, lead.payment_status, lead.payment_id,
       lead.recovery_stage, lead.city, lead.state, attr.utm_source, attr.utm_campaign,
+      lead.metadata?.x1_ref, lead.metadata?.x1_origin_status, lead.metadata?.x1_last_note,
+      lead.metadata?.x1_lost_reason, lead.metadata?.x1_payment_kit,
+      lead.metadata?.x1_payment_sent_at, lead.metadata?.x1_payment_url,
     ];
     return values.map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',');
   }));
@@ -1390,7 +1643,109 @@ document.querySelectorAll('.segment').forEach((button) => {
 document.querySelectorAll('[data-nav-filter]').forEach((button) => {
   button.addEventListener('click', () => setStatus(button.dataset.navFilter));
 });
+
+async function saveX1Lead(payload) {
+  const res = await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) throw authError(data.error);
+  if (!res.ok) throw new Error(data.error || 'Nao foi possivel atualizar o X1.');
+  state.leads = state.leads.map((lead) => lead.id === payload.id ? data.lead : lead);
+  applyFilters();
+  return data.lead;
+}
+
 document.addEventListener('click', async (event) => {
+  const quickReply = event.target.closest('[data-quick-reply]');
+  if (quickReply) {
+    const message = QUICK_REPLIES[Number(quickReply.dataset.quickReply)]?.[1];
+    if (!message) return;
+    try {
+      await navigator.clipboard.writeText(message);
+      const previous = quickReply.querySelector('strong')?.textContent;
+      if (quickReply.querySelector('strong')) quickReply.querySelector('strong').textContent = 'Copiado';
+      setTimeout(() => {
+        if (quickReply.querySelector('strong')) quickReply.querySelector('strong').textContent = previous;
+      }, 1400);
+    } catch (err) {
+      window.prompt('Copie a resposta:', message);
+    }
+    return;
+  }
+
+  const paymentButton = event.target.closest('[data-payment-copy], [data-payment-send]');
+  if (paymentButton) {
+    const id = paymentButton.dataset.paymentCopy || paymentButton.dataset.paymentSend;
+    const lead = state.leads.find((item) => item.id === id);
+    const kit = Number(document.querySelector(`[data-payment-kit="${CSS.escape(id)}"]`)?.value || 2);
+    if (!lead?.lead_id) return;
+    const paymentUrl = individualPaymentLink(lead, kit);
+    if (paymentButton.dataset.paymentSend) {
+      const popup = window.open('about:blank', '_blank');
+      const firstName = String(lead.name || '').trim().split(/\s+/)[0];
+      const greeting = firstName ? `Ola, ${firstName}!` : 'Ola!';
+      const message = `${greeting} Segue seu link seguro para finalizar o pedido do DuraLibid:\\n\\n${paymentUrl}`;
+      try {
+        await saveX1Lead({
+          id,
+          status: 'x1_payment_sent',
+          note: `Cobranca do kit ${kit} enviada pelo painel.`,
+          payment_url: paymentUrl,
+          kit_id: kit,
+          channel: 'whatsapp',
+        });
+        if (popup) popup.location.href = `https://wa.me/${whatsappDigits(lead.phone)}?text=${encodeURIComponent(message)}`;
+      } catch (err) {
+        if (popup) popup.close();
+        window.alert(err.message);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(paymentUrl);
+        const previous = paymentButton.textContent;
+        paymentButton.textContent = 'Link copiado';
+        setTimeout(() => { paymentButton.textContent = previous; }, 1400);
+      } catch (err) {
+        window.prompt('Copie o link de pagamento:', paymentUrl);
+      }
+    }
+    return;
+  }
+
+  const x1Button = event.target.closest('[data-x1-save]');
+  if (x1Button) {
+    const id = x1Button.dataset.x1Save;
+    const select = document.querySelector(`[data-x1-select="${CSS.escape(id)}"]`);
+    const status = select?.value;
+    const lostReason = status === 'x1_lost'
+      ? document.querySelector(`[data-x1-lost-reason="${CSS.escape(id)}"]`)?.value
+      : '';
+    if (status === 'x1_lost' && !lostReason) {
+      window.alert('Selecione o motivo da perda.');
+      return;
+    }
+    const note = status !== 'x1_lost'
+      ? window.prompt('Observacao opcional do atendimento:')?.trim() || ''
+      : '';
+    x1Button.disabled = true;
+    try {
+      await saveX1Lead({ id, status, note, lost_reason: lostReason });
+    } catch (err) {
+      if (err.auth) {
+        clearAuth();
+        showLogin(err.message);
+      } else {
+        window.alert(err.message);
+      }
+    } finally {
+      x1Button.disabled = false;
+    }
+    return;
+  }
+
   const button = event.target.closest('[data-copy-email]');
   if (!button) return;
   const email = button.dataset.copyEmail || '';

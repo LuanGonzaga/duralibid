@@ -1,5 +1,5 @@
 import { sendCapiEvent } from './capi.js';
-import { updateLeadByPaymentId } from '../lib/crm.js';
+import { claimPaymentProcessing } from '../lib/crm.js';
 
 const KITS = {
   1: { name: '1 Frasco — 30ml', price: 89.90,  qty: 1 },
@@ -220,7 +220,8 @@ export default async function handler(req, res) {
     const paidAmount = Number(payment.metadata?.order_amount || payment.transaction_amount || baseKit.price);
     const kit = { ...baseKit, price: paidAmount || baseKit.price };
 
-    await updateLeadByPaymentId(payment.id?.toString(), {
+    const paymentId = payment.id?.toString();
+    const claim = await claimPaymentProcessing(paymentId, {
       funnel_status: 'paid',
       payment_status: payment.status,
       amount: kit.price,
@@ -234,6 +235,10 @@ export default async function handler(req, res) {
         total: kit.price,
       },
     });
+    if (!claim.claimed) {
+      console.log(`Webhook payment ${paymentId} already processed; skipping side effects.`);
+      return res.status(200).json({ ok: true, duplicate: true });
+    }
 
     // Disparar evento Purchase na CAPI
     await sendCapiEvent({
@@ -244,7 +249,7 @@ export default async function handler(req, res) {
         content_ids: [`duralibid-${kitId}frasco${kit.qty > 1 ? 's' : ''}`],
         content_type: 'product',
         num_items: kit.qty,
-        order_id: payment.id.toString(),
+        order_id: paymentId,
       },
       userData: {
         email: payer.email,
@@ -258,7 +263,10 @@ export default async function handler(req, res) {
         fbc: payment.metadata?.fbc,
       },
       eventSourceUrl: payment.metadata?.source_url || 'https://duralibid.com.br/checkout.html',
-      eventId: `purchase_${payment.id}`,
+      eventId: `purchase_${paymentId}`,
+      eventTime: payment.date_approved
+        ? Math.floor(new Date(payment.date_approved).getTime() / 1000)
+        : undefined,
     });
 
     // Tentar criar etiqueta no Melhor Envio

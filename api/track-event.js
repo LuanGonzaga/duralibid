@@ -64,6 +64,20 @@ function cleanEventData(value) {
   }, {});
 }
 
+function x1Reference(body) {
+  const raw = [
+    body.destination,
+    body.details?.destination,
+    body.eventData?.destination,
+    body.details?.eventData?.destination,
+  ].filter(Boolean).join(' ');
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch (err) {}
+  return decoded.match(/\bDLB-[A-Z0-9]{6}\b/i)?.[0]?.toUpperCase();
+}
+
 function splitName(name) {
   const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
   return {
@@ -172,6 +186,7 @@ export default async function handler(req, res) {
       kit_id: kitId ? parseInt(kitId, 10) : undefined,
       payment_method: cleanString(body.paymentMethod || body.details?.paymentMethod, 60),
     };
+    const reference = x1Reference(body);
 
     const lead = {
       lead_id: leadId,
@@ -194,6 +209,7 @@ export default async function handler(req, res) {
         last_event: eventName,
         last_page_type: event.page_type,
         last_cta: event.cta_name,
+        x1_ref: reference,
         events: [event],
       },
     };

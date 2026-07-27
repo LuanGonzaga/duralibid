@@ -1,4 +1,28 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.duralibid.com.br"
+        }
+      ],
+      "destination": "https://duralibid.com.br/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "duralibid.vercel.app"
+        }
+      ],
+      "destination": "https://duralibid.com.br/$1",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/leads.html",

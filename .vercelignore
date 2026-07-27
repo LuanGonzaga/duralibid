@@ -1,0 +1,14 @@
+.git/
+.github/
+.claude/
+.gemini/
+.vscode/
+.env
+.env.*
+.vercel/
+node_modules/
+supabase/.temp/
+info-vendas/
+duralibid-deploy/
+images.7z
+test-me-webhook.js
