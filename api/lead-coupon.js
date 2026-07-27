@@ -1,5 +1,6 @@
 import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
 import { emailValidationErrorMessage, validateEmailAddress } from '../lib/email-validation.js';
 
 const COUPON_CODE = 'DURA5';
@@ -123,6 +124,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!enforceRateLimit(req, res, { namespace: 'lead-coupon', limit: 5, windowMs: 60 * 60 * 1000 })) return;
 
   try {
     const body = req.body || {};

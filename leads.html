@@ -672,55 +672,20 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 function text(value) { return value == null || value === '' ? '-' : String(value); }
-function storageGet(store, key) {
-  try { return store.getItem(key); } catch (e) { return null; }
-}
-function storageSet(store, key, value) {
-  try { store.setItem(key, value); } catch (e) {}
-}
 function storageRemove(store, key) {
   try { store.removeItem(key); } catch (e) {}
 }
-function readAuth() {
-  let auth = null;
-  const raw = storageGet(localStorage, AUTH_KEY) || storageGet(sessionStorage, AUTH_KEY);
-  if (raw) {
-    try { auth = JSON.parse(raw); } catch (e) {}
-  }
-  if (auth?.user && auth?.password) return auth;
-
-  const legacyUser = storageGet(sessionStorage, 'dl_panel_user') || storageGet(localStorage, 'dl_panel_user');
-  const legacyPassword = storageGet(sessionStorage, 'dl_panel_password') || storageGet(localStorage, 'dl_panel_password');
-  if (legacyUser && legacyPassword) {
-    auth = { user: legacyUser, password: legacyPassword, savedAt: Date.now() };
-    saveAuth(auth.user, auth.password);
-    return auth;
-  }
-  return { user: '', password: '' };
-}
-function saveAuth(user, pass) {
-  const auth = JSON.stringify({ user, password: pass, savedAt: Date.now() });
-  storageSet(localStorage, AUTH_KEY, auth);
-  storageSet(sessionStorage, AUTH_KEY, auth);
-  storageSet(sessionStorage, 'dl_panel_user', user);
-  storageSet(sessionStorage, 'dl_panel_password', pass);
-}
-function clearAuth() {
+let sessionUser = '';
+function clearLegacyAuth() {
   [localStorage, sessionStorage].forEach((store) => {
     storageRemove(store, AUTH_KEY);
     storageRemove(store, 'dl_panel_user');
     storageRemove(store, 'dl_panel_password');
   });
 }
-function panelUser() { return readAuth().user || ''; }
-function password() { return readAuth().password || ''; }
-function authHeaders() {
-  const auth = readAuth();
-  return {
-    'X-Admin-User': auth.user || '',
-    'X-Admin-Password': auth.password || '',
-  };
-}
+function clearAuth() { sessionUser = ''; clearLegacyAuth(); }
+function panelUser() { return sessionUser; }
+function authHeaders() { return {}; }
 function showLogin(message) {
   $('boot').classList.add('hidden');
   $('app').classList.add('hidden');
@@ -1591,9 +1556,21 @@ function exportCsv() {
 
 $('loginForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  saveAuth($('user').value.trim(), $('password').value);
   $('loginError').classList.add('hidden');
   try {
+    const res = await fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        user: $('user').value.trim(),
+        password: $('password').value,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw authError(data.error);
+    sessionUser = data.user || $('user').value.trim();
+    $('password').value = '';
     showApp();
     await loadDashboard();
   } catch (err) {
@@ -1608,7 +1585,12 @@ $('loginForm').addEventListener('submit', async (event) => {
   }
 });
 
-$('logout').addEventListener('click', () => {
+$('logout').addEventListener('click', async () => {
+  await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' }),
+  }).catch(() => {});
   clearAuth();
   location.reload();
 });
@@ -1762,10 +1744,14 @@ document.addEventListener('click', async (event) => {
 });
 
 async function boot() {
-  if (!password()) {
+  clearLegacyAuth();
+  const res = await fetch('/api/leads?action=session');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
     showLogin();
     return;
   }
+  sessionUser = data.user || '';
   showApp();
   try {
     await loadDashboard();

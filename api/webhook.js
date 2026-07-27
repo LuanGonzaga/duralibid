@@ -1,5 +1,14 @@
 import { sendCapiEvent } from './capi.js';
-import { claimPaymentProcessing } from '../lib/crm.js';
+import {
+  claimPaymentProcessing,
+  normalizeLeadId,
+  upsertLeadByLeadId,
+} from '../lib/crm.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
+import {
+  mercadoPagoWebhookSecretConfigured,
+  verifyMercadoPagoWebhook,
+} from '../lib/mercado-pago-webhook.js';
 
 const KITS = {
   1: { name: '1 Frasco — 30ml', price: 89.90,  qty: 1 },
@@ -201,16 +210,30 @@ function emailEnvios({ payer, kit, payment, etiqueta }) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(200).end();
+  if (!enforceRateLimit(req, res, { namespace: 'mp-webhook', limit: 300, windowMs: 60 * 1000 })) return;
 
   try {
     const { type, data } = req.body;
     if (type !== 'payment' || !data?.id) return res.status(200).end();
+
+    const signature = verifyMercadoPagoWebhook(req);
+    if (!signature.valid) {
+      console.warn('Mercado Pago webhook rejeitado:', signature.reason);
+      return res.status(401).json({ error: 'Assinatura do webhook invalida.' });
+    }
+    if (!mercadoPagoWebhookSecretConfigured()) {
+      console.warn('MP_WEBHOOK_SECRET nao configurado; assinatura do webhook ainda nao e obrigatoria.');
+    }
 
     // Buscar dados completos do pagamento no MP
     const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${data.id}`, {
       headers: { 'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}` },
     });
     const payment = await mpRes.json();
+    if (!mpRes.ok || !payment?.id) {
+      console.error('Falha ao consultar pagamento no Mercado Pago:', mpRes.status, payment);
+      return res.status(502).json({ error: 'Nao foi possivel validar o pagamento.' });
+    }
 
     if (payment.status !== 'approved') return res.status(200).end();
 
@@ -221,6 +244,23 @@ export default async function handler(req, res) {
     const kit = { ...baseKit, price: paidAmount || baseKit.price };
 
     const paymentId = payment.id?.toString();
+    const webhookLeadId = normalizeLeadId(payment.metadata?.lead_id || `mp_${paymentId}`);
+    await upsertLeadByLeadId({
+      lead_id: webhookLeadId,
+      payment_id: paymentId,
+      payment_method: payment.payment_method_id === 'pix' ? 'pix' : 'credit_card',
+      payment_status: payment.status,
+      kit_id: kitId,
+      kit_name: kit.name,
+      amount: kit.price,
+      name: [payer.first_name, payer.last_name].filter(Boolean).join(' '),
+      email: payer.email,
+      phone: `${payer.phone?.area_code || ''}${payer.phone?.number || ''}`,
+      funnel_status: 'paid',
+      metadata: {
+        last_event: 'payment_approved_webhook_received',
+      },
+    });
     const claim = await claimPaymentProcessing(paymentId, {
       funnel_status: 'paid',
       payment_status: payment.status,

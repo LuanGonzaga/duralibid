@@ -1,5 +1,6 @@
 import { sendCapiEvent } from './capi.js';
 import { normalizeLeadId, upsertLeadByLeadId } from '../lib/crm.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
 
 const KITS = {
   1: { name: 'DuraLibid - 1 Frasco', price: 89.90, quantity: 1, id: 'duralibid-1frasco' },
@@ -154,6 +155,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!enforceRateLimit(req, res, { namespace: 'track-event', limit: 120, windowMs: 60 * 1000 })) return;
 
   try {
     const body = req.body || {};

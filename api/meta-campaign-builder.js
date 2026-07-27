@@ -1,12 +1,7 @@
+import { adminAuthorized, adminConfigured, sameOriginMutation } from '../lib/admin-auth.js';
+
 const DEFAULT_VERSION = 'v25.0';
 const DEFAULT_SOURCE_CAMPAIGN_ID = '120246944719140105';
-
-function authorized(req) {
-  const user = process.env.ADMIN_PANEL_USER;
-  const password = process.env.ADMIN_PANEL_PASSWORD;
-  if (!user || !password) return false;
-  return req.headers['x-admin-user'] === user && req.headers['x-admin-password'] === password;
-}
 
 function adsToken() {
   return process.env.META_ADS_ACCESS_TOKEN || process.env.META_MARKETING_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN;
@@ -435,17 +430,19 @@ async function copyAdsToAdset({ sourceCampaignId, targetAdsetId, kit = 2, limit 
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-User, X-Admin-Password');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'private, no-store');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.ADMIN_PANEL_USER || !process.env.ADMIN_PANEL_PASSWORD) {
+  if (!adminConfigured()) {
     return res.status(503).json({ error: 'ADMIN_PANEL_USER ou ADMIN_PANEL_PASSWORD nao configurada.' });
   }
-  if (!authorized(req)) return res.status(401).json({ error: 'Usuario ou senha invalido.' });
+  if (!adminAuthorized(req)) return res.status(401).json({ error: 'Sessao expirada ou invalida.' });
+  if (req.method === 'POST' && !sameOriginMutation(req)) {
+    return res.status(403).json({ error: 'Origem nao autorizada.' });
+  }
   if (!configured()) {
     return res.status(503).json({ error: 'META_AD_ACCOUNT_ID, META_PIXEL_ID ou META_ADS_ACCESS_TOKEN nao configurada.' });
   }

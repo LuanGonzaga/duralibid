@@ -3,6 +3,16 @@ import {
   listLeads,
   updateLeadById,
 } from '../lib/crm.js';
+import {
+  adminAuthorized,
+  adminConfigured,
+  adminSession,
+  clearAdminSession,
+  sameOriginMutation,
+  setAdminSession,
+  verifyAdminCredentials,
+} from '../lib/admin-auth.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
 
 const X1_STATUS = new Set([
   'x1_contacted',
@@ -23,13 +33,6 @@ const LOST_REASONS = new Set([
 
 function clean(value, max = 500) {
   return String(value || '').trim().slice(0, max);
-}
-
-function authorized(req) {
-  const user = process.env.ADMIN_PANEL_USER;
-  const password = process.env.ADMIN_PANEL_PASSWORD;
-  if (!user || !password) return false;
-  return req.headers['x-admin-user'] === user && req.headers['x-admin-password'] === password;
 }
 
 function summarize(leads) {
@@ -61,18 +64,41 @@ function summarize(leads) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-User, X-Admin-Password');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.ADMIN_PANEL_USER || !process.env.ADMIN_PANEL_PASSWORD) {
+  if (!adminConfigured()) {
     return res.status(503).json({ error: 'ADMIN_PANEL_USER ou ADMIN_PANEL_PASSWORD nao configurada.' });
   }
-  if (!authorized(req)) return res.status(401).json({ error: 'Usuario ou senha invalido.' });
+
+  const action = clean(req.body?.action || req.query?.action, 40);
+  if (req.method === 'POST' && action === 'login') {
+    if (!sameOriginMutation(req)) return res.status(403).json({ error: 'Origem nao autorizada.' });
+    if (!enforceRateLimit(req, res, { namespace: 'admin-login', limit: 10, windowMs: 15 * 60 * 1000 })) return;
+    const user = clean(req.body?.user, 200);
+    const password = String(req.body?.password || '');
+    if (!verifyAdminCredentials(user, password)) {
+      return res.status(401).json({ error: 'Usuario ou senha invalido.' });
+    }
+    setAdminSession(res, user);
+    return res.status(200).json({ ok: true, user });
+  }
+
+  if (req.method === 'POST' && action === 'logout') {
+    clearAdminSession(res);
+    return res.status(200).json({ ok: true });
+  }
+
+  if (!adminAuthorized(req)) return res.status(401).json({ error: 'Sessao expirada ou invalida.' });
+  if (action === 'session') {
+    return res.status(200).json({ ok: true, user: adminSession(req)?.user || '' });
+  }
 
   if (req.method === 'POST') {
+    if (!sameOriginMutation(req)) return res.status(403).json({ error: 'Origem nao autorizada.' });
+    if (!enforceRateLimit(req, res, { namespace: 'admin-write', limit: 120, windowMs: 60 * 1000 })) return;
     const id = clean(req.body?.id, 80);
     const status = clean(req.body?.status, 40);
     const note = clean(req.body?.note, 1000);

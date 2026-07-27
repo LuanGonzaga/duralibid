@@ -1,12 +1,7 @@
+import { adminAuthorized, adminConfigured } from '../lib/admin-auth.js';
+
 const DEFAULT_VERSION = 'v25.0';
 const DEFAULT_TIMEZONE = 'America/Sao_Paulo';
-
-function authorized(req) {
-  const user = process.env.ADMIN_PANEL_USER;
-  const password = process.env.ADMIN_PANEL_PASSWORD;
-  if (!user || !password) return false;
-  return req.headers['x-admin-user'] === user && req.headers['x-admin-password'] === password;
-}
 
 function configured() {
   return Boolean(process.env.META_AD_ACCOUNT_ID && adsToken());
@@ -353,18 +348,17 @@ async function loadCampaignInsights(account, period) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-User, X-Admin-Password');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'private, no-store');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!process.env.ADMIN_PANEL_USER || !process.env.ADMIN_PANEL_PASSWORD) {
+  if (!adminConfigured()) {
     return res.status(503).json({ error: 'ADMIN_PANEL_USER ou ADMIN_PANEL_PASSWORD nao configurada.' });
   }
-  if (!authorized(req)) return res.status(401).json({ error: 'Usuario ou senha invalido.' });
+  if (!adminAuthorized(req)) return res.status(401).json({ error: 'Sessao expirada ou invalida.' });
 
   if (!configured()) {
     return res.status(200).json({
